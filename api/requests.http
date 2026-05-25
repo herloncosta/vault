@@ -1,0 +1,126 @@
+### Variables
+@baseUrl = http://localhost:3000
+@email = herlon@email.com
+@password = minhasenha
+@name = Test User
+
+### ─── Health ─────────────────────────────────────────────────────────────────
+
+### Health check
+GET {{baseUrl}}/health
+
+### ─── Auth ───────────────────────────────────────────────────────────────────
+
+### Register
+# @name register
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}",
+  "name": "{{name}}"
+}
+
+### Login (tokens set as httpOnly cookies automatically)
+# @name login
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### User ID (extracted from login response)
+@userId = {{login.response.body.user.id}}
+
+### Get current user (uses cookie from login)
+GET {{baseUrl}}/api/auth/me
+
+### Refresh tokens (uses refreshToken cookie from login)
+# @name refresh
+POST {{baseUrl}}/api/auth/refresh
+
+### Logout (uses accessToken cookie)
+POST {{baseUrl}}/api/auth/logout
+
+### ─── Users (login again to restore cookies) ──────────────────────────────────
+
+### Login fresh
+# @name login2
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}"
+}
+
+### User ID (extracted from login2)
+@userId2 = {{login2.response.body.user.id}}
+
+### List users
+GET {{baseUrl}}/api/users
+
+### Create user (admin only — will fail without admin role)
+# @name createUser
+POST {{baseUrl}}/api/users
+Content-Type: application/json
+
+{
+  "email": "admin-{{$randomInt 1000 9999}}@example.com",
+  "password": "{{password}}",
+  "name": "Admin User"
+}
+
+### User ID (extracted from create response)
+@createdUserId = {{createUser.response.body.id}}
+
+### Get user by ID
+GET {{baseUrl}}/api/users/{{userId2}}
+
+### Get user by ID (not found)
+GET {{baseUrl}}/api/users/00000000-0000-0000-0000-000000000000
+
+### Update user
+PUT {{baseUrl}}/api/users/{{userId2}}
+Content-Type: application/json
+
+{
+  "name": "Updated Name"
+}
+
+### Delete user
+DELETE {{baseUrl}}/api/users/{{userId2}}
+
+### ─── Validation errors ──────────────────────────────────────────────────────
+
+### Register with missing password
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "bad@example.com"
+}
+
+### Register with short password
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "bad@example.com",
+  "password": "123"
+}
+
+### Login with wrong password
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "wrong-password"
+}
+
+### Access protected route without token
+GET {{baseUrl}}/api/auth/me
