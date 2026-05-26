@@ -33,12 +33,12 @@ export default function LoginPage() {
         onSubmit={handleSubmit}
         className="relative w-full max-w-sm rounded-3xl border border-slate-200/60 bg-white/70 p-8 shadow-xl backdrop-blur-2xl dark:border-gray-800/60 dark:bg-gray-950/70"
       >
-        <h1 className="mb-2 text-center text-2xl font-bold text-slate-900 dark:text-gray-100">
-          vault
-        </h1>
-        <p className="mb-8 text-center text-sm text-slate-500 dark:text-gray-400">
-          Acesse sua conta financeira
-        </p>
+        <div className="mb-8 flex flex-col items-center gap-3">
+          <img src="/vault-logo.png" alt="Vault" className="h-10" />
+          <p className="text-center text-sm text-slate-500 dark:text-gray-400">
+            Acesse sua conta financeira
+          </p>
+        </div>
 
         {error && (
           <p className="mb-6 rounded-xl bg-red-50 px-4 py-2.5 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">

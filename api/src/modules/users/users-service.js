@@ -1,7 +1,7 @@
 import prisma from "../../config/database.js";
 import argon2 from "argon2";
 
-const userSelect = { id: true, email: true, name: true, role: true, createdAt: true };
+const userSelect = { id: true, email: true, name: true, role: true, monthlyBudget: true, createdAt: true };
 
 function assertOwnData(authUser, targetId) {
   if (authUser.role !== "ADMIN" && authUser.id !== targetId) {

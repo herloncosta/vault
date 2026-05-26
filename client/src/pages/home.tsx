@@ -7,6 +7,7 @@ import {
   TrendingDown,
   Plus,
   Send,
+  Pencil,
   ArrowDownToLine,
   ShoppingCart,
   Home,
@@ -17,6 +18,8 @@ import {
   Plane,
   HeartPulse,
   GraduationCap,
+  X,
+  Check,
   type LucideIcon,
 } from "lucide-react";
 import * as api from "../lib/api";
@@ -40,10 +43,13 @@ function formatCurrency(value: number) {
 }
 
 export default function HomePage() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState<api.Transaction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingBudget, setEditingBudget] = useState(false);
+  const [budgetInput, setBudgetInput] = useState("");
+  const [budgetSubmitting, setBudgetSubmitting] = useState(false);
 
   useEffect(() => {
     api
@@ -82,8 +88,23 @@ export default function HomePage() {
 
   const recentTransactions = transactions.slice(0, 5);
 
-  const budgetLimit = 5000;
+  const budgetLimit = user?.monthlyBudget ? Number(user.monthlyBudget) : 5000;
   const budgetPercent = Math.min(100, Math.round((monthExpense / budgetLimit) * 100));
+
+  async function handleSaveBudget() {
+    const value = Number.parseFloat(budgetInput.replace(",", "."));
+    if (Number.isNaN(value) || value <= 0) return;
+    setBudgetSubmitting(true);
+    try {
+      await api.updateBudget(value);
+      await refreshUser();
+      setEditingBudget(false);
+    } catch {
+      // silently fail
+    } finally {
+      setBudgetSubmitting(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -256,31 +277,76 @@ export default function HomePage() {
       </div>
 
       <div>
-        <h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-gray-100">
-          Limite mensal
-        </h2>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-gray-100">
+            Limite mensal
+          </h2>
+          {!editingBudget && (
+            <button
+              onClick={() => { setBudgetInput(String(budgetLimit)); setEditingBudget(true); }}
+              className="flex cursor-pointer items-center gap-1 text-xs text-slate-400 transition-all duration-300 hover:text-blue-500 dark:text-gray-500 dark:hover:text-blue-400"
+            >
+              <Pencil size={12} />
+              Alterar
+            </button>
+          )}
+        </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-lg dark:border-gray-800 dark:bg-gray-900">
-          <div className="mb-3 flex items-center justify-between text-sm">
-            <span className="text-slate-500 dark:text-gray-400">Gasto</span>
-            <span className="font-semibold text-slate-900 dark:text-gray-100">
-              {formatCurrency(monthExpense)} / {formatCurrency(budgetLimit)}
-            </span>
-          </div>
-          <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-gray-800">
-            <div
-              className={`h-full rounded-full transition-all duration-300 ${
-                budgetPercent < 50
-                  ? "bg-emerald-500"
-                  : budgetPercent < 80
-                    ? "bg-amber-500"
-                    : "bg-red-500"
-              }`}
-              style={{ width: `${budgetPercent}%` }}
-            />
-          </div>
-          <p className="mt-2 text-xs text-slate-400 dark:text-gray-500">
-            {budgetPercent}% do limite utilizado
-          </p>
+          {editingBudget ? (
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
+                Novo limite mensal
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  value={budgetInput}
+                  onChange={(e) => setBudgetInput(e.target.value)}
+                  placeholder="5000"
+                  className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-600 dark:focus:border-blue-400"
+                />
+                <button
+                  onClick={handleSaveBudget}
+                  disabled={budgetSubmitting}
+                  className="flex cursor-pointer items-center justify-center rounded-xl bg-blue-600 px-4 text-white transition-all duration-300 hover:bg-blue-700 disabled:opacity-60"
+                >
+                  <Check size={16} />
+                </button>
+                <button
+                  onClick={() => setEditingBudget(false)}
+                  disabled={budgetSubmitting}
+                  className="flex cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-slate-400 transition-all duration-300 hover:bg-slate-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-500 dark:hover:bg-gray-700"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="mb-3 flex items-center justify-between text-sm">
+                <span className="text-slate-500 dark:text-gray-400">Gasto</span>
+                <span className="font-semibold text-slate-900 dark:text-gray-100">
+                  {formatCurrency(monthExpense)} / {formatCurrency(budgetLimit)}
+                </span>
+              </div>
+              <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-gray-800">
+                <div
+                  className={`h-full rounded-full transition-all duration-300 ${
+                    budgetPercent < 50
+                      ? "bg-emerald-500"
+                      : budgetPercent < 80
+                        ? "bg-amber-500"
+                        : "bg-red-500"
+                  }`}
+                  style={{ width: `${budgetPercent}%` }}
+                />
+              </div>
+              <p className="mt-2 text-xs text-slate-400 dark:text-gray-500">
+                {budgetPercent}% do limite utilizado
+              </p>
+            </>
+          )}
         </div>
       </div>
     </main>

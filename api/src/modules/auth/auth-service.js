@@ -58,7 +58,7 @@ export async function register(data, reqInfo) {
   const password = await argon2.hash(data.password);
   const user = await prisma.user.create({
     data: { email: data.email, password, name: data.name ?? null, role: "OPERATOR" },
-    select: { id: true, email: true, name: true, role: true, createdAt: true },
+    select: { id: true, email: true, name: true, role: true, monthlyBudget: true, createdAt: true },
   });
 
   await logAccess({
@@ -108,7 +108,13 @@ export async function login(data, reqInfo) {
   return {
     accessToken,
     refreshToken,
-    user: { id: user.id, email: user.email, name: user.name, role: user.role },
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      monthlyBudget: user.monthlyBudget,
+    },
   };
 }
 
@@ -166,7 +172,13 @@ export async function refreshToken(refreshTokenStr, reqInfo) {
   return {
     accessToken: newAccessToken,
     refreshToken: newRefreshToken,
-    user: { id: user.id, email: user.email, name: user.name, role: user.role },
+    user: {
+      id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+      monthlyBudget: user.monthlyBudget,
+    },
   };
 }
 
@@ -201,7 +213,7 @@ export async function isTokenRevoked(jti) {
 export async function getProfile(id) {
   const user = await prisma.user.findUnique({
     where: { id },
-    select: { id: true, email: true, name: true, role: true, createdAt: true },
+    select: { id: true, email: true, name: true, role: true, monthlyBudget: true, createdAt: true },
   });
 
   if (!user) {
@@ -211,6 +223,14 @@ export async function getProfile(id) {
   }
 
   return user;
+}
+
+export async function setBudget(userId, monthlyBudget) {
+  return prisma.user.update({
+    where: { id: userId },
+    data: { monthlyBudget },
+    select: { id: true, email: true, name: true, role: true, monthlyBudget: true, createdAt: true },
+  });
 }
 
 export async function cleanupExpiredTokens() {

@@ -21,6 +21,7 @@ export interface User {
   email: string;
   name: string | null;
   role: string;
+  monthlyBudget?: string;
 }
 
 export interface LoginPayload {
@@ -112,4 +113,11 @@ export function updateTransaction(id: string, data: Partial<CreateTransactionPay
 
 export function deleteTransaction(id: string) {
   return request<void>(`/api/transactions/${id}`, { method: "DELETE" });
+}
+
+export function updateBudget(monthlyBudget: number) {
+  return request<User>("/api/auth/me/budget", {
+    method: "PATCH",
+    body: JSON.stringify({ monthlyBudget }),
+  });
 }

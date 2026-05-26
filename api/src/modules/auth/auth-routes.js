@@ -133,4 +133,30 @@ router.post("/logout", auth, controller.logout);
  */
 router.get("/me", auth, controller.me);
 
+/**
+ * @openapi
+ * /api/auth/me/budget:
+ *   patch:
+ *     tags: [Auth]
+ *     summary: Update monthly budget limit
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [monthlyBudget]
+ *             properties:
+ *               monthlyBudget:
+ *                 type: number
+ *     responses:
+ *       200:
+ *         description: Budget updated
+ *       400:
+ *         description: Invalid value
+ */
+router.patch("/me/budget", auth, controller.updateBudget);
+
 export default router;

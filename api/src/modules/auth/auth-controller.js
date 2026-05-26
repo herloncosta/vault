@@ -135,3 +135,16 @@ export async function me(req, res, next) {
     next(err);
   }
 }
+
+export async function updateBudget(req, res, next) {
+  try {
+    const { monthlyBudget } = req.body;
+    if (typeof monthlyBudget !== "number" || monthlyBudget < 0) {
+      return res.status(400).json({ error: "monthlyBudget must be a positive number" });
+    }
+    const user = await authService.setBudget(req.user.id, monthlyBudget);
+    res.json(user);
+  } catch (err) {
+    next(err);
+  }
+}

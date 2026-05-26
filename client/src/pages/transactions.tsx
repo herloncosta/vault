@@ -177,10 +177,10 @@ export default function TransactionsPage() {
         </div>
         <button
           onClick={() => setShowForm((v) => !v)}
-          className="flex cursor-pointer items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all duration-300 hover:bg-blue-700 hover:shadow-blue-600/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-[0.97]"
+          className="flex cursor-pointer items-center gap-2 rounded-xl bg-blue-600 px-3 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all duration-300 hover:bg-blue-700 hover:shadow-blue-600/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-[0.97] md:px-4"
         >
           {showForm ? <X size={16} /> : <Plus size={16} />}
-          {showForm ? "Cancelar" : "Nova transação"}
+          <span className="hidden md:inline">{showForm ? "Cancelar" : "Nova transação"}</span>
         </button>
       </div>
 

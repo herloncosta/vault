@@ -4,23 +4,7 @@
 ### 1. Requisitos Funcionais (RF)
 *O que o sistema faz. Cada funcionalidade é descrita com suas implicações de segurança.*
 
-#### Módulo de Autenticação e Autorização
-- **RF01 - Cadastro Seguro de Usuário:**
-    - O sistema deve permitir o cadastro com e-mail e senha forte.
-    - **Segurança:** A senha deve ser validada contra uma lista de senhas comuns vazadas (ex: Have I Been Pwned) e exigir complexidade mínima (>= 12 caracteres). O sistema nunca deve armazenar a senha em texto puro; deve usar um algoritmo de hashing lento e salgado (bcrypt/argon2id) no backend. O processo de cadastro deve incluir verificação de e-mail para prevenir criação de contas falsas.
-
-- **RF02 - Autenticação Multifator (MFA):**
-    - O sistema deve oferecer e incentivar fortemente a configuração de MFA via aplicativo TOTP (Time-based One-Time Password).
-    - **Segurança:** O segredo TOTP inicial deve ser transmitido de forma segura (ex: via QR code exibido em uma conexão TLS) e armazenado criptografado no banco de dados. A recuperação de conta deve exigir múltiplos fatores de prova de identidade, nunca apenas e-mail.
-
-- **RF03 - Gerenciamento de Sessão:**
-    - O sistema deve gerenciar sessões usando tokens JWT com claims de autorização, contendo um `jti` (JWT ID) único.
-    - **Segurança:** Os tokens de acesso devem ter vida curta (ex: 15 min) e ser invalidados no backend em caso de logout ou mudança de privilégios. O refresh token, de vida longa, deve ser armazenado de forma segura (HttpOnly, Secure, SameSite=Strict cookie) e rotacionado a cada uso, com detecção de reuso para potencial comprometimento.
-
 #### Módulo de Gestão de Dados Financeiros
-- **RF04 - Conexão com Open Finance (Banking APIs):**
-    - O sistema deve permitir a conexão com contas bancárias via APIs de Open Finance para sincronização automática de transações.
-    - **Segurança:** As credenciais de acesso do usuário nunca devem tocar nossos servidores (fluxo de autorização delegada OAuth 2.0). Os tokens de acesso e refresh obtidos das instituições financeiras devem ser armazenados de forma isolada e criptografados em cofre (vault), nunca em logs ou no banco de dados principal sem criptografia de envelope (Envelope Encryption).
 
 - **RF05 - Inserção, Edição e Remoção Manual de Transações:**
     - O usuário pode registrar transações com valor, data, categoria e notas.

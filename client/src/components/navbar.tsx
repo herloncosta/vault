@@ -20,50 +20,49 @@ export default function Navbar() {
   }
 
   return (
-    <nav className="border-b border-slate-200 bg-white/80 backdrop-blur dark:border-gray-800 dark:bg-gray-950/80">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
-        <Link
-          to="/"
-          className="text-lg font-bold text-slate-900 transition-all duration-300 hover:text-blue-600 dark:text-gray-100 dark:hover:text-blue-400"
-        >
-          vault
-        </Link>
+    <>
+      <nav className="relative z-10 border-b border-slate-200 bg-white/80 backdrop-blur dark:border-gray-800 dark:bg-gray-950/80">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
+          <Link to="/" className="transition-all duration-300 hover:opacity-80">
+            <img src="/vault-logo.png" alt="Vault" className="h-8" />
+          </Link>
 
-        <button
-          className="block cursor-pointer text-slate-400 transition-all duration-300 hover:text-slate-600 dark:text-gray-400 dark:hover:text-gray-200 md:hidden"
-          onClick={() => setOpen(true)}
-          aria-label="menu"
-        >
-          <Menu size={24} />
-        </button>
-
-        <div className="hidden items-center gap-6 md:flex">
-          {links.map(({ to, label, icon: Icon }) => (
-            <Link
-              key={to}
-              to={to}
-              className={`flex items-center gap-1.5 text-sm transition-all duration-300 ${
-                pathname === to
-                  ? "text-blue-600 dark:text-blue-400"
-                  : "text-slate-400 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
-              }`}
-            >
-              <Icon size={16} />
-              {label}
-            </Link>
-          ))}
-          <span className="text-xs text-slate-400 dark:text-gray-500">
-            {user?.name ?? user?.email}
-          </span>
           <button
-            onClick={logout}
-            className="flex cursor-pointer items-center gap-1.5 text-sm text-slate-400 transition-all duration-300 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
+            className="block cursor-pointer text-slate-400 transition-all duration-300 hover:text-slate-600 dark:text-gray-400 dark:hover:text-gray-200 md:hidden"
+            onClick={() => setOpen(true)}
+            aria-label="menu"
           >
-            <LogOut size={16} />
-            Sair
+            <Menu size={24} />
           </button>
+
+          <div className="hidden items-center gap-6 md:flex">
+            {links.map(({ to, label, icon: Icon }) => (
+              <Link
+                key={to}
+                to={to}
+                className={`flex items-center gap-1.5 text-sm transition-all duration-300 ${
+                  pathname === to
+                    ? "text-blue-600 dark:text-blue-400"
+                    : "text-slate-400 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
+                }`}
+              >
+                <Icon size={16} />
+                {label}
+              </Link>
+            ))}
+            <span className="text-xs text-slate-400 dark:text-gray-500">
+              {user?.name ?? user?.email}
+            </span>
+            <button
+              onClick={logout}
+              className="flex cursor-pointer items-center gap-1.5 text-sm text-slate-400 transition-all duration-300 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400"
+            >
+              <LogOut size={16} />
+              Sair
+            </button>
+          </div>
         </div>
-      </div>
+      </nav>
 
       {open && (
         <div
@@ -122,6 +121,6 @@ export default function Navbar() {
           </button>
         </div>
       </div>
-    </nav>
+    </>
   );
 }
