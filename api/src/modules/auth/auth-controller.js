@@ -1,5 +1,9 @@
 import * as authService from "./auth-service.js";
-import { registerSchema, loginSchema, refreshTokenSchema } from "./auth-validator.js";
+import {
+  registerSchema,
+  loginSchema,
+  refreshTokenSchema,
+} from "./auth-validator.js";
 import env from "../../config/env.js";
 
 const isSecure = env.nodeEnv === "production";
@@ -30,11 +34,16 @@ function msFromDuration(duration) {
   if (!match) return 7 * 24 * 60 * 60 * 1000;
   const num = Number.parseInt(match[1], 10);
   switch (match[2]) {
-    case "s": return num * 1000;
-    case "m": return num * 60 * 1000;
-    case "h": return num * 60 * 60 * 1000;
-    case "d": return num * 24 * 60 * 60 * 1000;
-    default: return 7 * 24 * 60 * 60 * 1000;
+    case "s":
+      return num * 1000;
+    case "m":
+      return num * 60 * 1000;
+    case "h":
+      return num * 60 * 60 * 1000;
+    case "d":
+      return num * 24 * 60 * 60 * 1000;
+    default:
+      return 7 * 24 * 60 * 60 * 1000;
   }
 }
 
@@ -81,7 +90,10 @@ export async function refresh(req, res, next) {
       return res.status(400).json({ error: "Refresh token is required" });
     }
 
-    const result = await authService.refreshToken(refreshTokenStr, reqInfo(req));
+    const result = await authService.refreshToken(
+      refreshTokenStr,
+      reqInfo(req),
+    );
 
     res
       .cookie("accessToken", result.accessToken, {

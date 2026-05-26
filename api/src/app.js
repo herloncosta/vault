@@ -9,6 +9,7 @@ import env from "./config/env.js";
 import swaggerSpec from "./config/swagger.js";
 import authRoutes from "./modules/auth/auth-routes.js";
 import userRoutes from "./modules/users/users-routes.js";
+import transactionRoutes from "./modules/transactions/transactions-routes.js";
 
 const app = express();
 
@@ -36,6 +37,7 @@ app.get("/health", (_req, res) => {
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/transactions", transactionRoutes);
 
 app.use(errorHandler);
 

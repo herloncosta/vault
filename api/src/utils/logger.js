@@ -4,7 +4,7 @@ import env from "../config/env.js";
 
 const isDev = env.nodeEnv !== "production";
 
-const logger = isDev
+export const logger = isDev
   ? pino({
       transport: { target: "pino-pretty" },
       level: "debug",
@@ -14,5 +14,3 @@ const logger = isDev
       format: winston.format.json(),
       transports: [new winston.transports.Console()],
     });
-
-export default logger;

@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Home, User, Settings, LogOut } from "lucide-react";
+import { Menu, X, Home, User, Settings, LogOut, ArrowLeftRight } from "lucide-react";
 import { useAuth } from "../contexts/auth-context";
 
 const links = [
   { to: "/", label: "Início", icon: Home },
+  { to: "/transacoes", label: "Transações", icon: ArrowLeftRight },
   { to: "/perfil", label: "Perfil", icon: User },
   { to: "/configuracoes", label: "Configurações", icon: Settings },
 ];

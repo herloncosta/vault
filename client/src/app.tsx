@@ -6,6 +6,7 @@ import LoginPage from "./pages/login";
 import HomePage from "./pages/home";
 import ProfilePage from "./pages/profile";
 import SettingsPage from "./pages/settings";
+import TransactionsPage from "./pages/transactions";
 
 function ProtectedLayout() {
   const { user, loading } = useAuth();
@@ -27,7 +28,8 @@ function ProtectedLayout() {
         <Route path="/" element={<HomePage />} />
         <Route path="/perfil" element={<ProfilePage />} />
         <Route path="/configuracoes" element={<SettingsPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="/transacoes" element={<TransactionsPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
   );
