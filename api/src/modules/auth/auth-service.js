@@ -233,6 +233,37 @@ export async function setBudget(userId, monthlyBudget) {
   });
 }
 
+const profileSelect = { id: true, email: true, name: true, role: true, monthlyBudget: true, createdAt: true };
+
+export async function updateProfile(userId, data) {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) {
+    const err = new Error("User not found");
+    err.status = 404;
+    throw err;
+  }
+
+  if (data.email && data.email !== user.email) {
+    const existing = await prisma.user.findUnique({ where: { email: data.email } });
+    if (existing) {
+      const err = new Error("Email already in use");
+      err.status = 409;
+      throw err;
+    }
+  }
+
+  const updateData = { ...data };
+  if (updateData.password) {
+    updateData.password = await argon2.hash(updateData.password);
+  }
+
+  return prisma.user.update({
+    where: { id: userId },
+    data: updateData,
+    select: profileSelect,
+  });
+}
+
 export async function cleanupExpiredTokens() {
   await prisma.revokedToken.deleteMany({
     where: { expiresAt: { lte: new Date() } },

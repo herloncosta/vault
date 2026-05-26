@@ -1,19 +1,27 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Home, User, Settings, LogOut, ArrowLeftRight } from "lucide-react";
+import { Menu, X, Home, User, Settings, LogOut, ArrowLeftRight, Users } from "lucide-react";
 import { useAuth } from "../contexts/auth-context";
 
-const links = [
-  { to: "/", label: "Início", icon: Home },
-  { to: "/transacoes", label: "Transações", icon: ArrowLeftRight },
-  { to: "/perfil", label: "Perfil", icon: User },
-  { to: "/configuracoes", label: "Configurações", icon: Settings },
-];
+function useLinks() {
+  const { user } = useAuth();
+  const base = [
+    { to: "/", label: "Início", icon: Home },
+    { to: "/transacoes", label: "Transações", icon: ArrowLeftRight },
+    { to: "/perfil", label: "Perfil", icon: User },
+    { to: "/configuracoes", label: "Configurações", icon: Settings },
+  ];
+  if (user?.role === "ADMIN") {
+    base.push({ to: "/admin/usuarios", label: "Usuários", icon: Users });
+  }
+  return base;
+}
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const { user, logout } = useAuth();
   const { pathname } = useLocation();
+  const links = useLinks();
 
   function close() {
     setOpen(false);

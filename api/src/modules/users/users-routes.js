@@ -4,20 +4,21 @@ import { auth, authorize } from "../../middleware/auth.js";
 
 const router = Router();
 
-router.use(auth);
-router.post("/", authorize("ADMIN"));
+router.use(auth, authorize("ADMIN"));
 
 /**
  * @openapi
  * /api/users:
  *   get:
  *     tags: [Users]
- *     summary: List all users (ADMIN) or own data (OPERATOR)
+ *     summary: List all users
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: List of users
+ *       403:
+ *         description: Forbidden (not ADMIN)
  */
 router.get("/", controller.list);
 
@@ -26,7 +27,7 @@ router.get("/", controller.list);
  * /api/users/{id}:
  *   get:
  *     tags: [Users]
- *     summary: Get a user by ID (any role, OPERATOR restricted to own)
+ *     summary: Get a user by ID
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -38,6 +39,8 @@ router.get("/", controller.list);
  *     responses:
  *       200:
  *         description: User found
+ *       403:
+ *         description: Forbidden (not ADMIN)
  *       404:
  *         description: User not found
  */
@@ -48,7 +51,7 @@ router.get("/:id", controller.getById);
  * /api/users:
  *   post:
  *     tags: [Users]
- *     summary: Create a new user (ADMIN only)
+ *     summary: Create a new user
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -85,7 +88,7 @@ router.post("/", controller.create);
  * /api/users/{id}:
  *   put:
  *     tags: [Users]
- *     summary: Update a user (any role, OPERATOR restricted to own)
+ *     summary: Update a user
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -106,11 +109,17 @@ router.post("/", controller.create);
  *                 format: email
  *               name:
  *                 type: string
+ *               role:
+ *                 type: string
+ *                 enum: [ADMIN, OPERATOR]
+ *               password:
+ *                 type: string
+ *                 minLength: 8
  *     responses:
  *       200:
  *         description: User updated
  *       403:
- *         description: Forbidden (not own data)
+ *         description: Forbidden (not ADMIN)
  *       404:
  *         description: User not found
  */
@@ -121,7 +130,7 @@ router.put("/:id", controller.update);
  * /api/users/{id}:
  *   delete:
  *     tags: [Users]
- *     summary: Delete a user (any role, OPERATOR restricted to own)
+ *     summary: Delete a user
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -134,7 +143,7 @@ router.put("/:id", controller.update);
  *       204:
  *         description: User deleted
  *       403:
- *         description: Forbidden (not own data)
+ *         description: Forbidden (not ADMIN)
  *       404:
  *         description: User not found
  */

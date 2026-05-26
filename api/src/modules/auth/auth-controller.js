@@ -3,6 +3,7 @@ import {
   registerSchema,
   loginSchema,
   refreshTokenSchema,
+  updateProfileSchema,
 } from "./auth-validator.js";
 import env from "../../config/env.js";
 
@@ -145,6 +146,19 @@ export async function updateBudget(req, res, next) {
     const user = await authService.setBudget(req.user.id, monthlyBudget);
     res.json(user);
   } catch (err) {
+    next(err);
+  }
+}
+
+export async function updateProfile(req, res, next) {
+  try {
+    const data = updateProfileSchema.parse(req.body);
+    const user = await authService.updateProfile(req.user.id, data);
+    res.json(user);
+  } catch (err) {
+    if (err.name === "ZodError") {
+      return res.status(400).json({ error: err.errors });
+    }
     next(err);
   }
 }

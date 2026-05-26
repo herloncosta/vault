@@ -3,27 +3,11 @@ import argon2 from "argon2";
 
 const userSelect = { id: true, email: true, name: true, role: true, monthlyBudget: true, createdAt: true };
 
-function assertOwnData(authUser, targetId) {
-  if (authUser.role !== "ADMIN" && authUser.id !== targetId) {
-    const err = new Error("Forbidden: you can only access your own data");
-    err.status = 403;
-    throw err;
-  }
+export async function list() {
+  return prisma.user.findMany({ select: userSelect, orderBy: { createdAt: "desc" } });
 }
 
-export async function list(authUser) {
-  if (authUser.role === "ADMIN") {
-    return prisma.user.findMany({ select: userSelect, orderBy: { createdAt: "desc" } });
-  }
-  return prisma.user.findMany({
-    where: { id: authUser.id },
-    select: userSelect,
-  });
-}
-
-export async function getById(authUser, id) {
-  assertOwnData(authUser, id);
-
+export async function getById(id) {
   const user = await prisma.user.findUnique({ where: { id }, select: userSelect });
   if (!user) {
     const err = new Error("User not found");
@@ -33,13 +17,7 @@ export async function getById(authUser, id) {
   return user;
 }
 
-export async function create(authUser, data) {
-  if (authUser.role !== "ADMIN") {
-    const err = new Error("Forbidden: only admins can create users");
-    err.status = 403;
-    throw err;
-  }
-
+export async function create(data) {
   const existing = await prisma.user.findUnique({ where: { email: data.email } });
   if (existing) {
     const err = new Error("Email already in use");
@@ -54,19 +32,11 @@ export async function create(authUser, data) {
   });
 }
 
-export async function update(authUser, id, data) {
-  assertOwnData(authUser, id);
-
+export async function update(id, data) {
   const user = await prisma.user.findUnique({ where: { id } });
   if (!user) {
     const err = new Error("User not found");
     err.status = 404;
-    throw err;
-  }
-
-  if (data.role !== undefined && authUser.role !== "ADMIN") {
-    const err = new Error("Forbidden: only admins can change roles");
-    err.status = 403;
     throw err;
   }
 
@@ -79,16 +49,19 @@ export async function update(authUser, id, data) {
     }
   }
 
+  const updateData = { ...data };
+  if (updateData.password) {
+    updateData.password = await argon2.hash(updateData.password);
+  }
+
   return prisma.user.update({
     where: { id },
-    data,
+    data: updateData,
     select: userSelect,
   });
 }
 
-export async function remove(authUser, id) {
-  assertOwnData(authUser, id);
-
+export async function remove(id) {
   const user = await prisma.user.findUnique({ where: { id } });
   if (!user) {
     const err = new Error("User not found");

@@ -36,11 +36,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateProfile = useCallback(
     async (data: { name?: string; email?: string }) => {
-      if (!user) return;
-      const updated = await api.updateUser(user.id, data);
+      const updated = await api.updateMyProfile(data);
       setUser(updated);
     },
-    [user],
+    [],
   );
 
   const refreshUser = useCallback(async () => {

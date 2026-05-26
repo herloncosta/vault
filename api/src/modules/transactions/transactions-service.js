@@ -13,10 +13,10 @@ function assertOwnData(authUser, targetUserId) {
 function buildWhere(authUser, filters = {}) {
   const where = {};
 
-  if (authUser.role !== "ADMIN") {
-    where.userId = authUser.id;
-  } else if (filters.userId) {
+  if (filters.userId && authUser.role === "ADMIN") {
     where.userId = filters.userId;
+  } else {
+    where.userId = authUser.id;
   }
 
   if (filters.type) where.type = filters.type;

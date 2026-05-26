@@ -3,7 +3,7 @@ import { createUserSchema, updateUserSchema } from "./users-validator.js";
 
 export async function list(req, res, next) {
   try {
-    const users = await userService.list(req.user);
+    const users = await userService.list();
     res.json(users);
   } catch (err) {
     next(err);
@@ -12,7 +12,7 @@ export async function list(req, res, next) {
 
 export async function getById(req, res, next) {
   try {
-    const user = await userService.getById(req.user, req.params.id);
+    const user = await userService.getById(req.params.id);
     res.json(user);
   } catch (err) {
     next(err);
@@ -22,7 +22,7 @@ export async function getById(req, res, next) {
 export async function create(req, res, next) {
   try {
     const data = createUserSchema.parse(req.body);
-    const user = await userService.create(req.user, data);
+    const user = await userService.create(data);
     res.status(201).json(user);
   } catch (err) {
     if (err.name === "ZodError") {
@@ -35,7 +35,7 @@ export async function create(req, res, next) {
 export async function update(req, res, next) {
   try {
     const data = updateUserSchema.parse(req.body);
-    const user = await userService.update(req.user, req.params.id, data);
+    const user = await userService.update(req.params.id, data);
     res.json(user);
   } catch (err) {
     if (err.name === "ZodError") {
@@ -47,7 +47,7 @@ export async function update(req, res, next) {
 
 export async function remove(req, res, next) {
   try {
-    await userService.remove(req.user, req.params.id);
+    await userService.remove(req.params.id);
     res.status(204).end();
   } catch (err) {
     next(err);

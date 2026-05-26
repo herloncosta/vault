@@ -22,6 +22,7 @@ export interface User {
   name: string | null;
   role: string;
   monthlyBudget?: string;
+  createdAt: string;
 }
 
 export interface LoginPayload {
@@ -48,11 +49,44 @@ export function getMe() {
   return request<User>("/api/auth/me");
 }
 
-export function updateUser(id: string, data: { name?: string; email?: string }) {
+export function listUsers() {
+  return request<User[]>("/api/users");
+}
+
+export function getUser(id: string) {
+  return request<User>(`/api/users/${id}`);
+}
+
+export interface CreateUserPayload {
+  email: string;
+  password: string;
+  name?: string;
+  role?: "ADMIN" | "OPERATOR";
+}
+
+export function createUser(data: CreateUserPayload) {
+  return request<User>("/api/users", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export interface UpdateUserPayload {
+  name?: string;
+  email?: string;
+  role?: "ADMIN" | "OPERATOR";
+  password?: string;
+}
+
+export function updateUser(id: string, data: UpdateUserPayload) {
   return request<User>(`/api/users/${id}`, {
     method: "PUT",
     body: JSON.stringify(data),
   });
+}
+
+export function deleteUser(id: string) {
+  return request<void>(`/api/users/${id}`, { method: "DELETE" });
 }
 
 export interface Transaction {
@@ -113,6 +147,13 @@ export function updateTransaction(id: string, data: Partial<CreateTransactionPay
 
 export function deleteTransaction(id: string) {
   return request<void>(`/api/transactions/${id}`, { method: "DELETE" });
+}
+
+export function updateMyProfile(data: { name?: string; email?: string; password?: string }) {
+  return request<User>("/api/auth/me", {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
 }
 
 export function updateBudget(monthlyBudget: number) {

@@ -159,4 +159,37 @@ router.get("/me", auth, controller.me);
  */
 router.patch("/me/budget", auth, controller.updateBudget);
 
+/**
+ * @openapi
+ * /api/auth/me:
+ *   put:
+ *     tags: [Auth]
+ *     summary: Update own profile (name, email, password)
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *                 minLength: 8
+ *     responses:
+ *       200:
+ *         description: Profile updated
+ *       400:
+ *         description: Validation error
+ *       409:
+ *         description: Email already in use
+ */
+router.put("/me", auth, controller.updateProfile);
+
 export default router;
