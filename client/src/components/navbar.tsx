@@ -32,7 +32,7 @@ export default function Navbar() {
       <nav className="relative z-10 border-b border-slate-200 bg-white/80 backdrop-blur dark:border-gray-800 dark:bg-gray-950/80">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
           <Link to="/" className="transition-all duration-300 hover:opacity-80">
-            <img src="/vault-logo.png" alt="Vault" className="h-8" />
+            <img src="/vault-logo.png" alt="Vault" className="h-16" />
           </Link>
 
           <button

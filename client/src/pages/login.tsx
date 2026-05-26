@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, TrendingUp, Shield } from "lucide-react";
 import { useAuth } from "../contexts/auth-context";
 
 export default function LoginPage() {
@@ -26,67 +26,106 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-slate-50 to-blue-50 px-4 dark:from-gray-950 dark:to-blue-950/30">
-      <div className="pointer-events-none absolute -inset-40 bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.08),transparent_60%)] dark:bg-[radial-gradient(circle_at_30%_20%,rgba(59,130,246,0.06),transparent_60%)]" />
+    <div className="flex min-h-screen flex-col md:flex-row">
+      <div className="relative hidden flex-1 flex-col justify-between overflow-hidden bg-gradient-to-br from-blue-700 via-blue-600 to-violet-700 p-8 md:flex md:p-12 lg:p-16">
+        <div className="pointer-events-none absolute -right-20 -top-20 h-80 w-80 rounded-full bg-white/5" />
+        <div className="pointer-events-none absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-white/5" />
+        <div className="pointer-events-none absolute right-1/4 top-1/3 h-48 w-48 rounded-full bg-white/[0.03]" />
 
-      <form
-        onSubmit={handleSubmit}
-        className="relative w-full max-w-sm rounded-3xl border border-slate-200/60 bg-white/70 p-8 shadow-xl backdrop-blur-2xl dark:border-gray-800/60 dark:bg-gray-950/70"
-      >
-        <div className="mb-8 flex flex-col items-center gap-3">
-          <img src="/vault-logo.png" alt="Vault" className="h-10" />
-          <p className="text-center text-sm text-slate-500 dark:text-gray-400">
-            Acesse sua conta financeira
-          </p>
+        <div className="relative">
+          <img src="/vault-logo.png" alt="Vault" className="h-18" />
         </div>
 
-        {error && (
-          <p className="mb-6 rounded-xl bg-red-50 px-4 py-2.5 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
-            {error}
-          </p>
-        )}
-
-        <div className="space-y-5">
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
-              Email
-            </label>
-            <input
-              type="email"
-              required
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="seu@email.com"
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-600 dark:focus:border-blue-400"
-            />
+        <div className="relative space-y-8">
+          <div className="space-y-3">
+            <h1 className="text-3xl font-bold leading-tight text-white md:text-4xl lg:text-5xl">
+              Controle suas
+              <br />
+              finanças com
+              <br />
+              <span className="text-blue-200">inteligência</span>
+            </h1>
+            <p className="max-w-sm text-base text-blue-100/80 md:text-lg">
+              Acompanhe receitas, despesas e investimentos em um só lugar. Tenha uma visão clara do seu dinheiro.
+            </p>
           </div>
 
-          <div>
-            <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
-              Senha
-            </label>
-            <input
-              type="password"
-              required
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-600 dark:focus:border-blue-400"
-            />
+          <div className="flex flex-col gap-4 sm:flex-row">
+            {[
+              { icon: TrendingUp, label: "Receitas", color: "text-emerald-300" },
+              { icon: TrendingUp, label: "Despesas", color: "text-red-300", className: "rotate-180" },
+              { icon: Shield, label: "Segurança", color: "text-blue-200" },
+            ].map(({ icon: Icon, label, color, className }) => (
+              <div key={label} className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 backdrop-blur-sm">
+                <Icon size={18} className={`${color} ${className ?? ""}`} />
+                <span className="text-sm text-white/80">{label}</span>
+              </div>
+            ))}
           </div>
-
-          <button
-            type="submit"
-            disabled={submitting}
-            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all duration-300 hover:bg-blue-700 hover:shadow-blue-600/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-[0.97] disabled:opacity-60 disabled:shadow-none"
-          >
-            {submitting ? "Entrando…" : "Entrar"}
-            {submitting ? null : <ArrowRight size={16} />}
-          </button>
         </div>
-      </form>
+
+        <p className="relative text-xs text-blue-200/50">
+          &copy; {new Date().getFullYear()} Vault. Todos os direitos reservados.
+        </p>
+      </div>
+
+      <div className="flex flex-1 items-center justify-center bg-white px-6 dark:bg-gray-950 md:px-10">
+        <div className="w-full max-w-sm">
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-gray-100">Bem-vindo de volta</h2>
+            <p className="mt-1 text-sm text-slate-500 dark:text-gray-400">
+              Acesse sua conta para continuar
+            </p>
+          </div>
+
+          {error && (
+            <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-400">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
+                Email
+              </label>
+              <input
+                type="email"
+                required
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="seu@email.com"
+                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-600 dark:focus:border-blue-400"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
+                Senha
+              </label>
+              <input
+                type="password"
+                required
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-600 dark:focus:border-blue-400"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={submitting}
+              className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all duration-300 hover:bg-blue-700 hover:shadow-blue-600/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-[0.97] disabled:opacity-60 disabled:shadow-none"
+            >
+              {submitting ? "Entrando…" : "Entrar"}
+              {submitting ? null : <ArrowRight size={16} />}
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   );
 }
