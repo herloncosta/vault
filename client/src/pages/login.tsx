@@ -71,7 +71,8 @@ export default function LoginPage() {
 
       <div className="flex flex-1 items-center justify-center bg-white px-6 dark:bg-gray-950 md:px-10">
         <div className="w-full max-w-sm">
-          <div className="mb-8">
+          <div className="mb-8 flex flex-col items-center md:items-start">
+            <img src="/vault-logo.png" alt="Vault" className="mb-6 h-18 md:hidden" />
             <h2 className="text-2xl font-bold text-slate-900 dark:text-gray-100">Bem-vindo de volta</h2>
             <p className="mt-1 text-sm text-slate-500 dark:text-gray-400">
               Acesse sua conta para continuar
