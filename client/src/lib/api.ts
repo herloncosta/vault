@@ -149,7 +149,7 @@ export function deleteTransaction(id: string) {
   return request<void>(`/api/transactions/${id}`, { method: "DELETE" });
 }
 
-export function updateMyProfile(data: { name?: string; email?: string; password?: string }) {
+export function updateMyProfile(data: { name?: string; email?: string; currentPassword?: string; password?: string }) {
   return request<User>("/api/auth/me", {
     method: "PUT",
     body: JSON.stringify(data),

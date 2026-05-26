@@ -6,7 +6,7 @@ interface AuthState {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  updateProfile: (data: { name?: string; email?: string }) => Promise<void>;
+  updateProfile: (data: { name?: string; email?: string; currentPassword?: string; password?: string }) => Promise<void>;
   refreshUser: () => Promise<void>;
 }
 
@@ -35,7 +35,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const updateProfile = useCallback(
-    async (data: { name?: string; email?: string }) => {
+    async (data: { name?: string; email?: string; currentPassword?: string; password?: string }) => {
       const updated = await api.updateMyProfile(data);
       setUser(updated);
     },

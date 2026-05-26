@@ -243,6 +243,15 @@ export async function updateProfile(userId, data) {
     throw err;
   }
 
+  if (data.password) {
+    const valid = await argon2.verify(user.password, data.currentPassword);
+    if (!valid) {
+      const err = new Error("Current password is incorrect");
+      err.status = 403;
+      throw err;
+    }
+  }
+
   if (data.email && data.email !== user.email) {
     const existing = await prisma.user.findUnique({ where: { email: data.email } });
     if (existing) {
@@ -253,6 +262,7 @@ export async function updateProfile(userId, data) {
   }
 
   const updateData = { ...data };
+  delete updateData.currentPassword;
   if (updateData.password) {
     updateData.password = await argon2.hash(updateData.password);
   }
