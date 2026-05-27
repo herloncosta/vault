@@ -18,8 +18,12 @@ import {
   Plane,
   HeartPulse,
   GraduationCap,
+  RotateCcw,
+  CreditCard,
+  ExternalLink,
   type LucideIcon,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import * as api from "../lib/api";
 
 const categoryIcons: Record<string, LucideIcon> = {
@@ -57,6 +61,12 @@ function formatCurrency(value: number) {
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("pt-BR");
 }
+
+const sourceConfig = {
+  transaction: { label: "", icon: null, color: "" },
+  installment: { label: "Parcelada", icon: CreditCard, color: "bg-violet-100 text-violet-600 dark:bg-violet-950 dark:text-violet-400" },
+  recurring: { label: "Fixa", icon: RotateCcw, color: "bg-blue-100 text-blue-600 dark:bg-blue-950 dark:text-blue-400" },
+};
 
 export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<api.Transaction[]>([]);
@@ -145,6 +155,7 @@ export default function TransactionsPage() {
   }
 
   async function handleEdit(t: api.Transaction) {
+    if (t.source !== "transaction") return;
     setEditingId(t.id);
     setType(t.type);
     setAmount(String(Number(t.amount)));
@@ -157,7 +168,8 @@ export default function TransactionsPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  async function handleDelete(id: string) {
+  async function handleDelete(id: string, source: string) {
+    if (source !== "transaction") return;
     try {
       await api.deleteTransaction(id);
       fetchTransactions();
@@ -172,7 +184,7 @@ export default function TransactionsPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-gray-100">Transações</h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-gray-400">
-            Gerencie suas receitas e despesas
+            Todas as suas movimentações em um só lugar
           </p>
         </div>
         <button
@@ -358,9 +370,11 @@ export default function TransactionsPage() {
           <div className="divide-y divide-slate-100 dark:divide-gray-800">
             {transactions.map((t) => {
               const CatIcon = categoryIcons[t.category ?? ""] ?? ArrowDownToLine;
+              const cfg = sourceConfig[t.source];
+
               return (
                 <div
-                  key={t.id}
+                  key={`${t.source}-${t.id}`}
                   className="flex items-center gap-3 px-4 py-3.5 transition-all duration-300 hover:bg-slate-50 dark:hover:bg-gray-800/60"
                 >
                   <div
@@ -372,17 +386,28 @@ export default function TransactionsPage() {
                   >
                     <CatIcon size={16} />
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-slate-900 dark:text-gray-100">
-                      {t.description}
-                    </p>
-                    <p className="text-xs text-slate-400 dark:text-gray-500">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="truncate text-sm font-medium text-slate-900 dark:text-gray-100">
+                        {t.description}
+                      </p>
+                      {t.source !== "transaction" && (
+                        <span className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${cfg.color}`}>
+                          {cfg.icon && <cfg.icon size={10} />}
+                          {cfg.label}
+                          {t.source === "installment" && t.installmentCount && (
+                            <> {t.installmentNumber}/{t.installmentCount}</>
+                          )}
+                        </span>
+                      )}
+                    </div>
+                    <p className="truncate text-xs text-slate-400 dark:text-gray-500">
                       {formatDate(t.date)}
                       {t.category ? ` • ${t.category}` : ""}
                       {t.paymentMethod ? ` • ${t.paymentMethod}` : ""}
                     </p>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 shrink-0">
                     <span
                       className={`text-sm font-semibold ${
                         t.type === "INCOME"
@@ -393,20 +418,32 @@ export default function TransactionsPage() {
                       {t.type === "INCOME" ? "+" : "-"}
                       {formatCurrency(Number(t.amount))}
                     </span>
-                    <button
-                      onClick={() => handleEdit(t)}
-                      className="cursor-pointer rounded-lg p-1.5 text-slate-300 transition-all duration-300 hover:bg-blue-50 hover:text-blue-500 dark:text-gray-600 dark:hover:bg-blue-900/20 dark:hover:text-blue-400"
-                      aria-label="editar"
-                    >
-                      <Pencil size={14} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(t.id)}
-                      className="cursor-pointer rounded-lg p-1.5 text-slate-300 transition-all duration-300 hover:bg-red-50 hover:text-red-500 dark:text-gray-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
-                      aria-label="excluir"
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                    {t.source === "transaction" ? (
+                      <>
+                        <button
+                          onClick={() => handleEdit(t)}
+                          className="cursor-pointer rounded-lg p-1.5 text-slate-300 transition-all duration-300 hover:bg-blue-50 hover:text-blue-500 dark:text-gray-600 dark:hover:bg-blue-900/20 dark:hover:text-blue-400"
+                          aria-label="editar"
+                        >
+                          <Pencil size={14} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(t.id, t.source)}
+                          className="cursor-pointer rounded-lg p-1.5 text-slate-300 transition-all duration-300 hover:bg-red-50 hover:text-red-500 dark:text-gray-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                          aria-label="excluir"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </>
+                    ) : (
+                      <Link
+                        to={t.source === "installment" ? "/despesas-parceladas" : "/despesas-fixas"}
+                        className="rounded-lg p-1.5 text-slate-300 transition-all duration-300 hover:bg-slate-100 hover:text-blue-500 dark:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-blue-400"
+                        aria-label="ver detalhes"
+                      >
+                        <ExternalLink size={14} />
+                      </Link>
+                    )}
                   </div>
                 </div>
               );

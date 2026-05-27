@@ -164,7 +164,6 @@ export default function RecurringExpensesPage() {
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-bold text-slate-900 dark:text-gray-100">
-            <RotateCcw size={28} className="text-blue-600 dark:text-blue-400" />
             Despesas Fixas
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-gray-400">

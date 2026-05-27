@@ -99,8 +99,12 @@ export interface Transaction {
   date: string;
   paymentMethod: string | null;
   status: "PENDING" | "COMPLETED" | "CANCELLED";
+  source: "transaction" | "installment" | "recurring";
+  sourceId: string | null;
+  installmentNumber: number | null;
+  installmentCount: number | null;
   createdAt: string;
-  updatedAt: string;
+  updatedAt: string | null;
   user?: { id: string; email: string; name: string | null };
 }
 
@@ -222,4 +226,81 @@ export function updateRecurringExpense(id: string, data: Partial<CreateRecurring
 
 export function deleteRecurringExpense(id: string) {
   return request<void>(`/api/recurring-expenses/${id}`, { method: "DELETE" });
+}
+
+export interface Installment {
+  id: string;
+  installmentExpenseId: string;
+  amount: number;
+  installmentNumber: number;
+  dueDate: string;
+  paid: boolean;
+  paidAt: string | null;
+  createdAt: string;
+}
+
+export interface InstallmentExpense {
+  id: string;
+  userId: string;
+  description: string;
+  totalAmount: number;
+  installmentCount: number;
+  type: "CREDIT_CARD" | "CARNE";
+  category: string | null;
+  firstDueDate: string;
+  createdAt: string;
+  updatedAt: string;
+  user?: { id: string; email: string; name: string | null };
+  installments: Installment[];
+}
+
+export interface InstallmentExpenseListResult {
+  data: InstallmentExpense[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface CreateInstallmentExpensePayload {
+  description: string;
+  totalAmount: number;
+  installmentCount: number;
+  type: "CREDIT_CARD" | "CARNE";
+  category?: string;
+  firstDueDate: string;
+}
+
+export function listInstallmentExpenses(params?: Record<string, string>) {
+  const qs = params ? `?${new URLSearchParams(params).toString()}` : "";
+  return request<InstallmentExpenseListResult>(`/api/installment-expenses${qs}`);
+}
+
+export function getInstallmentExpense(id: string) {
+  return request<InstallmentExpense>(`/api/installment-expenses/${id}`);
+}
+
+export function createInstallmentExpense(data: CreateInstallmentExpensePayload) {
+  return request<InstallmentExpense>("/api/installment-expenses", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function updateInstallmentExpense(id: string, data: Partial<CreateInstallmentExpensePayload>) {
+  return request<InstallmentExpense>(`/api/installment-expenses/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
+export function deleteInstallmentExpense(id: string) {
+  return request<void>(`/api/installment-expenses/${id}`, { method: "DELETE" });
+}
+
+export function updateInstallmentPaid(installmentId: string, paid: boolean) {
+  return request<Installment>(`/api/installment-expenses/installments/${installmentId}/paid`, {
+    method: "PATCH",
+    body: JSON.stringify({ paid }),
+  });
 }
