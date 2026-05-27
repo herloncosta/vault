@@ -55,7 +55,7 @@ export async function register(req, res, next) {
     res.status(201).json(user);
   } catch (err) {
     if (err.name === "ZodError") {
-      return res.status(400).json({ error: err.errors });
+      return res.status(400).json({ error: err.issues });
     }
     next(err);
   }
@@ -78,7 +78,7 @@ export async function login(req, res, next) {
       .json({ user: result.user });
   } catch (err) {
     if (err.name === "ZodError") {
-      return res.status(400).json({ error: err.errors });
+      return res.status(400).json({ error: err.issues });
     }
     next(err);
   }
@@ -108,7 +108,7 @@ export async function refresh(req, res, next) {
       .json({ user: result.user });
   } catch (err) {
     if (err.name === "ZodError") {
-      return res.status(400).json({ error: err.errors });
+      return res.status(400).json({ error: err.issues });
     }
     next(err);
   }
@@ -157,7 +157,7 @@ export async function updateProfile(req, res, next) {
     res.json(user);
   } catch (err) {
     if (err.name === "ZodError") {
-      return res.status(400).json({ error: err.errors });
+      return res.status(400).json({ error: err.issues });
     }
     next(err);
   }

@@ -12,11 +12,26 @@ export default function ProfileEditor() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
+  function validatePassword(pw: string, currentPw: string): string | null {
+    if (!pw) return null;
+    if (pw.length < 8) return "A senha deve ter no mínimo 8 caracteres.";
+    if (!currentPw) return "Informe sua senha atual para alterar a senha.";
+    return null;
+  }
+
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     setMessage("");
     setError("");
     setSaving(true);
+
+    const pwError = validatePassword(password, currentPassword);
+    if (pwError) {
+      setError(pwError);
+      setSaving(false);
+      return;
+    }
+
     try {
       const data: { name?: string; email?: string; currentPassword?: string; password?: string } = {};
       if (name !== (user?.name ?? "")) data.name = name || undefined;

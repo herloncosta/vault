@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import * as api from "../lib/api";
+import { fmt, parse as parseCurrency, toInput } from "../lib/currency";
 
 const categoryIcons: Record<string, LucideIcon> = {
   Alimentação: Utensils,
@@ -119,10 +120,8 @@ export default function TransactionsPage() {
     setSubmitting(true);
 
     try {
-      const parsedAmount = Number.parseFloat(amount.replace(",", "."));
-      if (Number.isNaN(parsedAmount) || parsedAmount <= 0) {
-        throw new Error("Valor inválido");
-      }
+      const parsedAmount = parseCurrency(amount);
+      if (parsedAmount <= 0) throw new Error("Valor inválido");
 
       if (editingId) {
         await api.updateTransaction(editingId, {
@@ -158,7 +157,7 @@ export default function TransactionsPage() {
     if (t.source !== "transaction") return;
     setEditingId(t.id);
     setType(t.type);
-    setAmount(String(Number(t.amount)));
+    setAmount(toInput(t.amount));
     setDescription(t.description);
     setCategory(t.category ?? "");
     setDate(new Date(t.date).toISOString().slice(0, 10));
@@ -258,7 +257,7 @@ export default function TransactionsPage() {
               required
               inputMode="decimal"
               value={amount}
-              onChange={(e) => setAmount(e.target.value)}
+              onChange={(e) => setAmount(fmt(e.target.value))}
               placeholder="0,00"
               className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-600 dark:focus:border-blue-400"
             />

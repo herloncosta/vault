@@ -30,7 +30,7 @@ export async function create(req, res, next) {
     res.status(201).json(expense);
   } catch (err) {
     if (err.name === "ZodError") {
-      return res.status(400).json({ error: err.errors });
+      return res.status(400).json({ error: err.issues });
     }
     next(err);
   }
@@ -43,7 +43,7 @@ export async function update(req, res, next) {
     res.json(expense);
   } catch (err) {
     if (err.name === "ZodError") {
-      return res.status(400).json({ error: err.errors });
+      return res.status(400).json({ error: err.issues });
     }
     next(err);
   }
@@ -65,7 +65,7 @@ export async function updateInstallmentPaid(req, res, next) {
     res.json(installment);
   } catch (err) {
     if (err.name === "ZodError") {
-      return res.status(400).json({ error: err.errors });
+      return res.status(400).json({ error: err.issues });
     }
     next(err);
   }

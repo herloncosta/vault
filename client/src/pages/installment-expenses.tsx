@@ -14,6 +14,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import * as api from "../lib/api";
+import { fmt, parse as parseCurrency, toInput } from "../lib/currency";
 
 const CATEGORY_OPTIONS = [
   "Moradia",
@@ -81,7 +82,7 @@ export default function InstallmentExpensesPage() {
   function openEdit(expense: api.InstallmentExpense) {
     setForm({
       description: expense.description,
-      totalAmount: String(expense.totalAmount),
+      totalAmount: toInput(Number(expense.totalAmount)),
       installmentCount: String(expense.installmentCount),
       type: expense.type,
       category: expense.category ?? "",
@@ -95,8 +96,8 @@ export default function InstallmentExpensesPage() {
     e.preventDefault();
     setError("");
 
-    const totalAmount = Number.parseFloat(form.totalAmount);
-    if (!totalAmount || totalAmount <= 0) { setError("Valor total deve ser positivo"); return; }
+    const totalAmount = parseCurrency(form.totalAmount);
+    if (totalAmount <= 0) { setError("Valor total deve ser positivo"); return; }
     if (!form.description.trim()) { setError("Descrição é obrigatória"); return; }
     if (!form.firstDueDate) { setError("Primeiro vencimento é obrigatório"); return; }
 
@@ -210,13 +211,12 @@ export default function InstallmentExpensesPage() {
               <label className="mb-1 block text-xs font-medium text-slate-500 dark:text-gray-400">
                 Valor total *
               </label>
-              <input
-                type="number"
-                step="0.01"
-                min="0.01"
-                placeholder="0,00"
-                value={form.totalAmount}
-                onChange={(e) => setForm({ ...form, totalAmount: e.target.value })}
+                <input
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="0,00"
+                  value={form.totalAmount}
+                  onChange={(e) => setForm({ ...form, totalAmount: fmt(e.target.value) })}
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm text-slate-900 transition-all duration-300 placeholder:text-slate-400 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-violet-500 dark:focus:ring-violet-900"
               />
             </div>

@@ -6,7 +6,6 @@ import {
   TrendingUp,
   TrendingDown,
   Plus,
-  Send,
   Pencil,
   ArrowDownToLine,
   ShoppingCart,
@@ -212,15 +211,6 @@ export default function HomePage() {
             <ArrowDownToLine size={18} />
           </div>
           <span className="text-xs font-medium text-slate-600 dark:text-gray-300">Despesa</span>
-        </button>
-        <button
-          onClick={() => navigate("/transacoes")}
-          className="flex flex-1 cursor-pointer flex-col items-center gap-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-lg transition-all duration-300 hover:shadow-xl active:scale-[0.97] dark:border-gray-800 dark:bg-gray-900"
-        >
-          <div className="rounded-xl bg-blue-50 p-2.5 text-blue-600 dark:bg-blue-900/20">
-            <Send size={18} />
-          </div>
-          <span className="text-xs font-medium text-slate-600 dark:text-gray-300">Transferir</span>
         </button>
       </div>
 
