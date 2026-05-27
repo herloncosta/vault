@@ -7,6 +7,7 @@ import HomePage from "./pages/home";
 import ProfilePage from "./pages/profile";
 import SettingsPage from "./pages/settings";
 import TransactionsPage from "./pages/transactions";
+import RecurringExpensesPage from "./pages/recurring-expenses";
 import AdminUsersPage from "./pages/admin-users";
 
 function ProtectedLayout() {
@@ -30,6 +31,7 @@ function ProtectedLayout() {
         <Route path="/perfil" element={<ProfilePage />} />
         <Route path="/configuracoes" element={<SettingsPage />} />
         <Route path="/transacoes" element={<TransactionsPage />} />
+        <Route path="/despesas-fixas" element={<RecurringExpensesPage />} />
         {user.role === "ADMIN" && <Route path="/admin/usuarios" element={<AdminUsersPage />} />}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

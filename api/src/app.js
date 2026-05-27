@@ -10,6 +10,7 @@ import swaggerSpec from "./config/swagger.js";
 import authRoutes from "./modules/auth/auth-routes.js";
 import userRoutes from "./modules/users/users-routes.js";
 import transactionRoutes from "./modules/transactions/transactions-routes.js";
+import recurringExpenseRoutes from "./modules/recurring-expenses/recurring-expenses-routes.js";
 
 const app = express();
 
@@ -38,6 +39,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/transactions", transactionRoutes);
+app.use("/api/recurring-expenses", recurringExpenseRoutes);
 
 app.use(errorHandler);
 

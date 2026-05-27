@@ -162,3 +162,64 @@ export function updateBudget(monthlyBudget: number) {
     body: JSON.stringify({ monthlyBudget }),
   });
 }
+
+export interface RecurringExpense {
+  id: string;
+  userId: string;
+  amount: number;
+  description: string;
+  category: string | null;
+  paymentMethod: string | null;
+  dayOfMonth: number;
+  startDate: string;
+  endDate: string | null;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+  user?: { id: string; email: string; name: string | null };
+}
+
+export interface RecurringExpenseListResult {
+  data: RecurringExpense[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface CreateRecurringExpensePayload {
+  amount: number;
+  description: string;
+  category?: string;
+  paymentMethod?: string;
+  dayOfMonth: number;
+  startDate: string;
+  endDate?: string;
+}
+
+export function listRecurringExpenses(params?: Record<string, string>) {
+  const qs = params ? `?${new URLSearchParams(params).toString()}` : "";
+  return request<RecurringExpenseListResult>(`/api/recurring-expenses${qs}`);
+}
+
+export function getRecurringExpense(id: string) {
+  return request<RecurringExpense>(`/api/recurring-expenses/${id}`);
+}
+
+export function createRecurringExpense(data: CreateRecurringExpensePayload) {
+  return request<RecurringExpense>("/api/recurring-expenses", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function updateRecurringExpense(id: string, data: Partial<CreateRecurringExpensePayload & { active: boolean }>) {
+  return request<RecurringExpense>(`/api/recurring-expenses/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
+export function deleteRecurringExpense(id: string) {
+  return request<void>(`/api/recurring-expenses/${id}`, { method: "DELETE" });
+}

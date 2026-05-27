@@ -21,10 +21,11 @@ model User {
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  refreshTokens RefreshToken[]
-  revokedTokens RevokedToken[]
-  accessLogs    AccessLog[]
-  transactions  Transaction[]
+  refreshTokens     RefreshToken[]
+  revokedTokens     RevokedToken[]
+  accessLogs        AccessLog[]
+  transactions      Transaction[]
+  recurringExpenses RecurringExpense[]
 
   @@map("users")
 }
@@ -90,4 +91,22 @@ model Transaction {
   updatedAt     DateTime          @updatedAt @map("updated_at")
 
   @@map("transactions")
+}
+
+model RecurringExpense {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount        Decimal  @db.Decimal(12, 2)
+  description   String
+  category      String?
+  paymentMethod String?  @map("payment_method")
+  dayOfMonth    Int
+  startDate     DateTime @map("start_date")
+  endDate       DateTime? @map("end_date")
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("recurring_expenses")
 }

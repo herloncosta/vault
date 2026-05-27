@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Home, User, Settings, LogOut, ArrowLeftRight, Users } from "lucide-react";
+import { Menu, X, Home, User, Settings, LogOut, ArrowLeftRight, Users, RotateCcw } from "lucide-react";
 import { useAuth } from "../contexts/auth-context";
 
 function useLinks() {
@@ -8,6 +8,7 @@ function useLinks() {
   const base = [
     { to: "/", label: "Início", icon: Home },
     { to: "/transacoes", label: "Transações", icon: ArrowLeftRight },
+    { to: "/despesas-fixas", label: "Despesas Fixas", icon: RotateCcw },
     { to: "/perfil", label: "Perfil", icon: User },
     { to: "/configuracoes", label: "Configurações", icon: Settings },
   ];
