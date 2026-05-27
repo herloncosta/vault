@@ -1,11 +1,9 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/auth-context";
 import {
   Wallet,
   TrendingUp,
   TrendingDown,
-  Plus,
   Pencil,
   ArrowDownToLine,
   ShoppingCart,
@@ -22,6 +20,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import * as api from "../lib/api";
+import TransactionForm from "../components/transaction-form";
 
 const categoryIcons: Record<string, LucideIcon> = {
   Alimentação: Utensils,
@@ -43,19 +42,24 @@ function formatCurrency(value: number) {
 
 export default function HomePage() {
   const { user, refreshUser } = useAuth();
-  const navigate = useNavigate();
   const [transactions, setTransactions] = useState<api.Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingBudget, setEditingBudget] = useState(false);
   const [budgetInput, setBudgetInput] = useState("");
   const [budgetSubmitting, setBudgetSubmitting] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [formType, setFormType] = useState<"INCOME" | "EXPENSE">("EXPENSE");
 
-  useEffect(() => {
+  function fetchTransactions() {
     api
-      .listTransactions({ limit: "100" })
+      .listTransactions({ limit: "1000" })
       .then((res) => setTransactions(res.data))
       .catch(() => setTransactions([]))
       .finally(() => setLoading(false));
+  }
+
+  useEffect(() => {
+    fetchTransactions();
   }, []);
 
   const now = new Date();
@@ -195,16 +199,16 @@ export default function HomePage() {
 
       <div className="mb-8 flex gap-3">
         <button
-          onClick={() => navigate("/transacoes")}
+          onClick={() => { setFormType("INCOME"); setShowForm(true); }}
           className="flex flex-1 cursor-pointer flex-col items-center gap-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-lg transition-all duration-300 hover:shadow-xl active:scale-[0.97] dark:border-gray-800 dark:bg-gray-900"
         >
           <div className="rounded-xl bg-emerald-50 p-2.5 text-emerald-500 dark:bg-emerald-900/20">
-            <Plus size={18} />
+            <TrendingUp size={18} />
           </div>
           <span className="text-xs font-medium text-slate-600 dark:text-gray-300">Receita</span>
         </button>
         <button
-          onClick={() => navigate("/transacoes")}
+          onClick={() => { setFormType("EXPENSE"); setShowForm(true); }}
           className="flex flex-1 cursor-pointer flex-col items-center gap-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-lg transition-all duration-300 hover:shadow-xl active:scale-[0.97] dark:border-gray-800 dark:bg-gray-900"
         >
           <div className="rounded-xl bg-red-50 p-2.5 text-red-400 dark:bg-red-900/20">
@@ -212,6 +216,35 @@ export default function HomePage() {
           </div>
           <span className="text-xs font-medium text-slate-600 dark:text-gray-300">Despesa</span>
         </button>
+      </div>
+
+      {showForm && (
+        <div className="mb-8">
+          <TransactionForm
+            initialType={formType}
+            onSave={fetchTransactions}
+            onClose={() => setShowForm(false)}
+          />
+        </div>
+      )}
+
+      <div className="mb-8">
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-slate-900 dark:text-gray-100">
+            Receitas x Despesas
+          </h2>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5">
+              <div className="h-2.5 w-2.5 rounded-sm bg-emerald-500" />
+              <span className="text-[10px] text-slate-400 dark:text-gray-500">Receitas</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="h-2.5 w-2.5 rounded-sm bg-red-400" />
+              <span className="text-[10px] text-slate-400 dark:text-gray-500">Despesas</span>
+            </div>
+          </div>
+        </div>
+        <MonthlyChart transactions={transactions} />
       </div>
 
       <div className="mb-8">
@@ -340,5 +373,119 @@ export default function HomePage() {
         </div>
       </div>
     </main>
+  );
+}
+
+const monthNames = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+
+function MonthlyChart({ transactions }: { transactions: api.Transaction[] }) {
+  const now = new Date();
+
+  const monthlyData = Array.from({ length: 12 }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - 11 + i, 1);
+    const month = d.getMonth();
+    const year = d.getFullYear();
+
+    const monthTx = transactions.filter((t) => {
+      const td = new Date(t.date);
+      return td.getMonth() === month && td.getFullYear() === year;
+    });
+
+    return {
+      label: `${monthNames[month]}/${String(year).slice(-2)}`,
+      income: monthTx.filter((t) => t.type === "INCOME").reduce((a, t) => a + Number(t.amount), 0),
+      expense: monthTx.filter((t) => t.type === "EXPENSE").reduce((a, t) => a + Number(t.amount), 0),
+    };
+  });
+
+  const maxValue = Math.max(...monthlyData.flatMap((m) => [m.income, m.expense]), 1);
+
+  const chartH = 180;
+  const pad = { top: 10, bottom: 28, left: 64, right: 12 };
+  const plotH = chartH - pad.top - pad.bottom;
+  const groupW = (600 - pad.left - pad.right) / 12;
+  const barW = 6;
+  const barGap = 3;
+
+  function barX(index: number) {
+    return pad.left + index * groupW + (groupW - barW * 2 - barGap) / 2;
+  }
+
+  function barHeight(value: number) {
+    return Math.max(0, (value / maxValue) * plotH);
+  }
+
+  function barY(value: number) {
+    return pad.top + plotH - barHeight(value);
+  }
+
+  const yTicks = 4;
+  const yStep = maxValue / yTicks;
+
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-lg dark:border-gray-800 dark:bg-gray-900">
+      <svg
+        viewBox={`0 0 600 ${chartH}`}
+        className="w-full"
+        preserveAspectRatio="xMidYMid meet"
+      >
+        {Array.from({ length: yTicks + 1 }, (_, i) => {
+          const val = yStep * i;
+          const yPos = pad.top + plotH - (val / maxValue) * plotH;
+          return (
+            <g key={i}>
+              <line
+                x1={pad.left}
+                y1={yPos}
+                x2={600 - pad.right}
+                y2={yPos}
+                stroke="currentColor"
+                className="text-slate-100 dark:text-gray-800"
+                strokeWidth={1}
+              />
+              <text
+                x={pad.left - 6}
+                y={yPos + 3}
+                textAnchor="end"
+                className="fill-slate-400 dark:fill-gray-500"
+                fontSize={9}
+              >
+                {formatCurrency(val)}
+              </text>
+            </g>
+          );
+        })}
+
+        {monthlyData.map((m, i) => (
+          <g key={m.label}>
+            <rect
+              x={barX(i)}
+              y={barY(m.income)}
+              width={barW}
+              height={barHeight(m.income)}
+              rx={3}
+              className="fill-emerald-500"
+            />
+            <rect
+              x={barX(i) + barW + barGap}
+              y={barY(m.expense)}
+              width={barW}
+              height={barHeight(m.expense)}
+              rx={3}
+              className="fill-red-400"
+            />
+            <text
+              x={barX(i) + barW + barGap / 2}
+              y={chartH - pad.bottom + 16}
+              textAnchor="middle"
+              className="fill-slate-400 dark:fill-gray-500"
+              fontSize={9}
+            >
+              {m.label}
+            </text>
+          </g>
+        ))}
+      </svg>
+    </div>
   );
 }
