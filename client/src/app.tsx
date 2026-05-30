@@ -1,20 +1,47 @@
-import { useState } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { lazy, Suspense, useState } from "react";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
 import { ThemeProvider } from "./contexts/theme-context";
 import { AuthProvider, useAuth } from "./contexts/auth-context";
 import Navbar from "./components/navbar";
-import LoginPage from "./pages/login";
-import HomePage from "./pages/home";
-import ProfilePage from "./pages/profile";
-import SettingsPage from "./pages/settings";
-import TransactionsPage from "./pages/transactions";
-import RecurringExpensesPage from "./pages/recurring-expenses";
-import InstallmentExpensesPage from "./pages/installment-expenses";
-import AdminUsersPage from "./pages/admin-users";
+
+const LoginPage = lazy(() => import("./pages/login"));
+const HomePage = lazy(() => import("./pages/home"));
+const ProfilePage = lazy(() => import("./pages/profile"));
+const SettingsPage = lazy(() => import("./pages/settings"));
+const TransactionsPage = lazy(() => import("./pages/transactions"));
+const RecurringExpensesPage = lazy(() => import("./pages/recurring-expenses"));
+const InstallmentExpensesPage = lazy(() => import("./pages/installment-expenses"));
+const AdminUsersPage = lazy(() => import("./pages/admin-users"));
+
+function PageFallback() {
+  return (
+    <div className="animate-pulse space-y-4 p-6">
+      <div className="h-8 w-48 rounded-lg bg-slate-200 dark:bg-gray-800" />
+      <div className="h-4 w-96 rounded-lg bg-slate-200 dark:bg-gray-800" />
+      <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div
+            key={i}
+            className="h-32 rounded-2xl bg-slate-200 dark:bg-gray-800"
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function ProtectedLayout() {
   const { user, loading } = useAuth();
-  const [sidebarOpen, setSidebarOpen] = useState(() => localStorage.getItem("sidebarOpen") !== "false");
+  const location = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(
+    () => localStorage.getItem("sidebarOpen") !== "false",
+  );
 
   if (loading) {
     return (
@@ -37,16 +64,22 @@ function ProtectedLayout() {
           sidebarOpen ? "md:ml-56" : "md:ml-16"
         } pt-16`}
       >
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/perfil" element={<ProfilePage />} />
-          <Route path="/configuracoes" element={<SettingsPage />} />
-          <Route path="/transacoes" element={<TransactionsPage />} />
-          <Route path="/despesas-fixas" element={<RecurringExpensesPage />} />
-          <Route path="/despesas-parceladas" element={<InstallmentExpensesPage />} />
-          {user.role === "ADMIN" && <Route path="/admin/usuarios" element={<AdminUsersPage />} />}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+        <Suspense fallback={<PageFallback />}>
+          <div key={location.pathname} className="page-enter">
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/perfil" element={<ProfilePage />} />
+              <Route path="/configuracoes" element={<SettingsPage />} />
+              <Route path="/transacoes" element={<TransactionsPage />} />
+              <Route path="/despesas-fixas" element={<RecurringExpensesPage />} />
+              <Route path="/despesas-parceladas" element={<InstallmentExpensesPage />} />
+              {user.role === "ADMIN" && (
+                <Route path="/admin/usuarios" element={<AdminUsersPage />} />
+              )}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </div>
+        </Suspense>
       </div>
     </div>
   );

@@ -173,6 +173,7 @@ export function updateBudget(monthlyBudget: number) {
 export interface RecurringExpense {
   id: string;
   userId: string;
+  type: "INCOME" | "EXPENSE";
   amount: number;
   description: string;
   category: string | null;
@@ -195,6 +196,7 @@ export interface RecurringExpenseListResult {
 }
 
 export interface CreateRecurringExpensePayload {
+  type?: "INCOME" | "EXPENSE";
   amount: number;
   description: string;
   category?: string;

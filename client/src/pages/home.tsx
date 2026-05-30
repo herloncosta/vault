@@ -19,6 +19,16 @@ import {
   Check,
   type LucideIcon,
 } from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
 import * as api from "../lib/api";
 import TransactionForm from "../components/transaction-form";
 
@@ -47,8 +57,8 @@ export default function HomePage() {
   const [editingBudget, setEditingBudget] = useState(false);
   const [budgetInput, setBudgetInput] = useState("");
   const [budgetSubmitting, setBudgetSubmitting] = useState(false);
-  const [showForm, setShowForm] = useState(false);
-  const [formType, setFormType] = useState<"INCOME" | "EXPENSE">("EXPENSE");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<"INCOME" | "EXPENSE">("EXPENSE");
 
   function fetchTransactions() {
     api
@@ -114,10 +124,10 @@ export default function HomePage() {
       <main className="mx-auto max-w-5xl px-4 py-10">
         <div className="space-y-6">
           <div className="h-8 w-48 animate-pulse rounded-lg bg-slate-200 dark:bg-gray-800" />
-          <div className="h-44 animate-pulse rounded-3xl bg-slate-200 dark:bg-gray-800" />
+          <div className="h-44 animate-pulse rounded-lg bg-slate-200 dark:bg-gray-800" />
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-28 animate-pulse rounded-2xl bg-slate-200 dark:bg-gray-800" />
+              <div key={i} className="h-28 animate-pulse rounded-md bg-slate-200 dark:bg-gray-800" />
             ))}
           </div>
         </div>
@@ -132,26 +142,6 @@ export default function HomePage() {
         <h1 className="text-2xl font-bold text-slate-900 dark:text-gray-100">
           {user?.name ?? user?.email}
         </h1>
-      </div>
-
-      <div className="relative mb-8 overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 to-violet-600 p-6 text-white shadow-xl shadow-blue-600/20 dark:from-blue-700 dark:to-violet-700">
-        <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-white/10" />
-        <div className="absolute -bottom-8 -left-8 h-28 w-28 rounded-full bg-white/5" />
-        <p className="relative text-xs font-medium tracking-widest text-white/70 uppercase">
-          Saldo total
-        </p>
-        <p className="relative mt-2 text-3xl font-bold tracking-tight">
-          {formatCurrency(balance)}
-        </p>
-        <div className="relative mt-4 flex items-center gap-2 text-sm text-white/70">
-          <TrendingUp size={16} className="text-emerald-300" />
-          <span className="text-emerald-300">
-            {totalIncome > 0
-              ? `+${((monthIncome / (totalIncome / 12)) * 100 - 100).toFixed(1)}%`
-              : "0.0%"}
-          </span>
-          <span>este mês</span>
-        </div>
       </div>
 
       <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -180,13 +170,13 @@ export default function HomePage() {
         ].map(({ label, amount, icon: Icon, color, bg }) => (
           <div
             key={label}
-            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-lg transition-all duration-300 hover:shadow-xl dark:border-gray-800 dark:bg-gray-900"
+            className="rounded-md border border-slate-200 bg-white p-5 shadow-lg transition-all duration-300 hover:shadow-xl dark:border-gray-800 dark:bg-gray-900"
           >
             <div className="mb-4 flex items-center justify-between">
               <span className="text-xs font-medium text-slate-500 dark:text-gray-400">
                 {label}
               </span>
-              <div className={`rounded-xl p-2 ${bg}`}>
+              <div className={`rounded-lg p-2 ${bg}`}>
                 <Icon size={16} className={color} />
               </div>
             </div>
@@ -197,53 +187,58 @@ export default function HomePage() {
         ))}
       </div>
 
+      <div className="relative mb-8 overflow-hidden rounded-lg bg-gradient-to-br from-blue-600 to-violet-600 p-6 text-white shadow-xl shadow-blue-600/20 dark:from-blue-700 dark:to-violet-700">
+        <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-white/10" />
+        <div className="absolute -bottom-8 -left-8 h-28 w-28 rounded-full bg-white/5" />
+        <p className="relative text-xs font-medium tracking-widest text-white/70 uppercase">
+          Saldo total
+        </p>
+        <p className="relative mt-2 text-3xl font-bold tracking-tight">
+          {formatCurrency(balance)}
+        </p>
+        <div className="relative mt-4 flex items-center gap-2 text-sm text-white/70">
+          <TrendingUp size={16} className="text-emerald-300" />
+          <span className="text-emerald-300">
+            {totalIncome > 0
+              ? `+${((monthIncome / (totalIncome / 12)) * 100 - 100).toFixed(1)}%`
+              : "0.0%"}
+          </span>
+          <span>este mês</span>
+        </div>
+      </div>
+
       <div className="mb-8 flex gap-3">
         <button
-          onClick={() => { setFormType("INCOME"); setShowForm(true); }}
-          className="flex flex-1 cursor-pointer flex-col items-center gap-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-lg transition-all duration-300 hover:shadow-xl active:scale-[0.97] dark:border-gray-800 dark:bg-gray-900"
+          onClick={() => { setModalType("INCOME"); setModalOpen(true); }}
+          className="flex flex-1 cursor-pointer flex-col items-center gap-2 rounded-md border border-slate-200 bg-white p-4 shadow-lg transition-all duration-300 hover:shadow-xl active:scale-[0.97] dark:border-gray-800 dark:bg-gray-900"
         >
-          <div className="rounded-xl bg-emerald-50 p-2.5 text-emerald-500 dark:bg-emerald-900/20">
+          <div className="rounded-lg bg-emerald-50 p-2.5 text-emerald-500 dark:bg-emerald-900/20">
             <TrendingUp size={18} />
           </div>
-          <span className="text-xs font-medium text-slate-600 dark:text-gray-300">Receita</span>
+          <span className="text-xs font-medium text-slate-600 dark:text-gray-300">Adicionar Receita</span>
         </button>
         <button
-          onClick={() => { setFormType("EXPENSE"); setShowForm(true); }}
-          className="flex flex-1 cursor-pointer flex-col items-center gap-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-lg transition-all duration-300 hover:shadow-xl active:scale-[0.97] dark:border-gray-800 dark:bg-gray-900"
+          onClick={() => { setModalType("EXPENSE"); setModalOpen(true); }}
+          className="flex flex-1 cursor-pointer flex-col items-center gap-2 rounded-md border border-slate-200 bg-white p-4 shadow-lg transition-all duration-300 hover:shadow-xl active:scale-[0.97] dark:border-gray-800 dark:bg-gray-900"
         >
-          <div className="rounded-xl bg-red-50 p-2.5 text-red-400 dark:bg-red-900/20">
+          <div className="rounded-lg bg-red-50 p-2.5 text-red-400 dark:bg-red-900/20">
             <ArrowDownToLine size={18} />
           </div>
-          <span className="text-xs font-medium text-slate-600 dark:text-gray-300">Despesa</span>
+          <span className="text-xs font-medium text-slate-600 dark:text-gray-300">Adicionar Despesa</span>
         </button>
       </div>
 
-      {showForm && (
-        <div className="mb-8">
-          <TransactionForm
-            initialType={formType}
-            onSave={fetchTransactions}
-            onClose={() => setShowForm(false)}
-          />
-        </div>
-      )}
+      <TransactionForm
+        isOpen={modalOpen}
+        initialType={modalType}
+        onSave={fetchTransactions}
+        onClose={() => setModalOpen(false)}
+      />
 
       <div className="mb-8">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-slate-900 dark:text-gray-100">
-            Receitas x Despesas
-          </h2>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5">
-              <div className="h-2.5 w-2.5 rounded-sm bg-emerald-500" />
-              <span className="text-[10px] text-slate-400 dark:text-gray-500">Receitas</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <div className="h-2.5 w-2.5 rounded-sm bg-red-400" />
-              <span className="text-[10px] text-slate-400 dark:text-gray-500">Despesas</span>
-            </div>
-          </div>
-        </div>
+        <h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-gray-100">
+          Receitas x Despesas
+        </h2>
         <MonthlyChart transactions={transactions} />
       </div>
 
@@ -251,7 +246,7 @@ export default function HomePage() {
         <h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-gray-100">
           Transações recentes
         </h2>
-        <div className="rounded-2xl border border-slate-200 bg-white p-2 shadow-lg dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-md border border-slate-200 bg-white p-2 shadow-lg dark:border-gray-800 dark:bg-gray-900">
           {recentTransactions.length === 0 ? (
             <div className="flex flex-col items-center gap-2 py-10">
               <ArrowDownToLine size={28} className="text-slate-300 dark:text-gray-600" />
@@ -263,10 +258,10 @@ export default function HomePage() {
               return (
                 <div
                   key={t.id}
-                  className="flex items-center gap-3 rounded-xl px-3 py-3 transition-all duration-300 hover:bg-slate-50 dark:hover:bg-gray-800/60"
+                  className="flex items-center gap-3 rounded-lg px-3 py-3 transition-all duration-300 hover:bg-slate-50 dark:hover:bg-gray-800/60"
                 >
                   <div
-                    className={`flex h-9 w-9 items-center justify-center rounded-xl ${
+                    className={`flex h-9 w-9 items-center justify-center rounded-lg ${
                       t.type === "INCOME"
                         ? "bg-emerald-50 text-emerald-500 dark:bg-emerald-900/20 dark:text-emerald-400"
                         : "bg-red-50 text-red-400 dark:bg-red-900/20 dark:text-red-400"
@@ -314,7 +309,7 @@ export default function HomePage() {
             </button>
           )}
         </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-lg dark:border-gray-800 dark:bg-gray-900">
+        <div className="rounded-md border border-slate-200 bg-white p-5 shadow-lg dark:border-gray-800 dark:bg-gray-900">
           {editingBudget ? (
             <div>
               <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
@@ -327,19 +322,19 @@ export default function HomePage() {
                   value={budgetInput}
                   onChange={(e) => setBudgetInput(e.target.value)}
                   placeholder="5000"
-                  className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-600 dark:focus:border-blue-400"
+                  className="flex-1 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-600 dark:focus:border-blue-400"
                 />
                 <button
                   onClick={handleSaveBudget}
                   disabled={budgetSubmitting}
-                  className="flex cursor-pointer items-center justify-center rounded-xl bg-blue-600 px-4 text-white transition-all duration-300 hover:bg-blue-700 disabled:opacity-60"
+                  className="flex cursor-pointer items-center justify-center rounded-lg bg-blue-600 px-4 text-white transition-all duration-300 hover:bg-blue-700 disabled:opacity-60"
                 >
                   <Check size={16} />
                 </button>
                 <button
                   onClick={() => setEditingBudget(false)}
                   disabled={budgetSubmitting}
-                  className="flex cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-slate-400 transition-all duration-300 hover:bg-slate-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-500 dark:hover:bg-gray-700"
+                  className="flex cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-slate-400 transition-all duration-300 hover:bg-slate-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-500 dark:hover:bg-gray-700"
                 >
                   <X size={16} />
                 </button>
@@ -382,7 +377,7 @@ function MonthlyChart({ transactions }: { transactions: api.Transaction[] }) {
   const now = new Date();
 
   const monthlyData = Array.from({ length: 12 }, (_, i) => {
-    const d = new Date(now.getFullYear(), now.getMonth() - 11 + i, 1);
+    const d = new Date(now.getFullYear(), now.getMonth() - 6 + i, 1);
     const month = d.getMonth();
     const year = d.getFullYear();
 
@@ -393,99 +388,67 @@ function MonthlyChart({ transactions }: { transactions: api.Transaction[] }) {
 
     return {
       label: `${monthNames[month]}/${String(year).slice(-2)}`,
-      income: monthTx.filter((t) => t.type === "INCOME").reduce((a, t) => a + Number(t.amount), 0),
-      expense: monthTx.filter((t) => t.type === "EXPENSE").reduce((a, t) => a + Number(t.amount), 0),
+      Receita: monthTx.filter((t) => t.type === "INCOME").reduce((a, t) => a + Number(t.amount), 0),
+      Despesa: monthTx.filter((t) => t.type === "EXPENSE").reduce((a, t) => a + Number(t.amount), 0),
     };
   });
 
-  const maxValue = Math.max(...monthlyData.flatMap((m) => [m.income, m.expense]), 1);
-
-  const chartH = 180;
-  const pad = { top: 10, bottom: 28, left: 64, right: 12 };
-  const plotH = chartH - pad.top - pad.bottom;
-  const groupW = (600 - pad.left - pad.right) / 12;
-  const barW = 6;
-  const barGap = 3;
-
-  function barX(index: number) {
-    return pad.left + index * groupW + (groupW - barW * 2 - barGap) / 2;
-  }
-
-  function barHeight(value: number) {
-    return Math.max(0, (value / maxValue) * plotH);
-  }
-
-  function barY(value: number) {
-    return pad.top + plotH - barHeight(value);
-  }
-
-  const yTicks = 4;
-  const yStep = maxValue / yTicks;
-
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-lg dark:border-gray-800 dark:bg-gray-900">
-      <svg
-        viewBox={`0 0 600 ${chartH}`}
-        className="w-full"
-        preserveAspectRatio="xMidYMid meet"
-      >
-        {Array.from({ length: yTicks + 1 }, (_, i) => {
-          const val = yStep * i;
-          const yPos = pad.top + plotH - (val / maxValue) * plotH;
-          return (
-            <g key={i}>
-              <line
-                x1={pad.left}
-                y1={yPos}
-                x2={600 - pad.right}
-                y2={yPos}
-                stroke="currentColor"
-                className="text-slate-100 dark:text-gray-800"
-                strokeWidth={1}
-              />
-              <text
-                x={pad.left - 6}
-                y={yPos + 3}
-                textAnchor="end"
-                className="fill-slate-400 dark:fill-gray-500"
-                fontSize={9}
-              >
-                {formatCurrency(val)}
-              </text>
-            </g>
-          );
-        })}
-
-        {monthlyData.map((m, i) => (
-          <g key={m.label}>
-            <rect
-              x={barX(i)}
-              y={barY(m.income)}
-              width={barW}
-              height={barHeight(m.income)}
-              rx={3}
-              className="fill-emerald-500"
-            />
-            <rect
-              x={barX(i) + barW + barGap}
-              y={barY(m.expense)}
-              width={barW}
-              height={barHeight(m.expense)}
-              rx={3}
-              className="fill-red-400"
-            />
-            <text
-              x={barX(i) + barW + barGap / 2}
-              y={chartH - pad.bottom + 16}
-              textAnchor="middle"
-              className="fill-slate-400 dark:fill-gray-500"
-              fontSize={9}
-            >
-              {m.label}
-            </text>
-          </g>
-        ))}
-      </svg>
+    <div className="rounded-md border border-slate-200 bg-white p-4 shadow-lg dark:border-gray-800 dark:bg-gray-900">
+      <ResponsiveContainer width="100%" height={260}>
+        <BarChart data={monthlyData} margin={{ top: 8, right: 8, left: 8, bottom: 4 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="text-slate-100 dark:text-gray-800" />
+          <XAxis
+            dataKey="label"
+            tick={{ fontSize: 10, fill: "currentColor" }}
+            className="text-slate-400 dark:text-gray-500"
+            axisLine={{ stroke: "currentColor" }}
+            tickLine={false}
+            interval={0}
+            angle={-30}
+            textAnchor="end"
+            height={36}
+          />
+          <YAxis
+            tick={{ fontSize: 10, fill: "currentColor" }}
+            className="text-slate-400 dark:text-gray-500"
+            axisLine={false}
+            tickLine={false}
+            tickFormatter={(v: number) =>
+              v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v)
+            }
+            width={40}
+          />
+          <Tooltip
+            contentStyle={{
+              backgroundColor: "var(--tooltip-bg, #fff)",
+              border: "1px solid var(--tooltip-border, #e2e8f0)",
+              borderRadius: "12px",
+              fontSize: "12px",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+            }}
+            formatter={(value) => [formatCurrency(Number(value) || 0)]}
+            labelStyle={{ fontWeight: 600, marginBottom: 4 }}
+          />
+          <Legend
+            wrapperStyle={{ fontSize: 11, paddingTop: 4 }}
+            iconType="circle"
+            iconSize={8}
+          />
+          <Bar
+            dataKey="Receita"
+            radius={[4, 4, 0, 0]}
+            maxBarSize={14}
+            fill="#10b981"
+          />
+          <Bar
+            dataKey="Despesa"
+            radius={[4, 4, 0, 0]}
+            maxBarSize={14}
+            fill="#f87171"
+          />
+        </BarChart>
+      </ResponsiveContainer>
     </div>
   );
 }

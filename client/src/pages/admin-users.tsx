@@ -110,7 +110,7 @@ export default function AdminUsersPage() {
     <main className="mx-auto max-w-5xl px-4 py-10">
       <div className="mb-8 flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-100 text-violet-600 dark:bg-violet-900/40 dark:text-violet-400">
+          <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-violet-100 text-violet-600 dark:bg-violet-900/40 dark:text-violet-400">
             <Users size={28} />
           </div>
           <div>
@@ -122,7 +122,7 @@ export default function AdminUsersPage() {
         </div>
         <button
           onClick={() => { resetForm(); setShowForm((v) => !v); }}
-          className="flex cursor-pointer items-center gap-2 rounded-xl bg-blue-600 px-3 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all duration-300 hover:bg-blue-700 hover:shadow-blue-600/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-[0.97] md:px-4"
+          className="flex cursor-pointer items-center gap-2 rounded-md bg-blue-600 px-3 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all duration-300 hover:bg-blue-700 hover:shadow-blue-600/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-[0.97] md:px-4"
         >
           {showForm ? <X size={16} /> : <Plus size={16} />}
           <span className="hidden md:inline">{showForm ? "Cancelar" : "Novo usuário"}</span>
@@ -132,7 +132,7 @@ export default function AdminUsersPage() {
       {showForm && (
         <form
           onSubmit={handleSubmit}
-          className="mb-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-lg dark:border-gray-800 dark:bg-gray-900"
+          className="mb-8 rounded-lg border border-slate-200 bg-white p-6 shadow-lg dark:border-gray-800 dark:bg-gray-900"
         >
           <div className="mb-6 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-slate-900 dark:text-gray-100">
@@ -150,7 +150,7 @@ export default function AdminUsersPage() {
           </div>
 
           {error && (
-            <p className="mb-6 rounded-xl bg-red-50 px-4 py-2.5 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
+            <p className="mb-6 rounded-md bg-red-50 px-4 py-2.5 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
               {error}
             </p>
           )}
@@ -166,7 +166,7 @@ export default function AdminUsersPage() {
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               placeholder="email@exemplo.com"
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-600 dark:focus:border-blue-400"
+              className="w-full rounded-md border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-600 dark:focus:border-blue-400"
             />
           </div>
 
@@ -180,7 +180,7 @@ export default function AdminUsersPage() {
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               placeholder="Nome do usuário"
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-600 dark:focus:border-blue-400"
+              className="w-full rounded-md border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-600 dark:focus:border-blue-400"
             />
           </div>
 
@@ -195,7 +195,7 @@ export default function AdminUsersPage() {
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               placeholder="••••••••"
-              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-600 dark:focus:border-blue-400"
+              className="w-full rounded-md border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-600 dark:focus:border-blue-400"
             />
             {form.password && form.password.length < 8 && (
               <p className="mt-1 text-xs text-red-500">Mínimo de 8 caracteres</p>
@@ -212,7 +212,7 @@ export default function AdminUsersPage() {
                   key={r}
                   type="button"
                   onClick={() => setForm({ ...form, role: r })}
-                  className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium transition-all duration-300 ${
+                  className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-md border px-4 py-3 text-sm font-medium transition-all duration-300 ${
                     form.role === r
                       ? r === "ADMIN"
                         ? "border-violet-400 bg-violet-50 text-violet-700 dark:border-violet-500/40 dark:bg-violet-900/20 dark:text-violet-400"
@@ -230,18 +230,18 @@ export default function AdminUsersPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all duration-300 hover:bg-blue-700 hover:shadow-blue-600/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-[0.97] disabled:opacity-60 disabled:shadow-none"
+            className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all duration-300 hover:bg-blue-700 hover:shadow-blue-600/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-[0.97] disabled:opacity-60 disabled:shadow-none"
           >
             {submitting ? "Salvando…" : editingId ? "Atualizar usuário" : "Criar usuário"}
           </button>
         </form>
       )}
 
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-lg dark:border-gray-800 dark:bg-gray-900">
+      <div className="rounded-lg border border-slate-200 bg-white shadow-lg dark:border-gray-800 dark:bg-gray-900">
         {loading ? (
           <div className="space-y-3 p-4">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-16 animate-pulse rounded-xl bg-slate-100 dark:bg-gray-800" />
+              <div key={i} className="h-16 animate-pulse rounded-md bg-slate-100 dark:bg-gray-800" />
             ))}
           </div>
         ) : users.length === 0 ? (
@@ -256,7 +256,7 @@ export default function AdminUsersPage() {
                 key={u.id}
                 className="flex items-center gap-4 px-4 py-4 transition-all duration-300 hover:bg-slate-50 dark:hover:bg-gray-800/60"
               >
-                <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${
+                <div className={`flex h-10 w-10 items-center justify-center rounded-md ${
                   u.role === "ADMIN"
                     ? "bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400"
                     : "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
@@ -315,7 +315,7 @@ export default function AdminUsersPage() {
           onClick={() => setDeleteConfirm(null)}
         >
           <div
-            className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-6 shadow-xl dark:border-gray-800 dark:bg-gray-900"
+            className="w-full max-w-sm rounded-lg border border-slate-200 bg-white p-6 shadow-xl dark:border-gray-800 dark:bg-gray-900"
             onClick={(e) => e.stopPropagation()}
           >
             <h3 className="mb-2 text-sm font-semibold text-slate-900 dark:text-gray-100">Excluir usuário</h3>
@@ -325,13 +325,13 @@ export default function AdminUsersPage() {
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setDeleteConfirm(null)}
-                className="cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 transition-all duration-300 hover:bg-slate-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                className="cursor-pointer rounded-md border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 transition-all duration-300 hover:bg-slate-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
               >
                 Cancelar
               </button>
               <button
                 onClick={() => handleDelete(deleteConfirm)}
-                className="cursor-pointer rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-all duration-300 hover:bg-red-700 active:scale-[0.97]"
+                className="cursor-pointer rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-all duration-300 hover:bg-red-700 active:scale-[0.97]"
               >
                 Excluir
               </button>

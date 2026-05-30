@@ -10,7 +10,7 @@ export default function ProfilePage() {
   return (
     <main className="mx-auto max-w-2xl px-4 py-12">
       <div className="mb-8 flex items-center gap-4">
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400">
+        <div className="flex h-14 w-14 items-center justify-center rounded-lg bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400">
           <User size={28} />
         </div>
         <div>
@@ -21,7 +21,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-lg dark:border-gray-800 dark:bg-gray-900">
+      <div className="mb-6 rounded-lg border border-slate-200 bg-white p-6 shadow-lg dark:border-gray-800 dark:bg-gray-900">
         <dl className="space-y-5 text-sm">
           <div className="flex items-center gap-3">
             <Mail size={18} className="text-slate-400 dark:text-gray-500" />

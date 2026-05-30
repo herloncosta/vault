@@ -92,6 +92,10 @@ client/                       # Vite + React + TypeScript frontend
 | Investment | `violet-500` | `violet-400` | Investimentos, destaques UI |
 | Warning | `amber-500` | `amber-400` | Limite próximo, alertas |
 
+### Border radius — page-level pattern
+
+All page-level containers (cards, sections, modals) must use `rounded-lg`. All interactive elements (buttons, inputs, icon wrappers, skeleton loaders, list items, pagination) must use `rounded-md`. Exception: avatar/badge chips may use `rounded-full`. This ensures a consistent, modern look across every screen.
+
 ### Responsiveness
 
 - **Mobile-first** — all components start from mobile layout and scale up via `md:`, `lg:` breakpoints.

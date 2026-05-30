@@ -116,38 +116,44 @@ export async function list(authUser, query = {}) {
   const recurringExpenses = await prisma.recurringExpense.findMany({ where: recurringWhere });
 
   const now = new Date();
-  const currentMonth = now.getMonth();
-  const currentYear = now.getFullYear();
 
   for (const re of recurringExpenses) {
     if (re.endDate && re.endDate < now) continue;
-    if (re.startDate > now) continue;
 
-    let occurrenceDate = new Date(currentYear, currentMonth, re.dayOfMonth);
-    if (occurrenceDate < now) {
-      occurrenceDate.setMonth(occurrenceDate.getMonth() + 1);
+    const startMonth = re.startDate.getMonth() + re.startDate.getFullYear() * 12;
+    const endMonth = re.endDate
+      ? re.endDate.getMonth() + re.endDate.getFullYear() * 12
+      : now.getMonth() + now.getFullYear() * 12 + 1;
+
+    for (let m = startMonth; m <= endMonth; m++) {
+      const year = Math.floor(m / 12);
+      const month = m % 12;
+      const occurrenceDate = new Date(year, month, re.dayOfMonth);
+
+      if (occurrenceDate > now && m > endMonth - 1) break;
+      if (occurrenceDate < re.startDate) continue;
+
+      if (filters.startDate && occurrenceDate < new Date(filters.startDate)) continue;
+      if (filters.endDate && occurrenceDate > new Date(filters.endDate)) continue;
+
+      unified.push({
+        id: `${re.id}_${year}_${month}`,
+        userId: re.userId,
+        type: re.type,
+        amount: Number(re.amount),
+        description: re.description,
+        category: re.category,
+        date: occurrenceDate.toISOString(),
+        paymentMethod: re.paymentMethod,
+        status: "PENDING",
+        source: "recurring",
+        sourceId: re.id,
+        installmentNumber: null,
+        installmentCount: null,
+        createdAt: re.createdAt.toISOString(),
+        updatedAt: null,
+      });
     }
-
-    if (filters.startDate && occurrenceDate < new Date(filters.startDate)) continue;
-    if (filters.endDate && occurrenceDate > new Date(filters.endDate)) continue;
-
-    unified.push({
-      id: re.id,
-      userId: re.userId,
-      type: "EXPENSE",
-      amount: Number(re.amount),
-      description: re.description,
-      category: re.category,
-      date: occurrenceDate.toISOString(),
-      paymentMethod: re.paymentMethod,
-      status: "PENDING",
-      source: "recurring",
-      sourceId: re.id,
-      installmentNumber: null,
-      installmentCount: null,
-      createdAt: re.createdAt.toISOString(),
-      updatedAt: null,
-    });
   }
 
   if (filters.type) {

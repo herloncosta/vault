@@ -21,6 +21,7 @@ function buildWhere(authUser, filters = {}) {
 
   if (filters.active !== undefined) where.active = filters.active === "true";
   if (filters.category) where.category = filters.category;
+  if (filters.type) where.type = filters.type;
 
   return where;
 }
@@ -65,6 +66,7 @@ export async function create(authUser, data) {
   return prisma.recurringExpense.create({
     data: {
       userId: authUser.id,
+      type: data.type ?? "EXPENSE",
       amount: data.amount,
       description: data.description,
       category: data.category ?? null,

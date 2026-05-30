@@ -95,19 +95,20 @@ model Transaction {
 }
 
 model RecurringExpense {
-  id            String   @id @default(uuid())
+  id            String          @id @default(uuid())
   userId        String
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  amount        Decimal  @db.Decimal(12, 2)
+  user          User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type          TransactionType @default(EXPENSE)
+  amount        Decimal         @db.Decimal(12, 2)
   description   String
   category      String?
-  paymentMethod String?  @map("payment_method")
+  paymentMethod String?         @map("payment_method")
   dayOfMonth    Int
-  startDate     DateTime @map("start_date")
-  endDate       DateTime? @map("end_date")
-  active        Boolean  @default(true)
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  startDate     DateTime        @map("start_date")
+  endDate       DateTime?       @map("end_date")
+  active        Boolean         @default(true)
+  createdAt     DateTime        @default(now()) @map("created_at")
+  updatedAt     DateTime        @updatedAt @map("updated_at")
 
   @@map("recurring_expenses")
 }

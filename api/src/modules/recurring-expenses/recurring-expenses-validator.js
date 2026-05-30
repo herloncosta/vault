@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const createRecurringExpenseSchema = z.object({
+  type: z.enum(["INCOME", "EXPENSE"]).optional(),
   amount: z.number().positive("Amount must be positive"),
   description: z.string().min(1, "Description is required").max(255),
   category: z.string().max(100).optional(),
@@ -11,6 +12,7 @@ export const createRecurringExpenseSchema = z.object({
 });
 
 export const updateRecurringExpenseSchema = z.object({
+  type: z.enum(["INCOME", "EXPENSE"]).optional(),
   amount: z.number().positive("Amount must be positive").optional(),
   description: z.string().min(1).max(255).optional(),
   category: z.string().max(100).optional(),
