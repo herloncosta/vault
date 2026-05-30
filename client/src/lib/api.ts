@@ -1,22 +1,71 @@
 const BASE = "";
 
-async function request<T>(url: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE}${url}`, {
-    credentials: "include",
-    headers: { "Content-Type": "application/json", ...options?.headers },
-    ...options,
-  });
+let refreshPromise: Promise<boolean> | null = null;
+let onUnauthorized: (() => void) | null = null;
 
-  if (!res.ok) {
+async function refreshTokens(): Promise<boolean> {
+  try {
+    const res = await fetch("/api/auth/refresh", {
+      method: "POST",
+      credentials: "include",
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+async function doFetch<T>(
+  url: string,
+  options?: RequestInit,
+): Promise<{ ok: boolean; status: number; body: T | undefined; message: string }> {
+  try {
+    const res = await fetch(`${BASE}${url}`, {
+      credentials: "include",
+      headers: { "Content-Type": "application/json", ...options?.headers },
+      ...options,
+    });
+
+    if (res.ok) {
+      if (res.status === 204) return { ok: true, status: 204, body: undefined, message: "" };
+      return { ok: true, status: 200, body: await res.json(), message: "" };
+    }
+
     const body = await res.json().catch(() => ({ error: res.statusText }));
     const message = Array.isArray(body.error)
       ? body.error.map((e: any) => e.message ?? e).join(". ")
       : (body.error || "Request failed");
-    throw new Error(message);
+
+    return { ok: false, status: res.status, body: undefined, message };
+  } catch {
+    return { ok: false, status: 0, body: undefined, message: "Erro de conexão" };
+  }
+}
+
+async function request<T>(url: string, options?: RequestInit): Promise<T> {
+  const result = await doFetch<T>(url, options);
+
+  if (result.ok) return result.body as T;
+
+  if (result.status === 401) {
+    if (!refreshPromise) refreshPromise = refreshTokens();
+    const refreshed = await refreshPromise;
+    refreshPromise = null;
+
+    if (refreshed) {
+      const retry = await doFetch<T>(url, options);
+      if (retry.ok) return retry.body as T;
+    }
+
+    onUnauthorized?.();
+    throw new Error("Sessão expirada");
   }
 
-  if (res.status === 204) return undefined as T;
-  return res.json();
+  throw new Error(result.message);
+}
+
+export function setOnUnauthorized(cb: () => void) {
+  onUnauthorized = cb;
 }
 
 export interface User {

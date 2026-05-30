@@ -22,6 +22,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .then(setUser)
       .catch(() => setUser(null))
       .finally(() => setLoading(false));
+
+    api.setOnUnauthorized(() => {
+      setUser(null);
+    });
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
