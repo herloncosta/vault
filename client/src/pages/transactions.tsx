@@ -115,7 +115,7 @@ export default function TransactionsPage() {
   }
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-10">
+    <main className="mx-auto min-h-screen max-w-5xl px-4 py-10">
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-gray-100">Transações</h1>

@@ -124,7 +124,7 @@ export default function TransactionForm({
       setCategory(editingInstallment.category ?? "");
       setFirstDueDate(editingInstallment.firstDueDate.slice(0, 10));
     } else {
-      setTxKind(type === "INCOME" ? "unique" : "unique");
+      setTxKind("unique");
       setAmount("");
       setDescription("");
       setCategory("");
@@ -138,7 +138,7 @@ export default function TransactionForm({
       setInstallmentType("CREDIT_CARD");
       setFirstDueDate("");
     }
-  }, [isOpen, editingTransaction, editingRecurring, editingInstallment, initialType, type]);
+  }, [isOpen, editingTransaction, editingRecurring, editingInstallment, initialType]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -182,8 +182,8 @@ export default function TransactionForm({
           category: category || undefined,
           paymentMethod: paymentMethod || undefined,
           dayOfMonth,
-          startDate: new Date(startDate + "T12:00:00").toISOString(),
-          endDate: endDate ? new Date(endDate + "T12:00:00").toISOString() : undefined,
+          startDate: new Date(`${startDate}T12:00:00`).toISOString(),
+          endDate: endDate ? new Date(`${endDate}T12:00:00`).toISOString() : undefined,
         };
 
         if (editingRecurring) {
@@ -321,7 +321,7 @@ export default function TransactionForm({
               />
             </div>
 
-            <div className="mb-5 grid grid-cols-2 gap-4">
+            <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
                   Categoria
@@ -371,7 +371,7 @@ export default function TransactionForm({
 
         {txKind === "fixed" && (
           <>
-            <div className="mb-5 grid grid-cols-2 gap-4">
+            <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
                   Valor
@@ -401,7 +401,7 @@ export default function TransactionForm({
               </div>
             </div>
 
-            <div className="mb-5 grid grid-cols-2 gap-4">
+            <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
                   Categoria
@@ -434,22 +434,20 @@ export default function TransactionForm({
               </div>
             </div>
 
-            <div className="mb-5 grid grid-cols-3 gap-4">
+            <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div>
                 <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
                   Dia vencimento
                 </label>
-                <div className="relative">
-                  <CalendarDays size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type="number"
-                    min="1"
-                    max="28"
-                    value={dayOfMonth}
-                    onChange={(e) => setDayOfMonth(Math.min(28, Math.max(1, Number(e.target.value) || 1)))}
-                    className="w-full rounded-lg border border-slate-200 bg-white px-8 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-blue-400"
-                  />
-                </div>
+                <select
+                  value={dayOfMonth}
+                  onChange={(e) => setDayOfMonth(Number(e.target.value))}
+                  className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-blue-400"
+                >
+                  {Array.from({ length: 28 }, (_, i) => i + 1).map((d) => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
@@ -494,7 +492,7 @@ export default function TransactionForm({
               />
             </div>
 
-            <div className="mb-5 grid grid-cols-2 gap-4">
+            <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
                   Valor total
@@ -525,7 +523,7 @@ export default function TransactionForm({
               </div>
             </div>
 
-            <div className="mb-5 grid grid-cols-2 gap-4">
+            <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
                 <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
                   Tipo
