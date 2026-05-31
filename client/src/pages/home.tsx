@@ -162,6 +162,7 @@ export default function HomePage() {
 						setModalOpen(true);
 					}}
 					className="flex cursor-pointer items-center gap-2 rounded-md bg-blue-600 px-3 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all duration-300 hover:bg-blue-700 hover:shadow-blue-600/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-[0.97] md:px-4"
+					aria-label="Nova transação"
 				>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
@@ -174,6 +175,7 @@ export default function HomePage() {
 						strokeLinecap="round"
 						strokeLinejoin="round"
 					>
+						<title>Ícone de Adicionar</title>
 						<path d="M5 12h14" />
 						<path d="M12 5v14" />
 					</svg>
@@ -229,7 +231,7 @@ export default function HomePage() {
 				))}
 			</div>
 
-			<div className="relative mb-8 overflow-hidden rounded-lg bg-gradient-to-br from-blue-600 to-violet-600 p-6 text-white shadow-xl shadow-blue-600/20 dark:from-blue-700 dark:to-violet-700">
+			<div className="relative mb-8 overflow-hidden rounded-lg bg-linear-to-br from-blue-600 to-violet-600 p-6 text-white shadow-xl shadow-blue-600/20 dark:from-blue-700 dark:to-violet-700">
 				<div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-white/10" />
 				<div className="absolute -bottom-8 -left-8 h-28 w-28 rounded-full bg-white/5" />
 				<p className="relative text-xs font-medium tracking-widest text-white/70 uppercase">
@@ -328,6 +330,7 @@ export default function HomePage() {
 					</h2>
 					{!editingBudget && (
 						<button
+							type="button"
 							onClick={() => {
 								setBudgetInput(String(budgetLimit));
 								setEditingBudget(true);
@@ -342,12 +345,16 @@ export default function HomePage() {
 				<div className="rounded-md border border-slate-200 bg-white p-5 shadow-lg dark:border-gray-800 dark:bg-gray-900">
 					{editingBudget ? (
 						<div>
-							<label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
+							<label
+								htmlFor="budget-input"
+								className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400"
+							>
 								Novo limite mensal
 							</label>
 							<div className="flex gap-2">
 								<input
 									type="text"
+									id="budget-input"
 									inputMode="decimal"
 									value={budgetInput}
 									onChange={(e) => setBudgetInput(e.target.value)}
@@ -355,6 +362,7 @@ export default function HomePage() {
 									className="flex-1 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-600 dark:focus:border-blue-400"
 								/>
 								<button
+									type="button"
 									onClick={handleSaveBudget}
 									disabled={budgetSubmitting}
 									className="flex cursor-pointer items-center justify-center rounded-lg bg-blue-600 px-4 text-white transition-all duration-300 hover:bg-blue-700 disabled:opacity-60"
@@ -362,6 +370,7 @@ export default function HomePage() {
 									<Check size={16} />
 								</button>
 								<button
+									type="button"
 									onClick={() => setEditingBudget(false)}
 									disabled={budgetSubmitting}
 									className="flex cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-slate-400 transition-all duration-300 hover:bg-slate-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-500 dark:hover:bg-gray-700"
