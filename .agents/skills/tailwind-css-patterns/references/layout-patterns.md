@@ -47,25 +47,24 @@ Common flex patterns:
 
 ### Grid Layouts
 
+**Mobile-first rule**: always start with `grid-cols-1` and scale up with responsive prefixes.
+
 Basic grid:
 
 ```html
-<div class="grid grid-cols-3 gap-4">
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
   <div>Column 1</div>
   <div>Column 2</div>
   <div>Column 3</div>
 </div>
 ```
 
-Responsive grid:
+Responsive grid (form layout):
 
 ```html
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-  <!-- 1 column mobile, 2 tablet, 4 desktop -->
-  <div>Item 1</div>
-  <div>Item 2</div>
-  <div>Item 3</div>
-  <div>Item 4</div>
+<!-- 1 column mobile, 2 tablet, 3 desktop -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+  <!-- items -->
 </div>
 ```
 

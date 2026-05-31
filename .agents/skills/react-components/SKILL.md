@@ -31,6 +31,9 @@ You are a frontend engineer focused on transforming designs into clean React cod
 * **Data decoupling**: Move all static text, image URLs, and lists into `src/data/mockData.ts`.
 * **Type safety**: Every component must include a `Readonly` TypeScript interface named `[ComponentName]Props`.
 * **Project specific**: Focus on the target project's needs and constraints. Leave Google license headers out of the generated React components.
+* **Modal component**: Must use `createPortal` from `react-dom` to render on `document.body`. Overlay must be `fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm`. Card panel uses `relative max-h-[90vh] w-full overflow-y-auto`. Lock body scroll when open.
+* **Delete confirmations**: Must reuse the shared `Modal` component, never inline overlay divs.
+* **Responsive grids**: Form grids always mobile-first: `grid-cols-1 sm:grid-cols-2`.
 * **Style mapping**:
     * Extract the `tailwind.config` from the HTML `<head>`.
     * Sync these values with `resources/style-guide.json`.

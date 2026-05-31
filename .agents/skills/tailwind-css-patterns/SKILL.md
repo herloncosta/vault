@@ -145,6 +145,55 @@ function ProductCard({ product }: { product: Product }) {
 - **[references/configuration.md](references/configuration.md)** — CSS-first config, JavaScript config, plugins, presets
 - **[references/reference.md](references/reference.md)** — Additional reference materials
 
+## Project Conventions (fintech-vault)
+
+### Design tokens
+| Token | Light | Dark |
+|---|---|---|
+| Background | `slate-50` | `gray-950` |
+| Surface | `white` | `gray-900` |
+| Border | `slate-200` | `gray-800` |
+| Text primary | `slate-900` | `gray-100` |
+| Text secondary | `slate-500` | `gray-400` |
+| Accent | `blue-600` | `blue-500` |
+| Positive | `emerald-500` | `emerald-400` |
+| Negative | `red-400` | `red-400` |
+| Investment | `violet-500` | `violet-400` |
+| Warning | `amber-500` | `amber-400` |
+
+### Modals
+- Render via `createPortal` on `document.body`
+- Overlay: `fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm`
+- Card: `relative max-h-[90vh] w-full overflow-y-auto {{maxWidth}} rounded-xl border border-slate-200 bg-white p-6 shadow-xl dark:border-gray-800 dark:bg-gray-900`
+- Lock body scroll: `document.body.style.overflow = "hidden"`
+- Never use `items-start` or `pt-*` — always `items-center`
+
+### Delete confirmations
+- Must reuse the `Modal` component — never inline divs with `fixed inset-0`
+
+### Grids
+- Form grids always start at `grid-cols-1`: `grid-cols-1 sm:grid-cols-2 gap-4`
+- Never write `grid-cols-2` or `grid-cols-3` without a `grid-cols-1` mobile base
+
+### Card action rows
+- Mobile: `flex flex-col` with `justify-between`
+- Desktop: `sm:flex-row sm:items-start sm:justify-between`
+
+### Form inputs
+```html
+class="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-600 dark:focus:border-blue-400"
+```
+
+### Primary button
+```html
+class="flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all duration-300 hover:bg-blue-700 hover:shadow-blue-600/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-[0.97] disabled:opacity-60 disabled:shadow-none"
+```
+
+### Interactive elements
+- Must handle `hover:`, `focus:`, `active:`, `disabled:` states
+- Always use `transition-all duration-300`
+- `rounded-md` for interactive elements, `rounded-lg` for cards
+
 ## External Resources
 
 - [Tailwind CSS Docs](https://tailwindcss.com/docs)

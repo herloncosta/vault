@@ -68,6 +68,11 @@ client/                       # Vite + React + TypeScript frontend
 - **Theme** — dark mode via `.dark` class toggled by `ThemeContext` in `contexts/theme-context.tsx`. All components must use `dark:` variants.
 - **Transition default** — `transition-all duration-300` on interactive elements.
 - **Component states** — every interactive element must handle `hover:`, `focus:`, `active:`, and `disabled:` visual states.
+- **Modal** — must use `createPortal` to render on `document.body`. Overlay: `fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm`. Card: `relative max-h-[90vh] w-full overflow-y-auto`. Lock body scroll when open. Never use `items-start` or `pt-*`.
+- **Delete confirmations** — must use the `Modal` component, never inline overlay divs.
+- **Form grids** — always mobile-first: `grid-cols-1 sm:grid-cols-2`. Never `grid-cols-2` without `grid-cols-1` base.
+- **Card action rows** — `flex flex-col` on mobile, `sm:flex-row sm:items-start sm:justify-between` on desktop.
+- **Select for bounded numeric choices** — use `<select>` with `<option>` elements instead of `<input type="number">` for things like day-of-month (1-28).
 
 ## Design guidelines
 

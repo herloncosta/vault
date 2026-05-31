@@ -105,30 +105,70 @@
 
 ## Modal/Dialog
 
-```html
-<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-  <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-    <div class="flex justify-between items-center mb-4">
-      <h3 class="text-xl font-bold">Modal Title</h3>
-      <button class="text-gray-500 hover:text-gray-700">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-        </svg>
-      </button>
-    </div>
-    <p class="text-gray-700 mb-6">
-      Modal content goes here.
-    </p>
-    <div class="flex justify-end space-x-4">
-      <button class="px-4 py-2 text-gray-600 hover:text-gray-800">
-        Cancel
-      </button>
-      <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-        Confirm
-      </button>
-    </div>
-  </div>
-</div>
+Must render via `createPortal` on `document.body` so overlay always covers full viewport regardless of DOM depth.
+
+```tsx
+import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
+
+function Modal({ isOpen, onClose, title, children, maxWidth = "max-w-lg", hideClose = false }: {
+  isOpen: boolean;
+  onClose: () => void;
+  title?: string;
+  children: React.ReactNode;
+  maxWidth?: string;
+  hideClose?: boolean;
+}) {
+  const elRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (!elRef.current) {
+      elRef.current = document.createElement("div");
+      elRef.current.className = "modal-portal";
+      document.body.appendChild(elRef.current);
+    }
+    return () => {
+      if (elRef.current) {
+        document.body.removeChild(elRef.current);
+        elRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className={`relative max-h-[90vh] w-full overflow-y-auto ${maxWidth} rounded-xl border border-slate-200 bg-white p-6 shadow-xl transition-all duration-300 dark:border-gray-800 dark:bg-gray-900`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {title && (
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-gray-100">{title}</h2>
+            {!hideClose && (
+              <button type="button" onClick={onClose}
+                className="flex cursor-pointer items-center gap-1 rounded-md p-1.5 text-sm text-slate-400 transition-all duration-300 hover:bg-slate-100 hover:text-slate-600 dark:text-gray-500 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+              >
+                <X size={16} />
+              </button>
+            )}
+          </div>
+        )}
+        {children}
+      </div>
+    </div>,
+    elRef.current!,
+  );
+}
 ```
 
 ## React Button Component with Variants
