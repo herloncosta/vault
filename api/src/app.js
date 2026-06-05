@@ -12,6 +12,7 @@ import userRoutes from "./modules/users/users-routes.js";
 import transactionRoutes from "./modules/transactions/transactions-routes.js";
 import recurringExpenseRoutes from "./modules/recurring-expenses/recurring-expenses-routes.js";
 import installmentExpenseRoutes from "./modules/installment-expenses/installment-expenses-routes.js";
+import categoryRoutes from "./modules/categories/categories-routes.js";
 
 const app = express();
 
@@ -42,6 +43,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/recurring-expenses", recurringExpenseRoutes);
 app.use("/api/installment-expenses", installmentExpenseRoutes);
+app.use("/api/categories", categoryRoutes);
 
 app.use(errorHandler);
 

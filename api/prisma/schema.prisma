@@ -21,14 +21,28 @@ model User {
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  refreshTokens     RefreshToken[]
-  revokedTokens     RevokedToken[]
-  accessLogs        AccessLog[]
-  transactions      Transaction[]
-  recurringExpenses  RecurringExpense[]
-  installmentExpenses InstallmentExpense[]
+  refreshTokens      RefreshToken[]
+  revokedTokens      RevokedToken[]
+  accessLogs         AccessLog[]
+  transactions       Transaction[]
+  recurringExpenses   RecurringExpense[]
+  installmentExpenses  InstallmentExpense[]
+  categories         Category[]
 
   @@map("users")
+}
+
+model Category {
+  id        String          @id @default(uuid())
+  userId    String
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  type      TransactionType
+  createdAt DateTime        @default(now()) @map("created_at")
+  updatedAt DateTime        @updatedAt @map("updated_at")
+
+  @@unique([userId, name, type])
+  @@map("categories")
 }
 
 model RefreshToken {

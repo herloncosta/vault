@@ -358,3 +358,35 @@ export function updateInstallmentPaid(installmentId: string, paid: boolean) {
     body: JSON.stringify({ paid }),
   });
 }
+
+export interface Category {
+  id: string;
+  userId: string;
+  name: string;
+  type: "INCOME" | "EXPENSE";
+  createdAt: string;
+  updatedAt: string;
+}
+
+export function listCategories(type?: string) {
+  const qs = type ? `?type=${type}` : "";
+  return request<Category[]>(`/api/categories${qs}`);
+}
+
+export function createCategory(data: { name: string; type: "INCOME" | "EXPENSE" }) {
+  return request<Category>("/api/categories", {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function updateCategory(id: string, data: { name: string }) {
+  return request<Category>(`/api/categories/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
+  });
+}
+
+export function deleteCategory(id: string) {
+  return request<void>(`/api/categories/${id}`, { method: "DELETE" });
+}

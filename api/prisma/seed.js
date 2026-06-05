@@ -60,11 +60,42 @@ async function main() {
     });
   }
 
+  const defaultCategories = [
+    { name: "Salário", type: "INCOME" },
+    { name: "Freelance", type: "INCOME" },
+    { name: "Aluguel", type: "INCOME" },
+    { name: "Investimentos", type: "INCOME" },
+    { name: "Outro", type: "INCOME" },
+    { name: "Alimentação", type: "EXPENSE" },
+    { name: "Transporte", type: "EXPENSE" },
+    { name: "Moradia", type: "EXPENSE" },
+    { name: "Compras", type: "EXPENSE" },
+    { name: "Saúde", type: "EXPENSE" },
+    { name: "Educação", type: "EXPENSE" },
+    { name: "Lazer", type: "EXPENSE" },
+    { name: "Viagem", type: "EXPENSE" },
+    { name: "Assinaturas", type: "EXPENSE" },
+    { name: "Seguros", type: "EXPENSE" },
+    { name: "Utilidades", type: "EXPENSE" },
+    { name: "Outro", type: "EXPENSE" },
+  ];
+
+  for (const userId of [admin.id, operator.id]) {
+    for (const cat of defaultCategories) {
+      await prisma.category.upsert({
+        where: { userId_name_type: { userId, name: cat.name, type: cat.type } },
+        update: {},
+        create: { userId, name: cat.name, type: cat.type },
+      });
+    }
+  }
+
   console.log("Seeded users:", {
     admin: admin.email,
     operator: operator.email,
   });
   console.log(`Seeded ${sampleTransactions.length} transactions for operator`);
+  console.log(`Seeded ${defaultCategories.length} default categories per user`);
 }
 
 main()

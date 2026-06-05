@@ -1,13 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useForm, Controller } from "react-hook-form";
 import * as api from "../lib/api";
 import { fmt, parse as parseCurrency } from "../lib/currency";
-
-const recurringIncomeCategories = ["Salário", "Freelance", "Aluguel", "Investimentos", "Outros"];
-const recurringExpenseCategories = [
-  "Moradia", "Alimentação", "Transporte", "Saúde", "Educação",
-  "Lazer", "Assinaturas", "Seguros", "Utilidades", "Outros",
-];
 
 const paymentOptions = ["Crédito", "Débito", "Boleto", "PIX", "Dinheiro", "Automático"];
 
@@ -40,6 +34,23 @@ function toDisplay(value: number): string {
 
 export default function RecurringExpenseForm({ type, editing, onSave, onClose }: Props) {
   const [error, setError] = useState("");
+  const [categories, setCategories] = useState<api.Category[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+
+  const fetchCategories = useCallback(async () => {
+    setLoadingCategories(true);
+    try {
+      const data = await api.listCategories(type);
+      setCategories(data);
+    } catch {
+      setCategories([]);
+    } finally {
+      setLoadingCategories(false);
+    }
+  }, [type]);
+
+  useEffect(() => { fetchCategories(); }, [fetchCategories]);
+
   const { control, register, handleSubmit, reset, formState: { isSubmitting } } = useForm<Form>({
     defaultValues: { amount: 0, description: "", category: "", paymentMethod: "", dayOfMonth: 1, startDate: "", endDate: "" },
   });
@@ -131,7 +142,9 @@ export default function RecurringExpenseForm({ type, editing, onSave, onClose }:
             className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-4 py-2.5 pr-9 text-sm text-slate-900 outline-none transition-all duration-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-blue-400"
           >
             <option value="">Sem categoria</option>
-            {(type === "INCOME" ? recurringIncomeCategories : recurringExpenseCategories).map((c) => <option key={c} value={c}>{c}</option>)}
+            {loadingCategories ? (
+              <option value="" disabled>Carregando…</option>
+            ) : categories.map((c) => <option key={c.id} value={c.name}>{c.name}</option>)}
           </select>
         </div>
         <div>

@@ -61,6 +61,30 @@ export async function register(data, reqInfo) {
     select: { id: true, email: true, name: true, role: true, monthlyBudget: true, createdAt: true },
   });
 
+  const defaultCategories = [
+    { name: "Salário", type: "INCOME" },
+    { name: "Freelance", type: "INCOME" },
+    { name: "Aluguel", type: "INCOME" },
+    { name: "Investimentos", type: "INCOME" },
+    { name: "Outro", type: "INCOME" },
+    { name: "Alimentação", type: "EXPENSE" },
+    { name: "Transporte", type: "EXPENSE" },
+    { name: "Moradia", type: "EXPENSE" },
+    { name: "Compras", type: "EXPENSE" },
+    { name: "Saúde", type: "EXPENSE" },
+    { name: "Educação", type: "EXPENSE" },
+    { name: "Lazer", type: "EXPENSE" },
+    { name: "Viagem", type: "EXPENSE" },
+    { name: "Assinaturas", type: "EXPENSE" },
+    { name: "Seguros", type: "EXPENSE" },
+    { name: "Utilidades", type: "EXPENSE" },
+    { name: "Outro", type: "EXPENSE" },
+  ];
+
+  await prisma.category.createMany({
+    data: defaultCategories.map((c) => ({ userId: user.id, name: c.name, type: c.type })),
+  });
+
   await logAccess({
     userId: user.id,
     action: "REGISTER",

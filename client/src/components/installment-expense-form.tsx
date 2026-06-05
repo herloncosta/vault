@@ -1,13 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { CreditCard, Receipt } from "lucide-react";
 import * as api from "../lib/api";
 import { fmt, parse as parseCurrency } from "../lib/currency";
-
-const installmentCategories = [
-  "Alimentação", "Transporte", "Moradia", "Compras", "Saúde",
-  "Educação", "Lazer", "Viagem", "Outro",
-];
 
 interface Props {
   editing: api.InstallmentExpense | null | undefined;
@@ -36,6 +31,23 @@ function toDisplay(value: number): string {
 
 export default function InstallmentExpenseForm({ editing, onSave, onClose }: Props) {
   const [error, setError] = useState("");
+  const [categories, setCategories] = useState<api.Category[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+
+  const fetchCategories = useCallback(async () => {
+    setLoadingCategories(true);
+    try {
+      const data = await api.listCategories("EXPENSE");
+      setCategories(data);
+    } catch {
+      setCategories([]);
+    } finally {
+      setLoadingCategories(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchCategories(); }, [fetchCategories]);
+
   const { control, register, handleSubmit, reset, watch, setValue, formState: { isSubmitting } } = useForm<Form>({
     defaultValues: { description: "", totalAmount: 0, installmentCount: "2", installmentType: "CREDIT_CARD", category: "", firstDueDate: "" },
   });
@@ -157,7 +169,9 @@ export default function InstallmentExpenseForm({ editing, onSave, onClose }: Pro
             className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-4 py-2.5 pr-9 text-sm text-slate-900 outline-none transition-all duration-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-blue-400"
           >
             <option value="">Sem categoria</option>
-            {installmentCategories.map((c) => <option key={c} value={c}>{c}</option>)}
+            {loadingCategories ? (
+              <option value="" disabled>Carregando…</option>
+            ) : categories.map((c) => <option key={c.id} value={c.name}>{c.name}</option>)}
           </select>
         </div>
       </div>
