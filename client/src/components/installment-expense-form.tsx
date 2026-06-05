@@ -101,8 +101,9 @@ export default function InstallmentExpenseForm({ editing, onSave, onClose }: Pro
       )}
 
       <div className="mb-5">
-        <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Descrição</label>
+        <label htmlFor="inst-description" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Descrição</label>
         <input
+          id="inst-description"
           type="text"
           {...register("description", { required: true })}
           placeholder="Ex: Notebook Dell"
@@ -112,13 +113,14 @@ export default function InstallmentExpenseForm({ editing, onSave, onClose }: Pro
 
       <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Valor total</label>
+          <label htmlFor="inst-totalAmount" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Valor total</label>
           <Controller
             name="totalAmount"
             control={control}
             rules={{ required: true, validate: (v) => v > 0 }}
             render={({ field }) => (
               <input
+                id="inst-totalAmount"
                 type="text"
                 inputMode="decimal"
                 value={toDisplay(field.value)}
@@ -130,8 +132,9 @@ export default function InstallmentExpenseForm({ editing, onSave, onClose }: Pro
           />
         </div>
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Quantidade de parcelas</label>
+          <label htmlFor="inst-installmentCount" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Quantidade de parcelas</label>
           <input
+            id="inst-installmentCount"
             type="number"
             min="2"
             max="120"
@@ -143,8 +146,8 @@ export default function InstallmentExpenseForm({ editing, onSave, onClose }: Pro
 
       <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Tipo</label>
-          <div className="flex gap-2">
+          <label htmlFor="inst-type" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Tipo</label>
+          <div id="inst-type" className="flex gap-2">
             {(["CREDIT_CARD", "CARNE"] as const).map((t) => (
               <button
                 key={t}
@@ -163,8 +166,9 @@ export default function InstallmentExpenseForm({ editing, onSave, onClose }: Pro
           </div>
         </div>
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Categoria</label>
+          <label htmlFor="inst-category" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Categoria</label>
           <select
+            id="inst-category"
             {...register("category")}
             className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-4 py-2.5 pr-9 text-sm text-slate-900 outline-none transition-all duration-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-blue-400"
           >
@@ -177,8 +181,9 @@ export default function InstallmentExpenseForm({ editing, onSave, onClose }: Pro
       </div>
 
       <div className="mb-6">
-        <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Primeiro vencimento</label>
+        <label htmlFor="inst-firstDueDate" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Primeiro vencimento</label>
         <input
+          id="inst-firstDueDate"
           type="date"
           {...register("firstDueDate", { required: true })}
           className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-blue-400"

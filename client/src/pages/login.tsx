@@ -87,10 +87,11 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
+              <label htmlFor="login-email" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
                 Email
               </label>
               <input
+                id="login-email"
                 type="email"
                 autoComplete="email"
                 {...register("email", { required: true })}
@@ -100,10 +101,11 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
+              <label htmlFor="login-password" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
                 Senha
               </label>
               <input
+                id="login-password"
                 type="password"
                 autoComplete="current-password"
                 {...register("password", { required: true })}

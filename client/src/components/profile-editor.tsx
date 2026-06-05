@@ -68,10 +68,11 @@ export default function ProfileEditor() {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
+          <label htmlFor="prof-name" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
             Nome
           </label>
           <input
+            id="prof-name"
             type="text"
             {...register("name")}
             placeholder="Seu nome"
@@ -80,10 +81,11 @@ export default function ProfileEditor() {
         </div>
 
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
+          <label htmlFor="prof-email" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
             Email
           </label>
           <input
+            id="prof-email"
             type="email"
             {...register("email")}
             placeholder="seu@email.com"
@@ -92,10 +94,11 @@ export default function ProfileEditor() {
         </div>
 
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
+          <label htmlFor="prof-password" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
             Nova senha <span className="text-slate-400 dark:text-gray-500">(deixe em branco para manter)</span>
           </label>
           <input
+            id="prof-password"
             type="password"
             {...register("password")}
             autoComplete="new-password"
@@ -106,10 +109,11 @@ export default function ProfileEditor() {
 
         {password && (
           <div>
-            <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
+            <label htmlFor="prof-currentPassword" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
               Senha atual <span className="text-red-400">(obrigatório para alterar a senha)</span>
             </label>
             <input
+              id="prof-currentPassword"
               type="password"
               {...register("currentPassword", { required: true })}
               autoComplete="current-password"

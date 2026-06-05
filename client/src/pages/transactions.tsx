@@ -124,6 +124,7 @@ export default function TransactionsPage() {
           </p>
         </div>
         <button
+          type="button"
           onClick={() => { setEditingTransaction(null); setModalInitialType("EXPENSE"); setModalOpen(true); }}
           className="flex cursor-pointer items-center gap-2 rounded-md bg-blue-600 px-3 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all duration-300 hover:bg-blue-700 hover:shadow-blue-600/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-[0.97] md:px-4"
         >
@@ -145,6 +146,7 @@ export default function TransactionsPage() {
         {["", "INCOME", "EXPENSE"].map((f) => (
           <button
             key={f}
+            type="button"
             onClick={() => setFilterType(f)}
             className={`cursor-pointer rounded-md px-3 py-1.5 text-xs font-medium transition-all duration-300 ${
               filterType === f
@@ -227,6 +229,7 @@ export default function TransactionsPage() {
                     {t.source === "transaction" ? (
                       <>
                         <button
+                          type="button"
                           onClick={() => handleEdit(t)}
                           className="cursor-pointer rounded-md p-1.5 text-slate-300 transition-all duration-300 hover:bg-blue-50 hover:text-blue-500 dark:text-gray-600 dark:hover:bg-blue-900/20 dark:hover:text-blue-400"
                           aria-label="editar"
@@ -234,6 +237,7 @@ export default function TransactionsPage() {
                           <Pencil size={14} />
                         </button>
                         <button
+                          type="button"
                           onClick={() => handleDelete(t.id, t.source)}
                           className="cursor-pointer rounded-md p-1.5 text-slate-300 transition-all duration-300 hover:bg-red-50 hover:text-red-500 dark:text-gray-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
                           aria-label="excluir"
@@ -261,6 +265,7 @@ export default function TransactionsPage() {
       {totalPages > 1 && (
         <div className="mt-6 flex items-center justify-center gap-1">
           <button
+            type="button"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
             className="flex cursor-pointer items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-slate-500 transition-all duration-300 hover:bg-slate-100 disabled:cursor-default disabled:opacity-40 dark:text-gray-400 dark:hover:bg-gray-800"
@@ -271,6 +276,7 @@ export default function TransactionsPage() {
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
             <button
               key={p}
+              type="button"
               onClick={() => setPage(p)}
               className={`flex cursor-pointer items-center justify-center rounded-md px-3 py-1.5 text-xs font-medium transition-all duration-300 ${
                 p === page
@@ -282,6 +288,7 @@ export default function TransactionsPage() {
             </button>
           ))}
           <button
+            type="button"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
             className="flex cursor-pointer items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-slate-500 transition-all duration-300 hover:bg-slate-100 disabled:cursor-default disabled:opacity-40 dark:text-gray-400 dark:hover:bg-gray-800"

@@ -132,6 +132,7 @@ export default function AdminUsersPage() {
           </div>
         </div>
         <button
+          type="button"
           onClick={() => showForm ? closeForm() : openCreate()}
           className="flex cursor-pointer items-center gap-2 rounded-md bg-blue-600 px-3 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all duration-300 hover:bg-blue-700 hover:shadow-blue-600/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-[0.97] md:px-4"
         >
@@ -167,10 +168,11 @@ export default function AdminUsersPage() {
           )}
 
           <div className="mb-5">
-            <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
+            <label htmlFor="user-email" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
               Email
             </label>
             <input
+              id="user-email"
               type="email"
               autoComplete="off"
               {...register("email", { required: true })}
@@ -180,10 +182,11 @@ export default function AdminUsersPage() {
           </div>
 
           <div className="mb-5">
-            <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
+            <label htmlFor="user-name" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
               Nome
             </label>
             <input
+              id="user-name"
               type="text"
               autoComplete="off"
               {...register("name")}
@@ -193,10 +196,11 @@ export default function AdminUsersPage() {
           </div>
 
           <div className="mb-5">
-            <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
+            <label htmlFor="user-password" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
               {editingId ? "Nova senha (deixe em branco para manter)" : "Senha"}
             </label>
             <input
+              id="user-password"
               type="password"
               required={!editingId}
               autoComplete="new-password"
@@ -207,10 +211,10 @@ export default function AdminUsersPage() {
           </div>
 
           <div className="mb-6">
-            <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
+            <label htmlFor="user-role" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">
               Permissão
             </label>
-            <div className="flex gap-2">
+            <div id="user-role" className="flex gap-2">
               {(["OPERATOR", "ADMIN"] as const).map((r) => (
                 <button
                   key={r}
@@ -293,6 +297,7 @@ export default function AdminUsersPage() {
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
                   <button
+                    type="button"
                     onClick={() => openEdit(u)}
                     className="cursor-pointer rounded-lg p-1.5 text-slate-300 transition-all duration-300 hover:bg-blue-50 hover:text-blue-500 dark:text-gray-600 dark:hover:bg-blue-900/20 dark:hover:text-blue-400"
                     aria-label="editar"
@@ -300,6 +305,7 @@ export default function AdminUsersPage() {
                     <Pencil size={14} />
                   </button>
                   <button
+                    type="button"
                     onClick={() => setDeleteConfirm(u.id)}
                     className="cursor-pointer rounded-lg p-1.5 text-slate-300 transition-all duration-300 hover:bg-red-50 hover:text-red-500 dark:text-gray-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
                     aria-label="excluir"
@@ -328,12 +334,14 @@ export default function AdminUsersPage() {
             </p>
             <div className="flex justify-end gap-3">
               <button
+                type="button"
                 onClick={() => setDeleteConfirm(null)}
                 className="cursor-pointer rounded-md border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 transition-all duration-300 hover:bg-slate-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
               >
                 Cancelar
               </button>
               <button
+                type="button"
                 onClick={() => handleDelete(deleteConfirm)}
                 className="cursor-pointer rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-all duration-300 hover:bg-red-700 active:scale-[0.97]"
               >

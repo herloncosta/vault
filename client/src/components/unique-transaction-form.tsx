@@ -86,13 +86,14 @@ export default function UniqueTransactionForm({ type, editing, onSave, onClose }
   return (
     <form onSubmit={onSubmit}>
       <div className="mb-5">
-        <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Valor</label>
+        <label htmlFor="uni-amount" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Valor</label>
         <Controller
           name="amount"
           control={control}
           rules={{ required: true, validate: (v) => v > 0 }}
           render={({ field }) => (
             <input
+              id="uni-amount"
               type="text"
               inputMode="decimal"
               value={toDisplay(field.value)}
@@ -105,8 +106,9 @@ export default function UniqueTransactionForm({ type, editing, onSave, onClose }
       </div>
 
       <div className="mb-5">
-        <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Descrição</label>
+        <label htmlFor="uni-description" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Descrição</label>
         <input
+          id="uni-description"
           type="text"
           {...register("description", { required: true })}
           placeholder="Ex: Salário mensal"
@@ -116,8 +118,9 @@ export default function UniqueTransactionForm({ type, editing, onSave, onClose }
 
       <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Categoria</label>
+          <label htmlFor="uni-category" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Categoria</label>
           <select
+            id="uni-category"
             {...register("category")}
             className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-4 py-2.5 pr-9 text-sm text-slate-900 outline-none transition-all duration-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-blue-400"
           >
@@ -128,8 +131,9 @@ export default function UniqueTransactionForm({ type, editing, onSave, onClose }
           </select>
         </div>
         <div>
-          <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Data</label>
+          <label htmlFor="uni-date" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Data</label>
           <input
+            id="uni-date"
             type="date"
             {...register("date", { required: true })}
             className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-blue-400"
@@ -138,8 +142,9 @@ export default function UniqueTransactionForm({ type, editing, onSave, onClose }
       </div>
 
       <div className="mb-6">
-        <label className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Forma de pagamento</label>
+        <label htmlFor="uni-paymentMethod" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Forma de pagamento</label>
         <select
+          id="uni-paymentMethod"
           {...register("paymentMethod")}
           className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-4 py-2.5 pr-9 text-sm text-slate-900 outline-none transition-all duration-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-blue-400"
         >

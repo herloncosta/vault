@@ -116,6 +116,7 @@ export default function InstallmentExpensesPage() {
           </p>
         </div>
         <button
+          type="button"
           onClick={() => { setEditingInstallment(null); setModalOpen(true); }}
           className="flex cursor-pointer items-center gap-2 rounded-md bg-violet-500 px-4 py-2.5 text-sm font-medium text-white transition-all duration-300 hover:bg-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-500 active:bg-violet-700 disabled:opacity-50"
         >
@@ -142,6 +143,7 @@ export default function InstallmentExpensesPage() {
         {filterButtons.map(({ value, label }) => (
           <button
             key={value}
+            type="button"
             onClick={() => setTypeFilter(value)}
             className={`cursor-pointer rounded-md px-4 py-2 text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-violet-500 ${
               typeFilter === value
@@ -185,6 +187,7 @@ export default function InstallmentExpensesPage() {
                 }`}
               >
                 <button
+                  type="button"
                   onClick={() => toggleExpand(expense.id)}
                   className="flex w-full cursor-pointer items-center justify-between p-5 text-left focus:outline-none"
                 >
@@ -234,12 +237,14 @@ export default function InstallmentExpensesPage() {
                       </div>
                       <div className="flex items-center gap-2">
                         <button
+                          type="button"
                           onClick={() => openEdit(expense)}
                           className="cursor-pointer rounded-md p-1.5 text-slate-400 transition-all duration-300 hover:bg-slate-100 hover:text-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-500 dark:hover:bg-gray-800 dark:hover:text-violet-400"
                         >
                           <Pencil size={15} />
                         </button>
                         <button
+                          type="button"
                           onClick={() => setDeleteId(expense.id)}
                           className="cursor-pointer rounded-md p-1.5 text-slate-400 transition-all duration-300 hover:bg-red-50 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 dark:hover:bg-red-950 dark:hover:text-red-400"
                         >
@@ -264,6 +269,7 @@ export default function InstallmentExpensesPage() {
                           >
                             <div className="flex items-center gap-3">
                               <button
+                                type="button"
                                 onClick={() => togglePaid(inst)}
                                 className={`cursor-pointer transition-all duration-300 focus:outline-none ${
                                   inst.paid
@@ -299,6 +305,7 @@ export default function InstallmentExpensesPage() {
       {totalPages > 1 && (
         <div className="mt-6 flex items-center justify-center gap-1">
           <button
+            type="button"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page <= 1}
             className="flex cursor-pointer items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-slate-500 transition-all duration-300 hover:bg-slate-100 disabled:cursor-default disabled:opacity-40 dark:text-gray-400 dark:hover:bg-gray-800"
@@ -309,6 +316,7 @@ export default function InstallmentExpensesPage() {
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
             <button
               key={p}
+              type="button"
               onClick={() => setPage(p)}
               className={`flex cursor-pointer items-center justify-center rounded-md px-3 py-1.5 text-xs font-medium transition-all duration-300 ${
                 p === page
@@ -320,6 +328,7 @@ export default function InstallmentExpensesPage() {
             </button>
           ))}
           <button
+            type="button"
             onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={page >= totalPages}
             className="flex cursor-pointer items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium text-slate-500 transition-all duration-300 hover:bg-slate-100 disabled:cursor-default disabled:opacity-40 dark:text-gray-400 dark:hover:bg-gray-800"
@@ -339,12 +348,14 @@ export default function InstallmentExpensesPage() {
         </p>
         <div className="mt-6 flex gap-3">
           <button
+            type="button"
             onClick={() => handleDelete(deleteId!)}
             className="flex-1 cursor-pointer rounded-md bg-red-500 px-4 py-2.5 text-sm font-medium text-white transition-all duration-300 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 active:bg-red-700"
           >
             Excluir
           </button>
           <button
+            type="button"
             onClick={() => setDeleteId(null)}
             className="flex-1 cursor-pointer rounded-md border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 transition-all duration-300 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-violet-500 active:bg-slate-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
           >

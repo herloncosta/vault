@@ -191,6 +191,7 @@ export default function SettingsPage() {
             </div>
           </div>
           <button
+            type="button"
             onClick={toggle}
             className={`relative inline-flex h-7 w-12 cursor-pointer items-center rounded-full transition-all duration-300 ${
               dark ? "bg-blue-600" : "bg-slate-200"
