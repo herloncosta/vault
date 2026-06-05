@@ -28,6 +28,9 @@ import {
 	Tooltip,
 	ResponsiveContainer,
 	Legend,
+	PieChart,
+	Pie,
+	Cell,
 } from "recharts";
 import * as api from "../lib/api";
 import TransactionForm from "../components/transaction-form";
@@ -265,6 +268,27 @@ export default function HomePage() {
 				<MonthlyChart transactions={transactions} />
 			</div>
 
+			<div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
+				<div>
+					<h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-gray-100">
+						Despesas por categoria
+					</h2>
+					<CategoryPieChart
+						transactions={monthTransactions}
+						type="EXPENSE"
+					/>
+				</div>
+				<div>
+					<h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-gray-100">
+						Receitas por categoria
+					</h2>
+					<CategoryPieChart
+						transactions={monthTransactions}
+						type="INCOME"
+					/>
+				</div>
+			</div>
+
 			<div className="mb-8">
 				<h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-gray-100">
 					Transações recentes
@@ -424,6 +448,72 @@ const monthNames = [
 	"Nov",
 	"Dez",
 ];
+
+const CHART_COLORS = [
+	"#10b981", "#f59e0b", "#ef4444", "#3b82f6", "#8b5cf6",
+	"#ec4899", "#14b8a6", "#f97316", "#6366f1", "#84cc16",
+	"#06b6d4", "#d946ef", "#eab308", "#22c55e", "#64748b",
+];
+
+function CategoryPieChart({ transactions, type }: { transactions: api.Transaction[]; type: "INCOME" | "EXPENSE" }) {
+	const byCategory = transactions
+		.filter((t) => t.type === type && t.category)
+		.reduce<Record<string, number>>((acc, t) => {
+			acc[t.category!] = (acc[t.category!] || 0) + Number(t.amount);
+			return acc;
+		}, {});
+
+	const data = Object.entries(byCategory)
+		.map(([name, value]) => ({ name, value }))
+		.sort((a, b) => b.value - a.value);
+
+	if (data.length === 0) {
+		return (
+			<div className="flex items-center justify-center rounded-md border border-slate-200 bg-white p-8 shadow-lg dark:border-gray-800 dark:bg-gray-900">
+				<p className="text-sm text-slate-400 dark:text-gray-500">Nenhum dado no mês atual</p>
+			</div>
+		);
+	}
+
+	return (
+		<div className="rounded-md border border-slate-200 bg-white p-4 shadow-lg dark:border-gray-800 dark:bg-gray-900">
+			<ResponsiveContainer width="100%" height={260}>
+				<PieChart>
+					<Pie
+						data={data}
+						dataKey="value"
+						nameKey="name"
+						cx="50%"
+						cy="50%"
+						outerRadius={90}
+						innerRadius={50}
+						paddingAngle={3}
+					>
+						{data.map((_, i) => (
+							<Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+						))}
+					</Pie>
+					<Tooltip
+						contentStyle={{
+							backgroundColor: "var(--tooltip-bg, #fff)",
+							border: "1px solid var(--tooltip-border, #e2e8f0)",
+							borderRadius: "12px",
+							fontSize: "12px",
+							boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+						}}
+						formatter={(value) => [formatCurrency(Number(value) || 0)]}
+						labelStyle={{ fontWeight: 600, marginBottom: 4 }}
+					/>
+					<Legend
+						wrapperStyle={{ fontSize: 11, paddingTop: 4 }}
+						iconType="circle"
+						iconSize={8}
+					/>
+				</PieChart>
+			</ResponsiveContainer>
+		</div>
+	);
+}
 
 function MonthlyChart({ transactions }: { transactions: api.Transaction[] }) {
 	const now = new Date();
