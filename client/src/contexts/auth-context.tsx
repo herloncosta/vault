@@ -6,8 +6,9 @@ interface AuthState {
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
-  updateProfile: (data: { name?: string; email?: string; currentPassword?: string; password?: string }) => Promise<void>;
+  updateProfile: (data: { name?: string; email?: string; currentPassword?: string; password?: string }) => Promise<api.User>;
   refreshUser: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -42,6 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (data: { name?: string; email?: string; currentPassword?: string; password?: string }) => {
       const updated = await api.updateMyProfile(data);
       setUser(updated);
+      return updated;
     },
     [],
   );
@@ -55,8 +57,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const deleteAccount = useCallback(async () => {
+    await api.deleteMyAccount();
+    setUser(null);
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, updateProfile, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, login, logout, updateProfile, refreshUser, deleteAccount }}>
       {children}
     </AuthContext.Provider>
   );

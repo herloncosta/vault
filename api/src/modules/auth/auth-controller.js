@@ -162,3 +162,16 @@ export async function updateProfile(req, res, next) {
     next(err);
   }
 }
+
+export async function deleteMyAccount(req, res, next) {
+  try {
+    await authService.deleteMyAccount(req.user.id);
+    res
+      .clearCookie("accessToken", accessCookieOpts)
+      .clearCookie("refreshToken", refreshCookieOpts)
+      .status(204)
+      .end();
+  } catch (err) {
+    next(err);
+  }
+}

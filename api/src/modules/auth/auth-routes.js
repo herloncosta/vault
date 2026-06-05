@@ -192,4 +192,20 @@ router.patch("/me/budget", auth, controller.updateBudget);
  */
 router.put("/me", auth, controller.updateProfile);
 
+/**
+ * @openapi
+ * /api/auth/me:
+ *   delete:
+ *     tags: [Auth]
+ *     summary: Delete own account and all associated data
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       204:
+ *         description: Account deleted
+ *       401:
+ *         description: Unauthorized
+ */
+router.delete("/me", auth, controller.deleteMyAccount);
+
 export default router;

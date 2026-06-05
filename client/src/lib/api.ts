@@ -212,6 +212,10 @@ export function updateMyProfile(data: { name?: string; email?: string; currentPa
   });
 }
 
+export function deleteMyAccount() {
+  return request<void>("/api/auth/me", { method: "DELETE" });
+}
+
 export function updateBudget(monthlyBudget: number) {
   return request<User>("/api/auth/me/budget", {
     method: "PATCH",

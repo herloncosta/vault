@@ -298,6 +298,21 @@ export async function updateProfile(userId, data) {
   });
 }
 
+export async function deleteMyAccount(userId) {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) {
+    const err = new Error("User not found");
+    err.status = 404;
+    throw err;
+  }
+
+  // Clear refresh tokens first
+  await prisma.refreshToken.deleteMany({ where: { userId } });
+
+  // Cascading deletes handle the rest (transactions, categories, etc.)
+  await prisma.user.delete({ where: { id: userId } });
+}
+
 export async function cleanupExpiredTokens() {
   await prisma.revokedToken.deleteMany({
     where: { expiresAt: { lte: new Date() } },
