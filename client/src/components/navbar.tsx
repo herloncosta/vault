@@ -1,7 +1,18 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
-  Menu, X, Home, User, Settings, LogOut, ArrowLeftRight, Users, RotateCcw, CreditCard, PanelLeftClose, PanelLeft,
+  Menu,
+  X,
+  Home,
+  User,
+  Settings,
+  LogOut,
+  ArrowLeftRight,
+  Users,
+  RotateCcw,
+  CreditCard,
+  PanelLeftClose,
+  PanelLeft,
 } from "lucide-react";
 import { useAuth } from "../contexts/auth-context";
 
@@ -48,8 +59,15 @@ export default function Navbar({ sidebarOpen, onToggleSidebar }: NavbarProps) {
         }`}
       >
         <div className="flex h-16 items-center border-b border-slate-200 px-3 dark:border-gray-800">
-          <Link to="/" className={`flex items-center transition-all duration-300 ${sidebarOpen ? "gap-2" : "justify-center"}`}>
-            <img src="/vault-logo.png" alt="Vault" className={`transition-all duration-300 ${sidebarOpen ? "h-10" : "h-8"}`} />
+          <Link
+            to="/"
+            className={`flex items-center transition-all duration-300 ${sidebarOpen ? "gap-2" : "justify-center"}`}
+          >
+            <img
+              src="/vault-logo.png"
+              alt="Vault"
+              className={`transition-all duration-300 ${sidebarOpen ? "h-10" : "h-8"}`}
+            />
           </Link>
         </div>
 
@@ -77,12 +95,15 @@ export default function Navbar({ sidebarOpen, onToggleSidebar }: NavbarProps) {
 
         <div className="border-t border-slate-200 px-2 py-3 dark:border-gray-800">
           <div className={`flex flex-col gap-1 ${sidebarOpen ? "" : "items-center"}`}>
-            <div className={`truncate text-xs text-slate-400 dark:text-gray-500 ${sidebarOpen ? "px-3 pb-1" : "hidden"}`}>
+            <div
+              className={`truncate text-xs text-slate-400 dark:text-gray-500 ${sidebarOpen ? "px-3 pb-1" : "hidden"}`}
+            >
               {user?.name ?? user?.email}
             </div>
             <button
+              type="button"
               onClick={logout}
-              className={`group flex items-center rounded-xl text-sm text-slate-400 transition-all duration-300 hover:bg-slate-100 hover:text-blue-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-blue-400 ${
+              className={`group flex items-center rounded-xl text-sm text-slate-400 transition-all duration-300 hover:bg-slate-100 hover:text-blue-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-blue-400 cursor-pointer ${
                 sidebarOpen ? "gap-3 px-3 py-2.5" : "justify-center px-0 py-3"
               }`}
               title={sidebarOpen ? undefined : "Sair"}
@@ -91,8 +112,9 @@ export default function Navbar({ sidebarOpen, onToggleSidebar }: NavbarProps) {
               {sidebarOpen && <span className="font-medium">Sair</span>}
             </button>
             <button
+              type="button"
               onClick={onToggleSidebar}
-              className={`group flex items-center rounded-xl text-sm text-slate-400 transition-all duration-300 hover:bg-slate-100 hover:text-blue-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-blue-400 ${
+              className={`group flex items-center rounded-xl text-sm text-slate-400 transition-all duration-300 hover:bg-slate-100 hover:text-blue-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-blue-400 cursor-pointer ${
                 sidebarOpen ? "gap-3 px-3 py-2.5" : "justify-center px-0 py-3"
               }`}
               title={sidebarOpen ? "Recolher" : "Expandir"}
@@ -109,6 +131,7 @@ export default function Navbar({ sidebarOpen, onToggleSidebar }: NavbarProps) {
           <img src="/vault-logo.png" alt="Vault" className="h-10" />
         </Link>
         <button
+          type="button"
           onClick={() => setMobileOpen(true)}
           className="cursor-pointer text-slate-400 transition-all duration-300 hover:text-slate-600 dark:text-gray-400 dark:hover:text-gray-200"
           aria-label="menu"
@@ -118,7 +141,11 @@ export default function Navbar({ sidebarOpen, onToggleSidebar }: NavbarProps) {
       </div>
 
       {mobileOpen && (
-        <div className="fixed inset-0 z-40 bg-black/40 md:hidden" onClick={closeMobile} />
+        <div
+          className="fixed inset-0 z-40 bg-black/40 md:hidden"
+          onKeyUp={closeMobile}
+          onClick={closeMobile}
+        />
       )}
 
       <div
@@ -129,6 +156,7 @@ export default function Navbar({ sidebarOpen, onToggleSidebar }: NavbarProps) {
         <div className="flex items-center justify-between">
           <span className="font-semibold text-slate-900 dark:text-gray-100">Menu</span>
           <button
+            type="button"
             onClick={closeMobile}
             className="cursor-pointer rounded p-1 text-slate-400 transition-all duration-300 hover:bg-slate-100 hover:text-slate-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
             aria-label="close"
@@ -160,7 +188,11 @@ export default function Navbar({ sidebarOpen, onToggleSidebar }: NavbarProps) {
             {user?.name ?? user?.email}
           </p>
           <button
-            onClick={() => { closeMobile(); logout(); }}
+            type="button"
+            onClick={() => {
+              closeMobile();
+              logout();
+            }}
             className="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-600 transition-all duration-300 hover:bg-slate-100 hover:text-blue-600 dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-blue-400"
           >
             <LogOut size={18} />

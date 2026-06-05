@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
 import {
   Plus,
   Pencil,
@@ -17,17 +18,26 @@ function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("pt-BR");
 }
 
-const emptyForm = { email: "", password: "", name: "", role: "OPERATOR" as "ADMIN" | "OPERATOR" };
+interface UserForm {
+  email: string;
+  password: string;
+  name: string;
+  role: "ADMIN" | "OPERATOR";
+}
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<api.User[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState(emptyForm);
-  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+
+  const { register, handleSubmit, reset, setValue, watch, formState: { isSubmitting } } = useForm<UserForm>({
+    defaultValues: { email: "", password: "", name: "", role: "OPERATOR" },
+  });
+
+  const role = watch("role");
 
   async function fetchUsers() {
     setLoading(true);
@@ -45,54 +55,55 @@ export default function AdminUsersPage() {
     fetchUsers();
   }, []);
 
-  function resetForm() {
-    setForm(emptyForm);
+  function openCreate() {
+    reset({ email: "", password: "", name: "", role: "OPERATOR" });
     setEditingId(null);
-    setError("");
-  }
-
-  function handleEdit(user: api.User) {
-    setEditingId(user.id);
-    setForm({ email: user.email, password: "", name: user.name ?? "", role: user.role as "ADMIN" | "OPERATOR" });
     setError("");
     setShowForm(true);
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  function openEdit(user: api.User) {
+    reset({ email: user.email, password: "", name: user.name ?? "", role: user.role as "ADMIN" | "OPERATOR" });
+    setEditingId(user.id);
     setError("");
-    setSubmitting(true);
+    setShowForm(true);
+  }
 
-    if (form.password && form.password.length < 8) {
+  function closeForm() {
+    setShowForm(false);
+    setEditingId(null);
+    setError("");
+  }
+
+  async function onSubmit(data: UserForm) {
+    setError("");
+
+    if (data.password && data.password.length < 8) {
       setError("A senha deve ter no mínimo 8 caracteres.");
-      setSubmitting(false);
       return;
     }
 
     try {
       if (editingId) {
         const payload: api.UpdateUserPayload = {
-          name: form.name || undefined,
-          email: form.email || undefined,
-          role: form.role as "ADMIN" | "OPERATOR" | undefined,
+          name: data.name || undefined,
+          email: data.email || undefined,
+          role: data.role,
         };
-        if (form.password) payload.password = form.password;
+        if (data.password) payload.password = data.password;
         await api.updateUser(editingId, payload);
       } else {
         await api.createUser({
-          email: form.email,
-          password: form.password,
-          name: form.name || undefined,
-          role: form.role as "ADMIN" | "OPERATOR",
+          email: data.email,
+          password: data.password,
+          name: data.name || undefined,
+          role: data.role,
         });
       }
-      resetForm();
-      setShowForm(false);
+      closeForm();
       fetchUsers();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Erro ao salvar usuário");
-    } finally {
-      setSubmitting(false);
     }
   }
 
@@ -121,7 +132,7 @@ export default function AdminUsersPage() {
           </div>
         </div>
         <button
-          onClick={() => { resetForm(); setShowForm((v) => !v); }}
+          onClick={() => showForm ? closeForm() : openCreate()}
           className="flex cursor-pointer items-center gap-2 rounded-md bg-blue-600 px-3 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all duration-300 hover:bg-blue-700 hover:shadow-blue-600/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-[0.97] md:px-4"
         >
           {showForm ? <X size={16} /> : <Plus size={16} />}
@@ -131,7 +142,7 @@ export default function AdminUsersPage() {
 
       {showForm && (
         <form
-          onSubmit={handleSubmit}
+          onSubmit={handleSubmit(onSubmit)}
           className="mb-8 rounded-lg border border-slate-200 bg-white p-6 shadow-lg dark:border-gray-800 dark:bg-gray-900"
         >
           <div className="mb-6 flex items-center justify-between">
@@ -141,7 +152,7 @@ export default function AdminUsersPage() {
             {editingId && (
               <button
                 type="button"
-                onClick={() => { resetForm(); setShowForm(false); }}
+                onClick={closeForm}
                 className="cursor-pointer text-xs text-slate-400 transition-all duration-300 hover:text-slate-600 dark:text-gray-500 dark:hover:text-gray-300"
               >
                 Cancelar edição
@@ -161,10 +172,8 @@ export default function AdminUsersPage() {
             </label>
             <input
               type="email"
-              required
               autoComplete="off"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              {...register("email", { required: true })}
               placeholder="email@exemplo.com"
               className="w-full rounded-md border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-600 dark:focus:border-blue-400"
             />
@@ -177,8 +186,7 @@ export default function AdminUsersPage() {
             <input
               type="text"
               autoComplete="off"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              {...register("name")}
               placeholder="Nome do usuário"
               className="w-full rounded-md border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-600 dark:focus:border-blue-400"
             />
@@ -192,14 +200,10 @@ export default function AdminUsersPage() {
               type="password"
               required={!editingId}
               autoComplete="new-password"
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              {...register("password", { required: !editingId })}
               placeholder="••••••••"
               className="w-full rounded-md border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-600 dark:focus:border-blue-400"
             />
-            {form.password && form.password.length < 8 && (
-              <p className="mt-1 text-xs text-red-500">Mínimo de 8 caracteres</p>
-            )}
           </div>
 
           <div className="mb-6">
@@ -211,9 +215,9 @@ export default function AdminUsersPage() {
                 <button
                   key={r}
                   type="button"
-                  onClick={() => setForm({ ...form, role: r })}
+                  onClick={() => setValue("role", r)}
                   className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-md border px-4 py-3 text-sm font-medium transition-all duration-300 ${
-                    form.role === r
+                    role === r
                       ? r === "ADMIN"
                         ? "border-violet-400 bg-violet-50 text-violet-700 dark:border-violet-500/40 dark:bg-violet-900/20 dark:text-violet-400"
                         : "border-blue-400 bg-blue-50 text-blue-700 dark:border-blue-500/40 dark:bg-blue-900/20 dark:text-blue-400"
@@ -229,10 +233,10 @@ export default function AdminUsersPage() {
 
           <button
             type="submit"
-            disabled={submitting}
+            disabled={isSubmitting}
             className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all duration-300 hover:bg-blue-700 hover:shadow-blue-600/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-[0.97] disabled:opacity-60 disabled:shadow-none"
           >
-            {submitting ? "Salvando…" : editingId ? "Atualizar usuário" : "Criar usuário"}
+            {isSubmitting ? "Salvando…" : editingId ? "Atualizar usuário" : "Criar usuário"}
           </button>
         </form>
       )}
@@ -289,7 +293,7 @@ export default function AdminUsersPage() {
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
                   <button
-                    onClick={() => handleEdit(u)}
+                    onClick={() => openEdit(u)}
                     className="cursor-pointer rounded-lg p-1.5 text-slate-300 transition-all duration-300 hover:bg-blue-50 hover:text-blue-500 dark:text-gray-600 dark:hover:bg-blue-900/20 dark:hover:text-blue-400"
                     aria-label="editar"
                   >
