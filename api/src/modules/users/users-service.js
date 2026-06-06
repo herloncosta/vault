@@ -26,10 +26,36 @@ export async function create(data) {
   }
 
   const password = await argon2.hash(data.password);
-  return prisma.user.create({
+  const user = await prisma.user.create({
     data: { email: data.email, password, name: data.name ?? null, role: data.role ?? "OPERATOR" },
     select: userSelect,
   });
+
+  const defaultCategories = [
+    { name: "Salário", type: "INCOME" },
+    { name: "Freelance", type: "INCOME" },
+    { name: "Aluguel", type: "INCOME" },
+    { name: "Investimentos", type: "INCOME" },
+    { name: "Outro", type: "INCOME" },
+    { name: "Alimentação", type: "EXPENSE" },
+    { name: "Transporte", type: "EXPENSE" },
+    { name: "Moradia", type: "EXPENSE" },
+    { name: "Compras", type: "EXPENSE" },
+    { name: "Saúde", type: "EXPENSE" },
+    { name: "Educação", type: "EXPENSE" },
+    { name: "Lazer", type: "EXPENSE" },
+    { name: "Viagem", type: "EXPENSE" },
+    { name: "Assinaturas", type: "EXPENSE" },
+    { name: "Seguros", type: "EXPENSE" },
+    { name: "Utilidades", type: "EXPENSE" },
+    { name: "Outro", type: "EXPENSE" },
+  ];
+
+  await prisma.category.createMany({
+    data: defaultCategories.map((c) => ({ userId: user.id, name: c.name, type: c.type })),
+  });
+
+  return user;
 }
 
 export async function update(id, data) {
