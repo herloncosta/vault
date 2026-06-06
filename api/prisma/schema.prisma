@@ -53,6 +53,7 @@ model RefreshToken {
   expiresAt DateTime
   createdAt DateTime @default(now()) @map("created_at")
 
+  @@index([expiresAt])
   @@map("refresh_tokens")
 }
 
@@ -64,6 +65,8 @@ model RevokedToken {
   expiresAt DateTime
   createdAt DateTime @default(now()) @map("created_at")
 
+  @@index([expiresAt])
+  @@index([jti])
   @@map("revoked_tokens")
 }
 

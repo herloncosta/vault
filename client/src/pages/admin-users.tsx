@@ -12,6 +12,7 @@ import {
   User,
   Calendar,
 } from "lucide-react";
+import { useAuth } from "../contexts/auth-context";
 import * as api from "../lib/api";
 
 function formatDate(dateStr: string) {
@@ -26,6 +27,11 @@ interface UserForm {
 }
 
 export default function AdminUsersPage() {
+  const { user } = useAuth();
+  if (!user || user.role !== "ADMIN") {
+    return null;
+  }
+
   const [users, setUsers] = useState<api.User[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);

@@ -1,8 +1,17 @@
 import { Router } from "express";
+import rateLimit from "express-rate-limit";
 import * as controller from "./auth-controller.js";
 import { auth } from "../../middleware/auth.js";
 
 const router = Router();
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Muitas tentativas de login. Tente novamente em 15 minutos." },
+});
 
 /**
  * @openapi
@@ -69,7 +78,7 @@ router.post("/register", controller.register);
  *       401:
  *         description: Invalid credentials
  */
-router.post("/login", controller.login);
+router.post("/login", loginLimiter, controller.login);
 
 /**
  * @openapi

@@ -77,8 +77,8 @@ export default function RecurringExpensesPage() {
       await api.deleteRecurringExpense(id);
       setDeleteId(null);
       fetchExpenses();
-    } catch (err: any) {
-      setError(err.message || "Erro ao excluir");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao excluir");
     }
   }
 
@@ -86,8 +86,8 @@ export default function RecurringExpensesPage() {
     try {
       await api.updateRecurringExpense(expense.id, { active: !expense.active });
       fetchExpenses();
-    } catch (err: any) {
-      setError(err.message || "Erro ao alterar status");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao alterar status");
     }
   }
 

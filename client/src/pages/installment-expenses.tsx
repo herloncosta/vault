@@ -77,8 +77,8 @@ export default function InstallmentExpensesPage() {
       setDeleteId(null);
       if (expandedId === id) setExpandedId(null);
       fetchExpenses();
-    } catch (err: any) {
-      setError(err.message || "Erro ao excluir");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao excluir");
     }
   }
 
@@ -86,8 +86,8 @@ export default function InstallmentExpensesPage() {
     try {
       await api.updateInstallmentPaid(installment.id, !installment.paid);
       fetchExpenses();
-    } catch (err: any) {
-      setError(err.message || "Erro ao alterar status");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Erro ao alterar status");
     }
   }
 

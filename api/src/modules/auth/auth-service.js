@@ -97,14 +97,9 @@ export async function register(data, reqInfo) {
 
 export async function login(data, reqInfo) {
   const user = await prisma.user.findUnique({ where: { email: data.email } });
-  if (!user) {
-    const err = new Error("Invalid email or password");
-    err.status = 401;
-    throw err;
-  }
-
-  const valid = await argon2.verify(user.password, data.password);
-  if (!valid) {
+  const dummyHash = "$argon2id$v=19$m=65536,t=3,p=4$" + "A".repeat(22) + "$" + "A".repeat(43);
+  const valid = await argon2.verify(user?.password ?? dummyHash, data.password);
+  if (!user || !valid) {
     const err = new Error("Invalid email or password");
     err.status = 401;
     throw err;

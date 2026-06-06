@@ -73,9 +73,7 @@ function ProtectedLayout() {
               <Route path="/transacoes" element={<TransactionsPage />} />
               <Route path="/despesas-fixas" element={<RecurringExpensesPage />} />
               <Route path="/despesas-parceladas" element={<InstallmentExpensesPage />} />
-              {user.role === "ADMIN" && (
-                <Route path="/admin/usuarios" element={<AdminUsersPage />} />
-              )}
+              <Route path="/admin/usuarios" element={<AdminUsersPage />} />
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </div>

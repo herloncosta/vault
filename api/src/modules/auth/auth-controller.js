@@ -86,7 +86,7 @@ export async function login(req, res, next) {
 
 export async function refresh(req, res, next) {
   try {
-    const refreshTokenStr = req.cookies?.refreshToken || req.body?.refreshToken;
+    const refreshTokenStr = req.cookies?.refreshToken;
     if (!refreshTokenStr) {
       return res.status(400).json({ error: "Refresh token is required" });
     }
@@ -140,7 +140,7 @@ export async function me(req, res, next) {
 export async function updateBudget(req, res, next) {
   try {
     const { monthlyBudget } = req.body;
-    if (typeof monthlyBudget !== "number" || monthlyBudget < 0) {
+    if (typeof monthlyBudget !== "number" || !Number.isFinite(monthlyBudget) || monthlyBudget < 0) {
       return res.status(400).json({ error: "monthlyBudget must be a positive number" });
     }
     const user = await authService.setBudget(req.user.id, monthlyBudget);
