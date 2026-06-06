@@ -11,7 +11,6 @@
 vault/
 ├── api/          Express 5 REST API  →  PostgreSQL (Prisma 7 ORM)
 ├── client/       React 19 SPA        →  Vite + Tailwind CSS v4
-└── infra/        Docker Compose      →  ngrok tunnel for dev
 ```
 
 ## Tech stack
@@ -21,12 +20,12 @@ vault/
 | **API** | Express 5, Prisma 7, PostgreSQL 16, JWT (jsonwebtoken + httpOnly cookies), argon2, zod |
 | **Client** | React 19, TypeScript 6, react-router-dom 7, recharts, lucide-react |
 | **Styling** | Tailwind CSS v4 (`@tailwindcss/vite`), dark mode via `.dark` class |
-| **Infra** | Docker (PostgreSQL, ngrok), dotenv |
+| **Infra** | Docker (PostgreSQL), dotenv |
 
 ## Prerequisites
 
 - **Node.js** >= 22 (uses `--watch` flag for dev)
-- **Docker** (for PostgreSQL / ngrok)
+- **Docker** (for PostgreSQL)
 
 ## Quick start
 

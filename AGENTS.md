@@ -6,7 +6,6 @@
 vault/
 ├── api/              # Express 5 REST API (Postgres + Prisma v7)
 ├── client/           # Vite + React 19 + TypeScript 6 SPA
-└── infra/            # ngrok docker-compose (tunnels client dev server)
 ```
 
 ## Commands
@@ -25,7 +24,6 @@ vault/
 | Client dev server | `client/` | `npm run dev` |
 | Build (tsc + vite) | `client/` | `npm run build` |
 | Format via Prettier | `client/` | `npm run format` |
-| ngrok tunnel | `infra/` | `docker compose up -d` |
 
 ## API gotchas
 
@@ -57,10 +55,6 @@ vault/
 ## What's already built
 
 All screens exist in `client/src/pages/`: login, home (dashboard), profile, settings, transactions, recurring-expenses, installment-expenses, admin-users. Do not create new top-level page files unless adding a new feature.
-
-## infra/
-
-`infra/docker-compose.yml` runs ngrok to expose the client dev server (port 5173). Requires `NGROK_AUTHTOKEN` in `infra/.env`. Vite config allows ngrok domain via `allowedHosts`.
 
 ## No tests
 
