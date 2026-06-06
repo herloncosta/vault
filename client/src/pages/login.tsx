@@ -20,8 +20,8 @@ export default function LoginPage() {
     try {
       await login(data.email, data.password);
       navigate("/");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+    } catch {
+      setError("Email ou senha incorretos");
     }
   }
 
