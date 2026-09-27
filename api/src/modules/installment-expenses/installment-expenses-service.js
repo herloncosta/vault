@@ -29,7 +29,7 @@ function buildWhere(authUser, filters = {}) {
   return where;
 }
 
-function generateInstallments(totalAmount, installmentCount, firstDueDate) {
+export function generateInstallments(totalAmount, installmentCount, firstDueDate) {
   const totalCents = Math.round(Number(totalAmount) * 100);
   const baseCents = Math.floor(totalCents / installmentCount);
   const firstDate = new Date(firstDueDate);
