@@ -292,11 +292,17 @@ export async function updateProfile(userId, data) {
     updateData.password = await argon2.hash(updateData.password);
   }
 
-  return prisma.user.update({
+  const updated = await prisma.user.update({
     where: { id: userId },
     data: updateData,
     select: profileSelect,
   });
+
+  if (data.password) {
+    await prisma.refreshToken.deleteMany({ where: { userId } });
+  }
+
+  return updated;
 }
 
 export async function deleteMyAccount(userId) {
