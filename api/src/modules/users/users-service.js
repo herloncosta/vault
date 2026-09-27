@@ -26,10 +26,11 @@ export async function create(data) {
   }
 
   const password = await argon2.hash(data.password);
-  const user = await prisma.user.create({
-    data: { email: data.email, password, name: data.name ?? null, role: data.role ?? "OPERATOR" },
-    select: userSelect,
-  });
+  const user = await prisma.$transaction(async (tx) => {
+    const created = await tx.user.create({
+      data: { email: data.email, password, name: data.name ?? null, role: data.role ?? "OPERATOR" },
+      select: userSelect,
+    });
 
   const defaultCategories = [
     { name: "Salário", type: "INCOME" },
@@ -51,8 +52,11 @@ export async function create(data) {
     { name: "Outro", type: "EXPENSE" },
   ];
 
-  await prisma.category.createMany({
-    data: defaultCategories.map((c) => ({ userId: user.id, name: c.name, type: c.type })),
+    await tx.category.createMany({
+      data: defaultCategories.map((c) => ({ userId: created.id, name: c.name, type: c.type })),
+    });
+
+    return created;
   });
 
   return user;
