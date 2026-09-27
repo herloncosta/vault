@@ -33,6 +33,7 @@ import {
 	Cell,
 } from "recharts";
 import * as api from "../lib/api";
+import { parse as parseCurrency } from "../lib/currency";
 import TransactionForm from "../components/transaction-form";
 
 const categoryIcons: Record<string, LucideIcon> = {
@@ -119,8 +120,8 @@ export default function HomePage() {
 	);
 
 	async function handleSaveBudget() {
-		const value = Number.parseFloat(budgetInput.replace(",", "."));
-		if (Number.isNaN(value) || value <= 0) return;
+		const value = parseCurrency(budgetInput);
+		if (!(value > 0)) return;
 		setBudgetSubmitting(true);
 		try {
 			await api.updateBudget(value);
