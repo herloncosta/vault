@@ -128,11 +128,14 @@ export async function update(authUser, id, data) {
 
   assertOwnData(authUser, existing.userId);
 
+  if (data.totalAmount !== undefined || data.installmentCount !== undefined) {
+    const err = new Error("totalAmount and installmentCount cannot be changed after creation; delete and recreate instead");
+    err.status = 400;
+    throw err;
+  }
+
   const updateData = { ...data };
   if (updateData.firstDueDate) updateData.firstDueDate = new Date(updateData.firstDueDate);
-
-  delete updateData.totalAmount;
-  delete updateData.installmentCount;
 
   return prisma.installmentExpense.update({
     where: { id },
