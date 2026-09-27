@@ -33,6 +33,9 @@ app.use(
     max: env.rateLimitMax,
     standardHeaders: true,
     legacyHeaders: false,
+    // Authenticated traffic is tied to an account (see access logs);
+    // brute-force protection lives on the anonymous auth routes instead.
+    skip: (req) => Boolean(req.cookies?.accessToken || req.headers.authorization),
   }),
 );
 
