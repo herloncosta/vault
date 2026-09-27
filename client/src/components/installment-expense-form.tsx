@@ -80,7 +80,7 @@ export default function InstallmentExpenseForm({ editing, onSave, onClose }: Pro
         installmentCount: Number.parseInt(data.installmentCount, 10),
         type: data.installmentType,
         category: data.category || undefined,
-        firstDueDate: new Date(data.firstDueDate).toISOString(),
+        firstDueDate: new Date(`${data.firstDueDate}T12:00:00`).toISOString(),
       };
       if (editing) {
         await api.updateInstallmentExpense(editing.id, payload);
