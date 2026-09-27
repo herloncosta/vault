@@ -56,10 +56,11 @@ export async function register(data, reqInfo) {
   }
 
   const password = await argon2.hash(data.password);
-  const user = await prisma.user.create({
-    data: { email: data.email, password, name: data.name ?? null, role: "OPERATOR" },
-    select: { id: true, email: true, name: true, role: true, monthlyBudget: true, createdAt: true },
-  });
+  const user = await prisma.$transaction(async (tx) => {
+    const created = await tx.user.create({
+      data: { email: data.email, password, name: data.name ?? null, role: "OPERATOR" },
+      select: { id: true, email: true, name: true, role: true, monthlyBudget: true, createdAt: true },
+    });
 
   const defaultCategories = [
     { name: "Salário", type: "INCOME" },
@@ -81,8 +82,11 @@ export async function register(data, reqInfo) {
     { name: "Outro", type: "EXPENSE" },
   ];
 
-  await prisma.category.createMany({
-    data: defaultCategories.map((c) => ({ userId: user.id, name: c.name, type: c.type })),
+    await tx.category.createMany({
+      data: defaultCategories.map((c) => ({ userId: created.id, name: c.name, type: c.type })),
+    });
+
+    return created;
   });
 
   await logAccess({
@@ -205,8 +209,10 @@ export async function logout(userId, tokenJti, reqInfo) {
   const decoded = jwt.decode(tokenJti);
   const exp = decoded?.exp ?? Math.floor(Date.now() / 1000) + 3600;
 
-  await prisma.revokedToken.create({
-    data: {
+  await prisma.revokedToken.upsert({
+    where: { jti: tokenJti },
+    update: { expiresAt: new Date(exp * 1000) },
+    create: {
       jti: tokenJti,
       userId,
       expiresAt: new Date(exp * 1000),
@@ -286,11 +292,17 @@ export async function updateProfile(userId, data) {
     updateData.password = await argon2.hash(updateData.password);
   }
 
-  return prisma.user.update({
+  const updated = await prisma.user.update({
     where: { id: userId },
     data: updateData,
     select: profileSelect,
   });
+
+  if (data.password) {
+    await prisma.refreshToken.deleteMany({ where: { userId } });
+  }
+
+  return updated;
 }
 
 export async function deleteMyAccount(userId) {

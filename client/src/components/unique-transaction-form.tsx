@@ -71,7 +71,7 @@ export default function UniqueTransactionForm({ type, editing, onSave, onClose }
     const payload = {
       type, amount: data.amount, description: data.description,
       category: data.category || undefined,
-      date: new Date(data.date).toISOString(),
+      date: new Date(`${data.date}T12:00:00`).toISOString(),
       paymentMethod: data.paymentMethod || undefined,
     };
     if (editing) {

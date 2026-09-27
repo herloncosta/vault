@@ -29,20 +29,30 @@ function buildWhere(authUser, filters = {}) {
 }
 
 function generateInstallments(totalAmount, installmentCount, firstDueDate) {
-  const installments = [];
-  const installmentAmount = Number((totalAmount / installmentCount).toFixed(2));
+  const totalCents = Math.round(Number(totalAmount) * 100);
+  const baseCents = Math.floor(totalCents / installmentCount);
   const firstDate = new Date(firstDueDate);
+  const installments = [];
 
   for (let i = 0; i < installmentCount; i++) {
-    const dueDate = new Date(firstDate);
-    dueDate.setMonth(dueDate.getMonth() + i);
+    // Clamp to the last day of the month to avoid overflow
+    // (e.g. Jan 31 + 1 month must be Feb 28, not Mar 2/3).
+    const lastDay = new Date(firstDate.getFullYear(), firstDate.getMonth() + i + 1, 0).getDate();
+    const dueDate = new Date(
+      firstDate.getFullYear(),
+      firstDate.getMonth() + i,
+      Math.min(firstDate.getDate(), lastDay),
+      firstDate.getHours(),
+      firstDate.getMinutes(),
+      firstDate.getSeconds(),
+    );
 
-    const amount = i === installmentCount - 1
-      ? Number(totalAmount) - installmentAmount * (installmentCount - 1)
-      : installmentAmount;
+    const cents = i === installmentCount - 1
+      ? totalCents - baseCents * (installmentCount - 1)
+      : baseCents;
 
     installments.push({
-      amount,
+      amount: cents / 100,
       installmentNumber: i + 1,
       dueDate,
     });
@@ -118,11 +128,14 @@ export async function update(authUser, id, data) {
 
   assertOwnData(authUser, existing.userId);
 
+  if (data.totalAmount !== undefined || data.installmentCount !== undefined) {
+    const err = new Error("totalAmount and installmentCount cannot be changed after creation; delete and recreate instead");
+    err.status = 400;
+    throw err;
+  }
+
   const updateData = { ...data };
   if (updateData.firstDueDate) updateData.firstDueDate = new Date(updateData.firstDueDate);
-
-  delete updateData.totalAmount;
-  delete updateData.installmentCount;
 
   return prisma.installmentExpense.update({
     where: { id },

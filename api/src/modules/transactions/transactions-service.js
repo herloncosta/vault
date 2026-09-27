@@ -23,7 +23,11 @@ function buildWhere(authUser, filters = {}) {
   if (filters.startDate || filters.endDate) {
     where.date = {};
     if (filters.startDate) where.date.gte = new Date(filters.startDate);
-    if (filters.endDate) where.date.lte = new Date(filters.endDate);
+    if (filters.endDate) {
+      const end = new Date(filters.endDate);
+      end.setHours(23, 59, 59, 999);
+      where.date.lte = end;
+    }
   }
 
   return where;
@@ -174,6 +178,83 @@ export async function list(authUser, query = {}) {
   const data = unified.slice(skip, skip + limit);
 
   return { data, total, page, limit, totalPages: Math.ceil(total / limit) };
+}
+
+export async function summary(authUser, query = {}) {
+  let year;
+  let month;
+  if (query.month) {
+    const m = /^(\d{4})-(\d{2})$/.exec(query.month);
+    if (!m || Number(m[2]) < 1 || Number(m[2]) > 12) {
+      const err = new Error("month must be in YYYY-MM format");
+      err.status = 400;
+      throw err;
+    }
+    year = Number(m[1]);
+    month = Number(m[2]) - 1;
+  } else {
+    const now = new Date();
+    year = now.getFullYear();
+    month = now.getMonth();
+  }
+
+  const userId = query.userId && authUser.role === "ADMIN" ? query.userId : authUser.id;
+
+  async function totals(y, mo) {
+    const start = new Date(y, mo, 1);
+    const end = new Date(y, mo + 1, 1);
+    const monthEnd = new Date(y, mo + 1, 0);
+
+    const [txGroups, instSum, recurring] = await Promise.all([
+      prisma.transaction.groupBy({
+        by: ["type"],
+        where: { userId, date: { gte: start, lt: end }, status: { not: "CANCELLED" } },
+        _sum: { amount: true },
+      }),
+      prisma.installment.aggregate({
+        _sum: { amount: true },
+        where: { installmentExpense: { userId }, dueDate: { gte: start, lt: end } },
+      }),
+      prisma.recurringExpense.findMany({
+        where: {
+          userId,
+          active: true,
+          startDate: { lte: monthEnd },
+          OR: [{ endDate: null }, { endDate: { gte: start } }],
+        },
+        select: { type: true, amount: true, dayOfMonth: true, startDate: true, endDate: true },
+      }),
+    ]);
+
+    let income = 0;
+    let expense = 0;
+    for (const g of txGroups) {
+      if (g.type === "INCOME") income += Number(g._sum.amount ?? 0);
+      else expense += Number(g._sum.amount ?? 0);
+    }
+    expense += Number(instSum._sum.amount ?? 0);
+
+    const lastDay = monthEnd.getDate();
+    for (const r of recurring) {
+      const occurrence = new Date(y, mo, Math.min(r.dayOfMonth, lastDay));
+      if (occurrence < r.startDate) continue;
+      if (r.endDate && occurrence > r.endDate) continue;
+      if (r.type === "INCOME") income += Number(r.amount);
+      else expense += Number(r.amount);
+    }
+
+    return { income, expense, balance: income - expense };
+  }
+
+  const current = await totals(year, month);
+  const prev = new Date(year, month - 1, 1);
+  const previous = await totals(prev.getFullYear(), prev.getMonth());
+
+  return {
+    month: `${year}-${String(month + 1).padStart(2, "0")}`,
+    current,
+    previous,
+  };
 }
 
 export async function getById(authUser, id) {

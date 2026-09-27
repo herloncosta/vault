@@ -47,7 +47,11 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
 
   if (result.ok) return result.body as T;
 
-  if (result.status === 401) {
+  // Login/refresh failures are final: retrying refresh here would loop
+  // and wrong credentials must not wipe the session state.
+  const noRetry = url.startsWith("/api/auth/login") || url.startsWith("/api/auth/refresh");
+
+  if (result.status === 401 && !noRetry) {
     if (!refreshPromise) refreshPromise = refreshTokens();
     const refreshed = await refreshPromise;
     refreshPromise = null;
@@ -171,6 +175,23 @@ export interface TransactionListResult {
 export function listTransactions(params?: Record<string, string>) {
   const qs = params ? `?${new URLSearchParams(params).toString()}` : "";
   return request<TransactionListResult>(`/api/transactions${qs}`);
+}
+
+export interface MonthTotals {
+  income: number;
+  expense: number;
+  balance: number;
+}
+
+export interface TransactionsSummary {
+  month: string;
+  current: MonthTotals;
+  previous: MonthTotals;
+}
+
+export function getTransactionsSummary(month?: string) {
+  const qs = month ? `?month=${month}` : "";
+  return request<TransactionsSummary>(`/api/transactions/summary${qs}`);
 }
 
 export function getTransaction(id: string) {

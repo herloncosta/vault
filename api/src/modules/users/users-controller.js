@@ -35,6 +35,9 @@ export async function create(req, res, next) {
 export async function update(req, res, next) {
   try {
     const data = updateUserSchema.parse(req.body);
+    if (req.params.id === req.user.id && data.role && data.role !== req.user.role) {
+      return res.status(403).json({ error: "You cannot change your own role" });
+    }
     const user = await userService.update(req.params.id, data);
     res.json(user);
   } catch (err) {
@@ -47,6 +50,9 @@ export async function update(req, res, next) {
 
 export async function remove(req, res, next) {
   try {
+    if (req.params.id === req.user.id) {
+      return res.status(400).json({ error: "You cannot delete your own account; use DELETE /api/auth/me instead" });
+    }
     await userService.remove(req.params.id);
     res.status(204).end();
   } catch (err) {

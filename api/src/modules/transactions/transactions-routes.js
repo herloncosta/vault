@@ -55,6 +55,29 @@ router.get("/", controller.list);
 
 /**
  * @openapi
+ * /api/transactions/summary:
+ *   get:
+ *     tags: [Transactions]
+ *     summary: Monthly income/expense summary with previous month comparison
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: month
+ *         schema:
+ *           type: string
+ *           example: "2026-09"
+ *         description: Month in YYYY-MM format (defaults to current month)
+ *     responses:
+ *       200:
+ *         description: Monthly summary
+ *       400:
+ *         description: Invalid month format
+ */
+router.get("/summary", controller.summary);
+
+/**
+ * @openapi
  * /api/transactions/{id}:
  *   get:
  *     tags: [Transactions]
