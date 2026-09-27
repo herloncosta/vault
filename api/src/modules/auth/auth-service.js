@@ -205,8 +205,10 @@ export async function logout(userId, tokenJti, reqInfo) {
   const decoded = jwt.decode(tokenJti);
   const exp = decoded?.exp ?? Math.floor(Date.now() / 1000) + 3600;
 
-  await prisma.revokedToken.create({
-    data: {
+  await prisma.revokedToken.upsert({
+    where: { jti: tokenJti },
+    update: { expiresAt: new Date(exp * 1000) },
+    create: {
       jti: tokenJti,
       userId,
       expiresAt: new Date(exp * 1000),
