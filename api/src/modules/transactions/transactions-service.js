@@ -23,7 +23,11 @@ function buildWhere(authUser, filters = {}) {
   if (filters.startDate || filters.endDate) {
     where.date = {};
     if (filters.startDate) where.date.gte = new Date(filters.startDate);
-    if (filters.endDate) where.date.lte = new Date(filters.endDate);
+    if (filters.endDate) {
+      const end = new Date(filters.endDate);
+      end.setHours(23, 59, 59, 999);
+      where.date.lte = end;
+    }
   }
 
   return where;
