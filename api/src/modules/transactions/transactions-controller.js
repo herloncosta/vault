@@ -10,6 +10,15 @@ export async function list(req, res, next) {
   }
 }
 
+export async function summary(req, res, next) {
+  try {
+    const result = await transactionService.summary(req.user, req.query);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+}
+
 export async function getById(req, res, next) {
   try {
     const transaction = await transactionService.getById(req.user, req.params.id);
