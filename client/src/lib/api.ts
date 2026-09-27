@@ -47,7 +47,11 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
 
   if (result.ok) return result.body as T;
 
-  if (result.status === 401) {
+  // Login/refresh failures are final: retrying refresh here would loop
+  // and wrong credentials must not wipe the session state.
+  const noRetry = url.startsWith("/api/auth/login") || url.startsWith("/api/auth/refresh");
+
+  if (result.status === 401 && !noRetry) {
     if (!refreshPromise) refreshPromise = refreshTokens();
     const refreshed = await refreshPromise;
     refreshPromise = null;
