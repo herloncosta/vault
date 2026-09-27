@@ -1,4 +1,5 @@
 import prisma from "../../config/database.js";
+import { assertCategoryExists } from "../categories/categories-service.js";
 
 const installmentExpenseInclude = {
   user: { select: { id: true, email: true, name: true } },
@@ -98,6 +99,7 @@ export async function getById(authUser, id) {
 }
 
 export async function create(authUser, data) {
+  await assertCategoryExists(authUser.id, data.category, "EXPENSE");
   const installments = generateInstallments(data.totalAmount, data.installmentCount, data.firstDueDate);
 
   return prisma.installmentExpense.create({
@@ -127,6 +129,10 @@ export async function update(authUser, id, data) {
   }
 
   assertOwnData(authUser, existing.userId);
+
+  if (data.category !== undefined) {
+    await assertCategoryExists(existing.userId, data.category, "EXPENSE");
+  }
 
   if (data.totalAmount !== undefined || data.installmentCount !== undefined) {
     const err = new Error("totalAmount and installmentCount cannot be changed after creation; delete and recreate instead");
