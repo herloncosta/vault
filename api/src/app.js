@@ -16,9 +16,12 @@ import categoryRoutes from "./modules/categories/categories-routes.js";
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 app.use(helmet());
+const corsOrigins = env.corsOrigin.split(",").map((o) => o.trim()).filter(Boolean);
 app.use(cors({
-  origin: env.corsOrigin.split(","),
+  origin: corsOrigins.includes("*") ? true : corsOrigins,
   credentials: true,
 }));
 app.use(express.json({ limit: "10kb" }));
