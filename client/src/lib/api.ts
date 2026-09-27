@@ -177,6 +177,23 @@ export function listTransactions(params?: Record<string, string>) {
   return request<TransactionListResult>(`/api/transactions${qs}`);
 }
 
+export interface MonthTotals {
+  income: number;
+  expense: number;
+  balance: number;
+}
+
+export interface TransactionsSummary {
+  month: string;
+  current: MonthTotals;
+  previous: MonthTotals;
+}
+
+export function getTransactionsSummary(month?: string) {
+  const qs = month ? `?month=${month}` : "";
+  return request<TransactionsSummary>(`/api/transactions/summary${qs}`);
+}
+
 export function getTransaction(id: string) {
   return request<Transaction>(`/api/transactions/${id}`);
 }

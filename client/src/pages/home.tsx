@@ -59,6 +59,7 @@ function formatCurrency(value: number) {
 export default function HomePage() {
 	const { user, refreshUser } = useAuth();
 	const [transactions, setTransactions] = useState<api.Transaction[]>([]);
+	const [summary, setSummary] = useState<api.TransactionsSummary | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [editingBudget, setEditingBudget] = useState(false);
 	const [budgetInput, setBudgetInput] = useState("");
@@ -72,6 +73,7 @@ export default function HomePage() {
 			.then((res) => setTransactions(res.data))
 			.catch(() => setTransactions([]))
 			.finally(() => setLoading(false));
+		api.getTransactionsSummary().then(setSummary).catch(() => setSummary(null));
 	}
 
 	useEffect(() => {
@@ -97,15 +99,18 @@ export default function HomePage() {
 
 	const balance = totalIncome - totalExpense;
 
-	const monthIncome = monthTransactions
+	const monthIncome = summary?.current.income ?? monthTransactions
 		.filter((t) => t.type === "INCOME")
 		.reduce((acc, t) => acc + Number(t.amount), 0);
 
-	const monthExpense = monthTransactions
+	const monthExpense = summary?.current.expense ?? monthTransactions
 		.filter((t) => t.type === "EXPENSE")
 		.reduce((acc, t) => acc + Number(t.amount), 0);
 
-	const recentTransactions = transactions.slice(0, 5);
+	const prevIncome = summary?.previous.income ?? 0;
+	const incomeChange = prevIncome > 0 ? ((monthIncome - prevIncome) / prevIncome) * 100 : null;
+
+	const recentTransactions = transactions.filter((t) => new Date(t.date) <= now).slice(0, 5);
 
 	const budgetLimit = user?.monthlyBudget ? Number(user.monthlyBudget) : 5000;
 	const budgetPercent = Math.min(
@@ -246,11 +251,11 @@ export default function HomePage() {
 				<div className="relative mt-4 flex items-center gap-2 text-sm text-white/70">
 					<TrendingUp size={16} className="text-emerald-300" />
 					<span className="text-emerald-300">
-						{totalIncome > 0
-							? `+${((monthIncome / (totalIncome / 12)) * 100 - 100).toFixed(1)}%`
-							: "0.0%"}
+						{incomeChange === null
+							? "sem dados do mês anterior"
+							: `${incomeChange >= 0 ? "+" : ""}${incomeChange.toFixed(1)}%`}
 					</span>
-					<span>este mês</span>
+					<span>vs. mês anterior</span>
 				</div>
 			</div>
 
