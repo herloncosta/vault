@@ -1,4 +1,5 @@
 import prisma from "../../config/database.js";
+import { assertCategoryExists } from "../categories/categories-service.js";
 
 const recurringExpenseInclude = { user: { select: { id: true, email: true, name: true } } };
 
@@ -63,6 +64,7 @@ export async function getById(authUser, id) {
 }
 
 export async function create(authUser, data) {
+  await assertCategoryExists(authUser.id, data.category, data.type ?? "EXPENSE");
   return prisma.recurringExpense.create({
     data: {
       userId: authUser.id,
@@ -89,6 +91,14 @@ export async function update(authUser, id, data) {
   }
 
   assertOwnData(authUser, existing.userId);
+
+  if (data.category !== undefined || data.type !== undefined) {
+    await assertCategoryExists(
+      existing.userId,
+      data.category ?? existing.category,
+      data.type ?? existing.type,
+    );
+  }
 
   const updateData = { ...data };
   if (updateData.startDate) updateData.startDate = new Date(updateData.startDate);

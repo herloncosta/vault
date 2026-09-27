@@ -12,5 +12,6 @@ export function parse(value: string): number {
 }
 
 export function toInput(value: number): string {
+  if (!value) return "";
   return fmt(String(Math.round(value * 100)));
 }

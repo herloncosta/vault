@@ -16,9 +16,12 @@ import categoryRoutes from "./modules/categories/categories-routes.js";
 
 const app = express();
 
+app.set("trust proxy", 1);
+
 app.use(helmet());
+const corsOrigins = env.corsOrigin.split(",").map((o) => o.trim()).filter(Boolean);
 app.use(cors({
-  origin: env.corsOrigin.split(","),
+  origin: corsOrigins.includes("*") ? true : corsOrigins,
   credentials: true,
 }));
 app.use(express.json({ limit: "10kb" }));
@@ -30,6 +33,9 @@ app.use(
     max: env.rateLimitMax,
     standardHeaders: true,
     legacyHeaders: false,
+    // Authenticated traffic is tied to an account (see access logs);
+    // brute-force protection lives on the anonymous auth routes instead.
+    skip: (req) => Boolean(req.cookies?.accessToken || req.headers.authorization),
   }),
 );
 

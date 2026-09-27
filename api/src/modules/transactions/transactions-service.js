@@ -1,4 +1,5 @@
 import prisma from "../../config/database.js";
+import { assertCategoryExists } from "../categories/categories-service.js";
 
 function assertOwnData(authUser, targetUserId) {
   if (authUser.role !== "ADMIN" && authUser.id !== targetUserId) {
@@ -280,6 +281,7 @@ export async function getById(authUser, id) {
 }
 
 export async function create(authUser, data) {
+  await assertCategoryExists(authUser.id, data.category, data.type);
   const transaction = await prisma.transaction.create({
     data: {
       userId: authUser.id,
@@ -313,6 +315,14 @@ export async function update(authUser, id, data) {
   }
 
   assertOwnData(authUser, existing.userId);
+
+  if (data.category !== undefined || data.type !== undefined) {
+    await assertCategoryExists(
+      existing.userId,
+      data.category ?? existing.category,
+      data.type ?? existing.type,
+    );
+  }
 
   const updateData = { ...data };
   if (updateData.date) updateData.date = new Date(updateData.date);
