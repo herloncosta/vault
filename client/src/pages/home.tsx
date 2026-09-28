@@ -5,6 +5,7 @@ import {
 	TrendingUp,
 	TrendingDown,
 	Pencil,
+	Plus,
 	ShoppingCart,
 	Home,
 	Car,
@@ -20,8 +21,8 @@ import {
 	ArrowDownToLine,
 } from "lucide-react";
 import {
-	BarChart,
-	Bar,
+	LineChart,
+	Line,
 	XAxis,
 	YAxis,
 	CartesianGrid,
@@ -33,7 +34,7 @@ import {
 	Cell,
 } from "recharts";
 import * as api from "../lib/api";
-import { parse as parseCurrency } from "../lib/currency";
+import { parse as parseCurrency, brl as formatCurrency } from "../lib/currency";
 import TransactionForm from "../components/transaction-form";
 
 const categoryIcons: Record<string, LucideIcon> = {
@@ -50,13 +51,6 @@ const categoryIcons: Record<string, LucideIcon> = {
 	Outro: ArrowDownToLine,
 };
 
-function formatCurrency(value: number) {
-	return new Intl.NumberFormat("pt-BR", {
-		style: "currency",
-		currency: "BRL",
-	}).format(value);
-}
-
 export default function HomePage() {
 	const { user, refreshUser } = useAuth();
 	const [transactions, setTransactions] = useState<api.Transaction[]>([]);
@@ -67,12 +61,18 @@ export default function HomePage() {
 	const [budgetSubmitting, setBudgetSubmitting] = useState(false);
 	const [modalOpen, setModalOpen] = useState(false);
 	const [modalType, setModalType] = useState<"INCOME" | "EXPENSE">("EXPENSE");
+	const [txError, setTxError] = useState(false);
+	const [budgetError, setBudgetError] = useState("");
 
 	function fetchTransactions() {
+		setTxError(false);
 		api
 			.listTransactions({ limit: "1000" })
 			.then((res) => setTransactions(res.data))
-			.catch(() => setTransactions([]))
+			.catch(() => {
+				setTransactions([]);
+				setTxError(true);
+			})
 			.finally(() => setLoading(false));
 		api.getTransactionsSummary().then(setSummary).catch(() => setSummary(null));
 	}
@@ -111,6 +111,11 @@ export default function HomePage() {
 	const prevIncome = summary?.previous.income ?? 0;
 	const incomeChange = prevIncome > 0 ? ((monthIncome - prevIncome) / prevIncome) * 100 : null;
 
+	const prevExpense = summary?.previous.expense ?? 0;
+	const expenseChange = prevExpense > 0 ? ((monthExpense - prevExpense) / prevExpense) * 100 : null;
+
+	const monthBalance = monthIncome - monthExpense;
+
 	const recentTransactions = transactions.filter((t) => new Date(t.date) <= now).slice(0, 5);
 
 	const budgetLimit = user?.monthlyBudget ? Number(user.monthlyBudget) : 5000;
@@ -123,12 +128,13 @@ export default function HomePage() {
 		const value = parseCurrency(budgetInput);
 		if (!(value > 0)) return;
 		setBudgetSubmitting(true);
+		setBudgetError("");
 		try {
 			await api.updateBudget(value);
 			await refreshUser();
 			setEditingBudget(false);
 		} catch {
-			// silently fail
+			setBudgetError("Não foi possível salvar. Tente de novo.");
 		} finally {
 			setBudgetSubmitting(false);
 		}
@@ -136,8 +142,8 @@ export default function HomePage() {
 
 	if (loading) {
 		return (
-			<main className="mx-auto max-w-5xl px-4 py-10">
-				<div className="space-y-6">
+		<main className="mx-auto max-w-6xl px-4 py-10">
+			<div className="space-y-6">
 					<div className="h-8 w-48 animate-pulse rounded-lg bg-slate-200 dark:bg-gray-800" />
 					<div className="h-44 animate-pulse rounded-lg bg-slate-200 dark:bg-gray-800" />
 					<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -147,51 +153,102 @@ export default function HomePage() {
 								className="h-28 animate-pulse rounded-md bg-slate-200 dark:bg-gray-800"
 							/>
 						))}
-					</div>
-				</div>
-			</main>
+			</div>
+		</div>
+	</main>
 		);
 	}
 
 	return (
-		<main className="mx-auto max-w-5xl px-4 py-10">
-			<div className="mb-8 flex items-start justify-between">
+	<main className="mx-auto max-w-6xl px-4 py-10">
+		<div className="relative mb-6 overflow-hidden rounded-2xl bg-linear-to-br from-blue-600 to-violet-600 p-6 text-white shadow-xl shadow-blue-600/20 md:p-8 dark:from-blue-700 dark:to-violet-700">
+			<div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-white/10" />
+			<div className="absolute -bottom-8 -left-8 h-28 w-28 rounded-full bg-white/5" />
+			<div className="relative flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
 				<div>
-					<p className="text-xs text-slate-500 dark:text-gray-400">
+					<p className="text-xs text-white/70">
 						Bem-vindo de volta,
 					</p>
-					<h1 className="text-2xl font-bold text-slate-900 dark:text-gray-100">
+					<h1 className="mt-0.5 text-xl font-bold md:text-2xl">
 						{user?.name ?? user?.email}
 					</h1>
+					<p className="mt-5 text-xs font-medium tracking-widest text-white/70 uppercase">
+						Saldo do mês
+					</p>
+					<p className="mt-1 text-3xl font-bold tracking-tight md:text-4xl">
+						{formatCurrency(monthBalance)}
+					</p>
+					<p className="mt-1 text-sm text-white/70">
+						Total geral: {formatCurrency(balance)}
+					</p>
+					<div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-white/70">
+						{incomeChange === null && expenseChange === null ? (
+							<span>sem dados do mês anterior</span>
+						) : (
+							<>
+								{incomeChange !== null && (
+									<span className="flex items-center gap-1">
+										<TrendingUp size={16} className="text-emerald-300" />
+										<span className="text-emerald-300">
+											Receitas {incomeChange >= 0 ? "+" : ""}{incomeChange.toFixed(1)}%
+										</span>
+									</span>
+								)}
+								{expenseChange !== null && (
+									<span className="text-red-200">
+										Gastos {expenseChange >= 0 ? "+" : ""}{expenseChange.toFixed(1)}%
+									</span>
+								)}
+								<span>vs. mês anterior</span>
+							</>
+						)}
+					</div>
 				</div>
-				<button
-					type="button"
-					onClick={() => {
-						setModalType("EXPENSE");
-						setModalOpen(true);
-					}}
-					className="flex cursor-pointer items-center gap-2 rounded-md bg-blue-600 px-3 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all duration-300 hover:bg-blue-700 hover:shadow-blue-600/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-[0.97] md:px-4"
-					aria-label="Nova transação"
-				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="16"
-						height="16"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						strokeWidth="2"
-						strokeLinecap="round"
-						strokeLinejoin="round"
+				<div className="flex gap-2">
+					<button
+						type="button"
+						onClick={() => {
+							setModalType("INCOME");
+							setModalOpen(true);
+						}}
+						className="flex cursor-pointer items-center gap-2 rounded-xl bg-white/15 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur transition-all duration-300 hover:bg-white/25 focus:outline-none focus:ring-2 focus:ring-white/50 active:scale-[0.97]"
 					>
-						<title>Ícone de Adicionar</title>
-						<path d="M5 12h14" />
-						<path d="M12 5v14" />
-					</svg>
-					<span className="hidden md:inline">Nova transação</span>
-				</button>
+						<Plus size={16} />
+						Nova receita
+					</button>
+					<button
+						type="button"
+						onClick={() => {
+							setModalType("EXPENSE");
+							setModalOpen(true);
+						}}
+						className="flex cursor-pointer items-center gap-2 rounded-xl bg-black/20 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur transition-all duration-300 hover:bg-black/30 focus:outline-none focus:ring-2 focus:ring-white/50 active:scale-[0.97]"
+					>
+						<Plus size={16} />
+						Nova despesa
+					</button>
+				</div>
 			</div>
+		</div>
 
+			{txError ? (
+				<div className="rounded-xl border border-red-200 bg-white p-10 text-center shadow-lg dark:border-red-900/40 dark:bg-gray-900">
+					<p className="text-sm font-semibold text-slate-900 dark:text-gray-100">
+						Não foi possível carregar seus dados
+					</p>
+					<p className="mt-1 text-xs text-slate-500 dark:text-gray-500">
+						Verifique sua conexão e tente de novo.
+					</p>
+					<button
+						type="button"
+						onClick={fetchTransactions}
+						className="mt-4 cursor-pointer rounded-md bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all duration-300 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-[0.97]"
+					>
+						Tentar novamente
+					</button>
+				</div>
+			) : (
+				<>
 			<div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
 				{[
 					{
@@ -209,19 +266,16 @@ export default function HomePage() {
 						bg: "bg-red-50 dark:bg-red-900/20",
 					},
 					{
-						label: "Saldo mensal",
-						amount: formatCurrency(monthIncome - monthExpense),
+						label: "Saldo total",
+						amount: formatCurrency(balance),
 						icon: Wallet,
-						color:
-							monthIncome - monthExpense >= 0
-								? "text-emerald-500 dark:text-emerald-400"
-								: "text-red-400",
+						color: "text-violet-500 dark:text-violet-400",
 						bg: "bg-violet-50 dark:bg-violet-900/20",
 					},
 				].map(({ label, amount, icon: Icon, color, bg }) => (
 					<div
 						key={label}
-						className="rounded-md border border-slate-200 bg-white p-5 shadow-lg transition-all duration-300 hover:shadow-xl dark:border-gray-800 dark:bg-gray-900"
+						className="rounded-xl border border-slate-200 bg-white p-5 shadow-lg transition-all duration-300 hover:shadow-xl dark:border-gray-800 dark:bg-gray-900"
 					>
 						<div className="mb-4 flex items-center justify-between">
 							<span className="text-xs font-medium text-slate-500 dark:text-gray-400">
@@ -231,83 +285,52 @@ export default function HomePage() {
 								<Icon size={16} className={color} />
 							</div>
 						</div>
-						<p
-							className={`text-lg font-bold ${label === "Saldo mensal" ? color : "text-slate-900 dark:text-gray-100"}`}
-						>
+						<p className="text-lg font-bold text-slate-900 dark:text-gray-100">
 							{amount}
 						</p>
 					</div>
 				))}
 			</div>
 
-			<div className="relative mb-8 overflow-hidden rounded-lg bg-linear-to-br from-blue-600 to-violet-600 p-6 text-white shadow-xl shadow-blue-600/20 dark:from-blue-700 dark:to-violet-700">
-				<div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-white/10" />
-				<div className="absolute -bottom-8 -left-8 h-28 w-28 rounded-full bg-white/5" />
-				<p className="relative text-xs font-medium tracking-widest text-white/70 uppercase">
-					Saldo total
-				</p>
-				<p className="relative mt-2 text-3xl font-bold tracking-tight">
-					{formatCurrency(balance)}
-				</p>
-				<div className="relative mt-4 flex items-center gap-2 text-sm text-white/70">
-					<TrendingUp size={16} className="text-emerald-300" />
-					<span className="text-emerald-300">
-						{incomeChange === null
-							? "sem dados do mês anterior"
-							: `${incomeChange >= 0 ? "+" : ""}${incomeChange.toFixed(1)}%`}
-					</span>
-					<span>vs. mês anterior</span>
-				</div>
-			</div>
-
-			<TransactionForm
+		<TransactionForm
 				isOpen={modalOpen}
 				initialType={modalType}
 				onSave={fetchTransactions}
 				onClose={() => setModalOpen(false)}
 			/>
 
-			<div className="mb-8">
-				<h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-gray-100">
-					Receitas x Despesas
-				</h2>
-				<MonthlyChart transactions={transactions} />
-			</div>
-
-			<div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
+		<div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
+			<div className="space-y-6 lg:col-span-2">
 				<div>
 					<h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-gray-100">
-						Despesas por categoria
+						Receitas x Despesas · últimos 7 meses
 					</h2>
-					<CategoryPieChart
-						transactions={monthTransactions}
-						type="EXPENSE"
-					/>
+					<MonthlyChart transactions={transactions} />
 				</div>
-				<div>
-					<h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-gray-100">
-						Receitas por categoria
-					</h2>
-					<CategoryPieChart
-						transactions={monthTransactions}
-						type="INCOME"
-					/>
-				</div>
+
+			<div>
+				<h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-gray-100">
+					Despesas por categoria · este mês
+				</h2>
+				<ExpenseDonut transactions={monthTransactions} />
 			</div>
 
-			<div className="mb-8">
-				<h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-gray-100">
-					Transações recentes
+		<div className="lg:col-span-2">
+			<h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-gray-100">
+				Transações recentes
 				</h2>
-				<div className="rounded-md border border-slate-200 bg-white p-2 shadow-lg dark:border-gray-800 dark:bg-gray-900">
+				<div className="rounded-xl border border-slate-200 bg-white p-2 shadow-lg dark:border-gray-800 dark:bg-gray-900">
 					{recentTransactions.length === 0 ? (
 						<div className="flex flex-col items-center gap-2 py-10">
 							<ArrowDownToLine
 								size={28}
-								className="text-slate-300 dark:text-gray-600"
+								className="text-slate-400 dark:text-gray-600"
 							/>
-							<p className="text-sm text-slate-400 dark:text-gray-500">
+							<p className="text-sm text-slate-500 dark:text-gray-500">
 								Nenhuma transação ainda
+							</p>
+							<p className="text-xs text-slate-500 dark:text-gray-500">
+								Use Nova receita ou Nova despesa para começar.
 							</p>
 						</div>
 					) : (
@@ -332,7 +355,7 @@ export default function HomePage() {
 										<p className="text-sm font-medium text-slate-900 dark:text-gray-100">
 											{t.description}
 										</p>
-										<p className="text-xs text-slate-400 dark:text-gray-500">
+										<p className="text-xs text-slate-500 dark:text-gray-500">
 											{new Date(t.date).toLocaleDateString("pt-BR")}
 										</p>
 									</div>
@@ -352,11 +375,12 @@ export default function HomePage() {
 					)}
 				</div>
 			</div>
+		</div>
 
-			<div>
-				<div className="mb-4 flex items-center justify-between">
-					<h2 className="text-sm font-semibold text-slate-900 dark:text-gray-100">
-						Limite mensal
+		<div className="lg:col-start-3 lg:row-start-1 lg:row-span-3">
+			<div className="mb-4 flex items-center justify-between">
+				<h2 className="text-sm font-semibold text-slate-900 dark:text-gray-100">
+					Limite mensal
 					</h2>
 					{!editingBudget && (
 						<button
@@ -365,14 +389,14 @@ export default function HomePage() {
 								setBudgetInput(String(budgetLimit));
 								setEditingBudget(true);
 							}}
-							className="flex cursor-pointer items-center gap-1 text-xs text-slate-400 transition-all duration-300 hover:text-blue-500 dark:text-gray-500 dark:hover:text-blue-400"
+							className="flex cursor-pointer items-center gap-1 text-xs text-slate-500 transition-all duration-300 hover:text-blue-500 dark:text-gray-500 dark:hover:text-blue-400"
 						>
 							<Pencil size={12} />
 							Alterar
 						</button>
 					)}
 				</div>
-				<div className="rounded-md border border-slate-200 bg-white p-5 shadow-lg dark:border-gray-800 dark:bg-gray-900">
+				<div className="rounded-xl border border-slate-200 bg-white p-5 shadow-lg dark:border-gray-800 dark:bg-gray-900">
 					{editingBudget ? (
 						<div>
 							<label
@@ -389,7 +413,7 @@ export default function HomePage() {
 									value={budgetInput}
 									onChange={(e) => setBudgetInput(e.target.value)}
 									placeholder="5000"
-									className="flex-1 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-600 dark:focus:border-blue-400"
+									className="flex-1 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-400 dark:focus:border-blue-400"
 								/>
 								<button
 									type="button"
@@ -403,11 +427,14 @@ export default function HomePage() {
 									type="button"
 									onClick={() => setEditingBudget(false)}
 									disabled={budgetSubmitting}
-									className="flex cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-slate-400 transition-all duration-300 hover:bg-slate-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-500 dark:hover:bg-gray-700"
+									className="flex cursor-pointer items-center justify-center rounded-lg border border-slate-200 bg-white px-4 text-slate-500 transition-all duration-300 hover:bg-slate-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-500 dark:hover:bg-gray-700"
 								>
 									<X size={16} />
 								</button>
 							</div>
+							{budgetError && (
+								<p className="mt-2 text-xs text-red-500 dark:text-red-400">{budgetError}</p>
+							)}
 						</div>
 					) : (
 						<>
@@ -429,14 +456,17 @@ export default function HomePage() {
 									style={{ width: `${budgetPercent}%` }}
 								/>
 							</div>
-							<p className="mt-2 text-xs text-slate-400 dark:text-gray-500">
+							<p className="mt-2 text-xs text-slate-500 dark:text-gray-500">
 								{budgetPercent}% do limite utilizado
 							</p>
 						</>
 					)}
 				</div>
 			</div>
-		</main>
+		</div>
+			</>
+		)}
+	</main>
 	);
 }
 
@@ -461,9 +491,15 @@ const CHART_COLORS = [
 	"#06b6d4", "#d946ef", "#eab308", "#22c55e", "#64748b",
 ];
 
-function CategoryPieChart({ transactions, type }: { transactions: api.Transaction[]; type: "INCOME" | "EXPENSE" }) {
+function colorForCategory(name: string) {
+	let hash = 0;
+	for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+	return CHART_COLORS[hash % CHART_COLORS.length];
+}
+
+function ExpenseDonut({ transactions }: { transactions: api.Transaction[] }) {
 	const byCategory = transactions
-		.filter((t) => t.type === type && t.category)
+		.filter((t) => t.type === "EXPENSE" && t.category)
 		.reduce<Record<string, number>>((acc, t) => {
 			acc[t.category!] = (acc[t.category!] || 0) + Number(t.amount);
 			return acc;
@@ -475,48 +511,64 @@ function CategoryPieChart({ transactions, type }: { transactions: api.Transactio
 
 	if (data.length === 0) {
 		return (
-			<div className="flex items-center justify-center rounded-md border border-slate-200 bg-white p-8 shadow-lg dark:border-gray-800 dark:bg-gray-900">
-				<p className="text-sm text-slate-400 dark:text-gray-500">Nenhum dado no mês atual</p>
+			<div className="flex items-center justify-center rounded-xl border border-slate-200 bg-white p-8 shadow-lg dark:border-gray-800 dark:bg-gray-900">
+				<p className="text-sm text-slate-500 dark:text-gray-500">Nenhuma despesa no mês atual</p>
 			</div>
 		);
 	}
 
+	const total = data.reduce((a, d) => a + d.value, 0);
+
 	return (
-		<div className="rounded-md border border-slate-200 bg-white p-4 shadow-lg dark:border-gray-800 dark:bg-gray-900">
-			<ResponsiveContainer width="100%" height={260}>
-				<PieChart>
-					<Pie
-						data={data}
-						dataKey="value"
-						nameKey="name"
-						cx="50%"
-						cy="50%"
-						outerRadius={90}
-						innerRadius={50}
-						paddingAngle={3}
-					>
-						{data.map((_, i) => (
-							<Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-						))}
-					</Pie>
-					<Tooltip
-						contentStyle={{
-							backgroundColor: "var(--tooltip-bg, #fff)",
-							border: "1px solid var(--tooltip-border, #e2e8f0)",
-							borderRadius: "12px",
-							fontSize: "12px",
-							boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-						}}
-						formatter={(value) => [formatCurrency(Number(value) || 0)]}
-						labelStyle={{ fontWeight: 600, marginBottom: 4 }}
-					/>
-					<Legend
-						wrapperStyle={{ fontSize: 11, paddingTop: 4 }}
-						iconType="circle"
-						iconSize={8}
-					/>
-				</PieChart>
-			</ResponsiveContainer>
+		<div className="rounded-xl border border-slate-200 bg-white p-4 shadow-lg dark:border-gray-800 dark:bg-gray-900">
+			<div className="flex flex-col items-center gap-4 sm:flex-row">
+				<ResponsiveContainer width="100%" height={220} className="sm:max-w-[220px]">
+					<PieChart>
+						<Pie
+							data={data}
+							dataKey="value"
+							nameKey="name"
+							cx="50%"
+							cy="50%"
+							outerRadius={90}
+							innerRadius={50}
+							paddingAngle={3}
+						>
+							{data.map((d) => (
+								<Cell key={d.name} fill={colorForCategory(d.name)} />
+							))}
+						</Pie>
+						<Tooltip
+							contentStyle={{
+								backgroundColor: "var(--tooltip-bg, #fff)",
+								border: "1px solid var(--tooltip-border, #e2e8f0)",
+								borderRadius: "12px",
+								fontSize: "12px",
+								boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+							}}
+							formatter={(value) => [formatCurrency(Number(value) || 0)]}
+							labelStyle={{ fontWeight: 600, marginBottom: 4 }}
+						/>
+					</PieChart>
+				</ResponsiveContainer>
+				<ul className="w-full flex-1 space-y-2">
+					{data.map((d) => (
+						<li key={d.name} className="flex items-center gap-2 text-sm">
+							<span
+								className="h-2.5 w-2.5 shrink-0 rounded-full"
+								style={{ backgroundColor: colorForCategory(d.name) }}
+							/>
+							<span className="flex-1 truncate text-slate-600 dark:text-gray-300">{d.name}</span>
+							<span className="font-semibold text-slate-900 dark:text-gray-100">
+								{formatCurrency(d.value)}
+							</span>
+							<span className="w-11 shrink-0 text-right text-xs text-slate-500 dark:text-gray-500">
+								{total > 0 ? Math.round((d.value / total) * 100) : 0}%
+							</span>
+						</li>
+					))}
+				</ul>
+			</div>
 		</div>
 	);
 }
@@ -524,7 +576,7 @@ function CategoryPieChart({ transactions, type }: { transactions: api.Transactio
 function MonthlyChart({ transactions }: { transactions: api.Transaction[] }) {
 	const now = new Date();
 
-	const monthlyData = Array.from({ length: 12 }, (_, i) => {
+	const monthlyData = Array.from({ length: 7 }, (_, i) => {
 		const d = new Date(now.getFullYear(), now.getMonth() - 6 + i, 1);
 		const month = d.getMonth();
 		const year = d.getFullYear();
@@ -546,9 +598,9 @@ function MonthlyChart({ transactions }: { transactions: api.Transaction[] }) {
 	});
 
 	return (
-		<div className="rounded-md border border-slate-200 bg-white p-4 shadow-lg dark:border-gray-800 dark:bg-gray-900">
+		<div className="rounded-xl border border-slate-200 bg-white p-4 shadow-lg dark:border-gray-800 dark:bg-gray-900">
 			<ResponsiveContainer width="100%" height={260}>
-				<BarChart
+				<LineChart
 					data={monthlyData}
 					margin={{ top: 8, right: 8, left: 8, bottom: 4 }}
 				>
@@ -560,17 +612,13 @@ function MonthlyChart({ transactions }: { transactions: api.Transaction[] }) {
 					<XAxis
 						dataKey="label"
 						tick={{ fontSize: 10, fill: "currentColor" }}
-						className="text-slate-400 dark:text-gray-500"
+						className="text-slate-500 dark:text-gray-500"
 						axisLine={{ stroke: "currentColor" }}
 						tickLine={false}
-						interval={0}
-						angle={-30}
-						textAnchor="end"
-						height={36}
 					/>
 					<YAxis
 						tick={{ fontSize: 10, fill: "currentColor" }}
-						className="text-slate-400 dark:text-gray-500"
+						className="text-slate-500 dark:text-gray-500"
 						axisLine={false}
 						tickLine={false}
 						tickFormatter={(v: number) =>
@@ -594,19 +642,21 @@ function MonthlyChart({ transactions }: { transactions: api.Transaction[] }) {
 						iconType="circle"
 						iconSize={8}
 					/>
-					<Bar
+					<Line
+						type="monotone"
 						dataKey="Receita"
-						radius={[4, 4, 0, 0]}
-						maxBarSize={14}
-						fill="#10b981"
+						stroke="#10b981"
+						strokeWidth={2}
+						dot={{ r: 3 }}
 					/>
-					<Bar
+					<Line
+						type="monotone"
 						dataKey="Despesa"
-						radius={[4, 4, 0, 0]}
-						maxBarSize={14}
-						fill="#f87171"
+						stroke="#f87171"
+						strokeWidth={2}
+						dot={{ r: 3 }}
 					/>
-				</BarChart>
+				</LineChart>
 			</ResponsiveContainer>
 		</div>
 	);

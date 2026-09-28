@@ -13,6 +13,22 @@ const loginLimiter = rateLimit({
   message: { error: "Muitas tentativas de login. Tente novamente em 15 minutos." },
 });
 
+const registerLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Muitas contas criadas. Tente novamente em 15 minutos." },
+});
+
+const refreshLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Muitas tentativas. Tente novamente em 15 minutos." },
+});
+
 /**
  * @openapi
  * /api/auth/register:
@@ -43,7 +59,7 @@ const loginLimiter = rateLimit({
  *       409:
  *         description: Email already in use
  */
-router.post("/register", controller.register);
+router.post("/register", registerLimiter, controller.register);
 
 /**
  * @openapi
@@ -108,7 +124,7 @@ router.post("/login", loginLimiter, controller.login);
  *       401:
  *         description: Invalid or revoked refresh token
  */
-router.post("/refresh", controller.refresh);
+router.post("/refresh", refreshLimiter, controller.refresh);
 
 /**
  * @openapi

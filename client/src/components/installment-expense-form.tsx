@@ -2,7 +2,8 @@ import { useEffect, useState, useCallback } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { CreditCard, Receipt } from "lucide-react";
 import * as api from "../lib/api";
-import { fmt, parse as parseCurrency } from "../lib/currency";
+import { fmt, parse as parseCurrency, toInput } from "../lib/currency";
+import FormSelect from "./select";
 
 interface Props {
   editing: api.InstallmentExpense | null | undefined;
@@ -17,16 +18,6 @@ interface Form {
   installmentType: "CREDIT_CARD" | "CARNE";
   category: string;
   firstDueDate: string;
-}
-
-function toNumber(raw: string): number {
-  const f = fmt(raw);
-  return f ? parseCurrency(f) : 0;
-}
-
-function toDisplay(value: number): string {
-  if (!value) return "";
-  return fmt(String(Math.round(value * 100)));
 }
 
 export default function InstallmentExpenseForm({ editing, onSave, onClose }: Props) {
@@ -46,10 +37,27 @@ export default function InstallmentExpenseForm({ editing, onSave, onClose }: Pro
     }
   }, []);
 
-  useEffect(() => { fetchCategories(); }, [fetchCategories]);
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
-  const { control, register, handleSubmit, reset, watch, setValue, formState: { isSubmitting } } = useForm<Form>({
-    defaultValues: { description: "", totalAmount: 0, installmentCount: "2", installmentType: "CREDIT_CARD", category: "", firstDueDate: "" },
+  const {
+    control,
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    setValue,
+    formState: { isSubmitting },
+  } = useForm<Form>({
+    defaultValues: {
+      description: "",
+      totalAmount: 0,
+      installmentCount: "2",
+      installmentType: "CREDIT_CARD",
+      category: "",
+      firstDueDate: "",
+    },
   });
 
   useEffect(() => {
@@ -63,15 +71,31 @@ export default function InstallmentExpenseForm({ editing, onSave, onClose }: Pro
         firstDueDate: editing.firstDueDate.slice(0, 10),
       });
     } else {
-      reset({ description: "", totalAmount: 0, installmentCount: "2", installmentType: "CREDIT_CARD", category: "", firstDueDate: "" });
+      reset({
+        description: "",
+        totalAmount: 0,
+        installmentCount: "2",
+        installmentType: "CREDIT_CARD",
+        category: "",
+        firstDueDate: "",
+      });
     }
   }, [editing, reset]);
 
   const onSubmit = handleSubmit(async (data) => {
     setError("");
-    if (data.totalAmount <= 0) { setError("Valor total inválido"); return; }
-    if (!data.description.trim()) { setError("Descrição é obrigatória"); return; }
-    if (!data.firstDueDate) { setError("Primeiro vencimento é obrigatório"); return; }
+    if (data.totalAmount <= 0) {
+      setError("Valor total inválido");
+      return;
+    }
+    if (!data.description.trim()) {
+      setError("Descrição é obrigatória");
+      return;
+    }
+    if (!data.firstDueDate) {
+      setError("Primeiro vencimento é obrigatório");
+      return;
+    }
 
     try {
       const payload: api.CreateInstallmentExpensePayload = {
@@ -97,23 +121,35 @@ export default function InstallmentExpenseForm({ editing, onSave, onClose }: Pro
   return (
     <form onSubmit={onSubmit}>
       {error && (
-        <p className="mb-6 rounded-lg bg-red-50 px-4 py-2.5 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">{error}</p>
+        <p className="mb-6 rounded-lg bg-red-50 px-4 py-2.5 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
+          {error}
+        </p>
       )}
 
       <div className="mb-5">
-        <label htmlFor="inst-description" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Descrição</label>
+        <label
+          htmlFor="inst-description"
+          className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400"
+        >
+          Descrição
+        </label>
         <input
           id="inst-description"
           type="text"
           {...register("description", { required: true })}
           placeholder="Ex: Notebook Dell"
-          className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-600 dark:focus:border-blue-400"
+          className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-400 dark:focus:border-blue-400"
         />
       </div>
 
       <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="inst-totalAmount" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Valor total</label>
+          <label
+            htmlFor="inst-totalAmount"
+            className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400"
+          >
+            Valor total
+          </label>
           <Controller
             name="totalAmount"
             control={control}
@@ -123,16 +159,21 @@ export default function InstallmentExpenseForm({ editing, onSave, onClose }: Pro
                 id="inst-totalAmount"
                 type="text"
                 inputMode="decimal"
-                value={toDisplay(field.value)}
-                onChange={(e) => field.onChange(toNumber(e.target.value))}
+                value={toInput(field.value)}
+                onChange={(e) => field.onChange(parseCurrency(fmt(e.target.value)))}
                 placeholder="0,00"
-                className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-600 dark:focus:border-blue-400"
+                className="w-full rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-400 dark:focus:border-blue-400"
               />
             )}
           />
         </div>
         <div>
-          <label htmlFor="inst-installmentCount" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Quantidade de parcelas</label>
+          <label
+            htmlFor="inst-installmentCount"
+            className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400"
+          >
+            Quantidade de parcelas
+          </label>
           <input
             id="inst-installmentCount"
             type="number"
@@ -146,7 +187,12 @@ export default function InstallmentExpenseForm({ editing, onSave, onClose }: Pro
 
       <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="inst-type" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Tipo</label>
+          <label
+            htmlFor="inst-type"
+            className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400"
+          >
+            Tipo
+          </label>
           <div id="inst-type" className="flex gap-2">
             {(["CREDIT_CARD", "CARNE"] as const).map((t) => (
               <button
@@ -166,22 +212,36 @@ export default function InstallmentExpenseForm({ editing, onSave, onClose }: Pro
           </div>
         </div>
         <div>
-          <label htmlFor="inst-category" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Categoria</label>
-          <select
-            id="inst-category"
-            {...register("category")}
-            className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-4 py-2.5 pr-9 text-sm text-slate-900 outline-none transition-all duration-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-blue-400"
+          <label
+            htmlFor="inst-category"
+            className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400"
           >
-            <option value="">Sem categoria</option>
-            {loadingCategories ? (
-              <option value="" disabled>Carregando…</option>
-            ) : categories.map((c) => <option key={c.id} value={c.name}>{c.name}</option>)}
-          </select>
+            Categoria
+          </label>
+          <Controller
+            name="category"
+            control={control}
+            render={({ field }) => (
+              <FormSelect
+                inputId="inst-category"
+                value={field.value}
+                onChange={field.onChange}
+                options={categories.map((c) => ({ value: c.name, label: c.name }))}
+                placeholder="Sem categoria"
+                isLoading={loadingCategories}
+              />
+            )}
+          />
         </div>
       </div>
 
       <div className="mb-6">
-        <label htmlFor="inst-firstDueDate" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Primeiro vencimento</label>
+        <label
+          htmlFor="inst-firstDueDate"
+          className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400"
+        >
+          Primeiro vencimento
+        </label>
         <input
           id="inst-firstDueDate"
           type="date"

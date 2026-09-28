@@ -17,8 +17,8 @@ async function main() {
     60 * 60 * 1000,
   );
 
-  app.listen(env.port, () => {
-    logger.info(`Server running on port ${env.port}`);
+  app.listen(env.port, env.host, () => {
+    logger.info(`Server running on http://${env.host}:${env.port}`);
   });
 }
 

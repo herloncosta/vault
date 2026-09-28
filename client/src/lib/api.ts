@@ -109,10 +109,6 @@ export function listUsers() {
   return request<User[]>("/api/users");
 }
 
-export function getUser(id: string) {
-  return request<User>(`/api/users/${id}`);
-}
-
 export interface CreateUserPayload {
   email: string;
   password: string;
@@ -192,10 +188,6 @@ export interface TransactionsSummary {
 export function getTransactionsSummary(month?: string) {
   const qs = month ? `?month=${month}` : "";
   return request<TransactionsSummary>(`/api/transactions/summary${qs}`);
-}
-
-export function getTransaction(id: string) {
-  return request<Transaction>(`/api/transactions/${id}`);
 }
 
 export interface CreateTransactionPayload {
@@ -285,10 +277,6 @@ export function listRecurringExpenses(params?: Record<string, string>) {
   return request<RecurringExpenseListResult>(`/api/recurring-expenses${qs}`);
 }
 
-export function getRecurringExpense(id: string) {
-  return request<RecurringExpense>(`/api/recurring-expenses/${id}`);
-}
-
 export function createRecurringExpense(data: CreateRecurringExpensePayload) {
   return request<RecurringExpense>("/api/recurring-expenses", {
     method: "POST",
@@ -353,10 +341,6 @@ export interface CreateInstallmentExpensePayload {
 export function listInstallmentExpenses(params?: Record<string, string>) {
   const qs = params ? `?${new URLSearchParams(params).toString()}` : "";
   return request<InstallmentExpenseListResult>(`/api/installment-expenses${qs}`);
-}
-
-export function getInstallmentExpense(id: string) {
-  return request<InstallmentExpense>(`/api/installment-expenses/${id}`);
 }
 
 export function createInstallmentExpense(data: CreateInstallmentExpensePayload) {

@@ -14,10 +14,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../contexts/auth-context";
 import * as api from "../lib/api";
-
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString("pt-BR");
-}
+import { fmtDate as formatDate } from "../lib/date";
 
 interface UserForm {
   email: string;
@@ -160,7 +157,7 @@ export default function AdminUsersPage() {
               <button
                 type="button"
                 onClick={closeForm}
-                className="cursor-pointer text-xs text-slate-400 transition-all duration-300 hover:text-slate-600 dark:text-gray-500 dark:hover:text-gray-300"
+                className="cursor-pointer text-xs text-slate-500 transition-all duration-300 hover:text-slate-600 dark:text-gray-500 dark:hover:text-gray-300"
               >
                 Cancelar edição
               </button>
@@ -183,7 +180,7 @@ export default function AdminUsersPage() {
               autoComplete="off"
               {...register("email", { required: true })}
               placeholder="email@exemplo.com"
-              className="w-full rounded-md border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-600 dark:focus:border-blue-400"
+              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-400 dark:focus:border-blue-400"
             />
           </div>
 
@@ -197,7 +194,7 @@ export default function AdminUsersPage() {
               autoComplete="off"
               {...register("name")}
               placeholder="Nome do usuário"
-              className="w-full rounded-md border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-600 dark:focus:border-blue-400"
+              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-400 dark:focus:border-blue-400"
             />
           </div>
 
@@ -212,7 +209,7 @@ export default function AdminUsersPage() {
               autoComplete="new-password"
               {...register("password", { required: !editingId })}
               placeholder="••••••••"
-              className="w-full rounded-md border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-600 dark:focus:border-blue-400"
+              className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-400 dark:focus:border-blue-400"
             />
           </div>
 
@@ -226,7 +223,7 @@ export default function AdminUsersPage() {
                   key={r}
                   type="button"
                   onClick={() => setValue("role", r)}
-                  className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-md border px-4 py-3 text-sm font-medium transition-all duration-300 ${
+                  className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium transition-all duration-300 ${
                     role === r
                       ? r === "ADMIN"
                         ? "border-violet-400 bg-violet-50 text-violet-700 dark:border-violet-500/40 dark:bg-violet-900/20 dark:text-violet-400"
@@ -260,8 +257,8 @@ export default function AdminUsersPage() {
           </div>
         ) : users.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-16">
-            <Users size={40} className="text-slate-300 dark:text-gray-600" />
-            <p className="text-sm text-slate-400 dark:text-gray-500">Nenhum usuário encontrado</p>
+            <Users size={40} className="text-slate-400 dark:text-gray-600" />
+            <p className="text-sm text-slate-500 dark:text-gray-500">Nenhum usuário encontrado</p>
           </div>
         ) : (
           <div className="divide-y divide-slate-100 dark:divide-gray-800">
@@ -290,7 +287,7 @@ export default function AdminUsersPage() {
                       {u.role === "ADMIN" ? "Admin" : "Operador"}
                     </span>
                   </div>
-                  <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-slate-400 dark:text-gray-500">
+                  <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-slate-500 dark:text-gray-500">
                     <span className="flex items-center gap-1">
                       <Mail size={11} />
                       {u.email}
@@ -305,7 +302,7 @@ export default function AdminUsersPage() {
                   <button
                     type="button"
                     onClick={() => openEdit(u)}
-                    className="cursor-pointer rounded-lg p-1.5 text-slate-300 transition-all duration-300 hover:bg-blue-50 hover:text-blue-500 dark:text-gray-600 dark:hover:bg-blue-900/20 dark:hover:text-blue-400"
+                    className="cursor-pointer rounded-lg p-1.5 text-slate-400 transition-all duration-300 hover:bg-blue-50 hover:text-blue-500 dark:text-gray-600 dark:hover:bg-blue-900/20 dark:hover:text-blue-400"
                     aria-label="editar"
                   >
                     <Pencil size={14} />
@@ -313,7 +310,7 @@ export default function AdminUsersPage() {
                   <button
                     type="button"
                     onClick={() => setDeleteConfirm(u.id)}
-                    className="cursor-pointer rounded-lg p-1.5 text-slate-300 transition-all duration-300 hover:bg-red-50 hover:text-red-500 dark:text-gray-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                    className="cursor-pointer rounded-lg p-1.5 text-slate-400 transition-all duration-300 hover:bg-red-50 hover:text-red-500 dark:text-gray-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
                     aria-label="excluir"
                   >
                     <Trash2 size={14} />
@@ -342,7 +339,7 @@ export default function AdminUsersPage() {
               <button
                 type="button"
                 onClick={() => setDeleteConfirm(null)}
-                className="cursor-pointer rounded-md border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 transition-all duration-300 hover:bg-slate-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                className="cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600 transition-all duration-300 hover:bg-slate-50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
               >
                 Cancelar
               </button>

@@ -1,4 +1,5 @@
 import prisma from "../../config/database.js";
+import { assertCategoryExists } from "../categories/categories-service.js";
 
 function assertOwnData(authUser, targetUserId) {
   if (authUser.role !== "ADMIN" && authUser.id !== targetUserId) {
@@ -122,8 +123,6 @@ export async function list(authUser, query = {}) {
   const now = new Date();
 
   for (const re of recurringExpenses) {
-    if (re.endDate && re.endDate < now) continue;
-
     const startMonth = re.startDate.getMonth() + re.startDate.getFullYear() * 12;
     const endMonth = re.endDate
       ? re.endDate.getMonth() + re.endDate.getFullYear() * 12
@@ -134,7 +133,7 @@ export async function list(authUser, query = {}) {
       const month = m % 12;
       const occurrenceDate = new Date(year, month, re.dayOfMonth);
 
-      if (occurrenceDate > now && m > endMonth - 1) break;
+      if (!re.endDate && occurrenceDate > now && m > endMonth - 1) break;
       if (occurrenceDate < re.startDate) continue;
 
       if (filters.startDate && occurrenceDate < new Date(filters.startDate)) continue;
@@ -280,6 +279,7 @@ export async function getById(authUser, id) {
 }
 
 export async function create(authUser, data) {
+  await assertCategoryExists(authUser.id, data.category, data.type);
   const transaction = await prisma.transaction.create({
     data: {
       userId: authUser.id,
@@ -313,6 +313,14 @@ export async function update(authUser, id, data) {
   }
 
   assertOwnData(authUser, existing.userId);
+
+  if (data.category !== undefined || data.type !== undefined) {
+    await assertCategoryExists(
+      existing.userId,
+      data.category ?? existing.category,
+      data.type ?? existing.type,
+    );
+  }
 
   const updateData = { ...data };
   if (updateData.date) updateData.date = new Date(updateData.date);

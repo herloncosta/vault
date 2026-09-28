@@ -59,7 +59,7 @@ function CategorySection({ type, label, color }: { type: "INCOME" | "EXPENSE"; l
     <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-lg dark:border-gray-800 dark:bg-gray-900">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-sm font-semibold text-slate-900 dark:text-gray-100">{label}</h2>
-        <span className="text-xs text-slate-400 dark:text-gray-500">{categories.length} categorias</span>
+        <span className="text-xs text-slate-500 dark:text-gray-500">{categories.length} categorias</span>
       </div>
 
       {error && (
@@ -73,7 +73,7 @@ function CategorySection({ type, label, color }: { type: "INCOME" | "EXPENSE"; l
           type="text"
           {...register("name", { required: true })}
           placeholder="Nova categoria"
-          className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-600 dark:focus:border-blue-400"
+          className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none transition-all duration-300 placeholder:text-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-400 dark:focus:border-blue-400"
         />
         <button
           type="submit"
@@ -86,7 +86,7 @@ function CategorySection({ type, label, color }: { type: "INCOME" | "EXPENSE"; l
       </form>
 
       {categories.length === 0 ? (
-        <p className="py-4 text-center text-xs text-slate-400 dark:text-gray-500">
+        <p className="py-4 text-center text-xs text-slate-500 dark:text-gray-500">
           Nenhuma categoria cadastrada
         </p>
       ) : (
@@ -109,7 +109,7 @@ function CategorySection({ type, label, color }: { type: "INCOME" | "EXPENSE"; l
                     <button
                       type="button"
                       onClick={() => setEditingId(cat.id)}
-                      className="cursor-pointer rounded p-1 text-slate-300 transition-all duration-300 hover:bg-blue-50 hover:text-blue-500 dark:text-gray-600 dark:hover:bg-blue-900/20 dark:hover:text-blue-400"
+                      className="cursor-pointer rounded p-1 text-slate-400 transition-all duration-300 hover:bg-blue-50 hover:text-blue-500 dark:text-gray-600 dark:hover:bg-blue-900/20 dark:hover:text-blue-400"
                       aria-label="editar"
                     >
                       <Pencil size={13} />
@@ -117,7 +117,7 @@ function CategorySection({ type, label, color }: { type: "INCOME" | "EXPENSE"; l
                     <button
                       type="button"
                       onClick={() => onDelete(cat.id)}
-                      className="cursor-pointer rounded p-1 text-slate-300 transition-all duration-300 hover:bg-red-50 hover:text-red-500 dark:text-gray-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                      className="cursor-pointer rounded p-1 text-slate-400 transition-all duration-300 hover:bg-red-50 hover:text-red-500 dark:text-gray-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
                       aria-label="excluir"
                     >
                       <Trash2 size={13} />
@@ -143,7 +143,7 @@ function EditInline({ initialValue, onSave, onCancel }: { initialValue: string; 
         value={value}
         onChange={(e) => setValue(e.target.value)}
         autoFocus
-        className="flex-1 rounded-md border border-blue-300 bg-white px-2 py-1 text-sm text-slate-900 outline-none focus:ring-1 focus:ring-blue-400 dark:border-blue-600 dark:bg-gray-800 dark:text-gray-100"
+        className="flex-1 rounded-xl border border-blue-300 bg-white px-2 py-1 text-sm text-slate-900 outline-none focus:ring-1 focus:ring-blue-400 dark:border-blue-600 dark:bg-gray-800 dark:text-gray-100"
         onKeyDown={(e) => {
           if (e.key === "Enter") onSave(value);
           if (e.key === "Escape") onCancel();
@@ -160,7 +160,7 @@ function EditInline({ initialValue, onSave, onCancel }: { initialValue: string; 
       <button
         type="button"
         onClick={onCancel}
-        className="cursor-pointer rounded p-1 text-slate-400 transition-all duration-300 hover:bg-slate-100 dark:hover:bg-gray-700"
+        className="cursor-pointer rounded p-1 text-slate-500 transition-all duration-300 hover:bg-slate-100 dark:hover:bg-gray-700"
         aria-label="cancelar"
       >
         <X size={14} />
@@ -208,7 +208,7 @@ export default function SettingsPage() {
       </div>
 
       <div className="mb-6 flex items-center gap-3">
-        <Tags size={18} className="text-slate-400" />
+        <Tags size={18} className="text-slate-500" />
         <h2 className="text-sm font-semibold text-slate-900 dark:text-gray-100">Categorias</h2>
       </div>
 

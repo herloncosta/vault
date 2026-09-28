@@ -57,6 +57,18 @@ export async function update(authUser, id, data) {
   return prisma.category.update({ where: { id }, data: { name: data.name } });
 }
 
+export async function assertCategoryExists(userId, name, type) {
+  if (!name) return;
+  const category = await prisma.category.findUnique({
+    where: { userId_name_type: { userId, name, type } },
+  });
+  if (!category) {
+    const err = new Error(`Category "${name}" does not exist`);
+    err.status = 400;
+    throw err;
+  }
+}
+
 export async function remove(authUser, id) {
   await getById(authUser, id);
   await prisma.category.delete({ where: { id } });

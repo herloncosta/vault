@@ -82,7 +82,7 @@ export default function Navbar({ sidebarOpen, onToggleSidebar }: NavbarProps) {
                 } ${
                   pathname === to
                     ? "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400"
-                    : "text-slate-400 hover:bg-slate-100 hover:text-blue-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-blue-400"
+                    : "text-slate-500 hover:bg-slate-100 hover:text-blue-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-blue-400"
                 }`}
                 title={sidebarOpen ? undefined : label}
               >
@@ -96,14 +96,14 @@ export default function Navbar({ sidebarOpen, onToggleSidebar }: NavbarProps) {
         <div className="border-t border-slate-200 px-2 py-3 dark:border-gray-800">
           <div className={`flex flex-col gap-1 ${sidebarOpen ? "" : "items-center"}`}>
             <div
-              className={`truncate text-xs text-slate-400 dark:text-gray-500 ${sidebarOpen ? "px-3 pb-1" : "hidden"}`}
+              className={`truncate text-xs text-slate-500 dark:text-gray-500 ${sidebarOpen ? "px-3 pb-1" : "hidden"}`}
             >
               {user?.name ?? user?.email}
             </div>
             <button
               type="button"
               onClick={logout}
-              className={`group flex items-center rounded-xl text-sm text-slate-400 transition-all duration-300 hover:bg-slate-100 hover:text-blue-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-blue-400 cursor-pointer ${
+              className={`group flex items-center rounded-xl text-sm text-slate-500 transition-all duration-300 hover:bg-slate-100 hover:text-blue-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-blue-400 cursor-pointer ${
                 sidebarOpen ? "gap-3 px-3 py-2.5" : "justify-center px-0 py-3"
               }`}
               title={sidebarOpen ? undefined : "Sair"}
@@ -114,7 +114,7 @@ export default function Navbar({ sidebarOpen, onToggleSidebar }: NavbarProps) {
             <button
               type="button"
               onClick={onToggleSidebar}
-              className={`group flex items-center rounded-xl text-sm text-slate-400 transition-all duration-300 hover:bg-slate-100 hover:text-blue-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-blue-400 cursor-pointer ${
+              className={`group flex items-center rounded-xl text-sm text-slate-500 transition-all duration-300 hover:bg-slate-100 hover:text-blue-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-blue-400 cursor-pointer ${
                 sidebarOpen ? "gap-3 px-3 py-2.5" : "justify-center px-0 py-3"
               }`}
               title={sidebarOpen ? "Recolher" : "Expandir"}
@@ -133,7 +133,7 @@ export default function Navbar({ sidebarOpen, onToggleSidebar }: NavbarProps) {
         <button
           type="button"
           onClick={() => setMobileOpen(true)}
-          className="cursor-pointer text-slate-400 transition-all duration-300 hover:text-slate-600 dark:text-gray-400 dark:hover:text-gray-200"
+          className="cursor-pointer text-slate-500 transition-all duration-300 hover:text-slate-600 dark:text-gray-400 dark:hover:text-gray-200"
           aria-label="menu"
         >
           <Menu size={24} />
@@ -158,7 +158,7 @@ export default function Navbar({ sidebarOpen, onToggleSidebar }: NavbarProps) {
           <button
             type="button"
             onClick={closeMobile}
-            className="cursor-pointer rounded p-1 text-slate-400 transition-all duration-300 hover:bg-slate-100 hover:text-slate-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
+            className="cursor-pointer rounded p-1 text-slate-500 transition-all duration-300 hover:bg-slate-100 hover:text-slate-600 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200"
             aria-label="close"
           >
             <X size={20} />
@@ -184,7 +184,7 @@ export default function Navbar({ sidebarOpen, onToggleSidebar }: NavbarProps) {
         </div>
 
         <div className="mt-auto border-t border-slate-200 pt-4 dark:border-gray-800">
-          <p className="mb-3 truncate text-xs text-slate-400 dark:text-gray-500">
+          <p className="mb-3 truncate text-xs text-slate-500 dark:text-gray-500">
             {user?.name ?? user?.email}
           </p>
           <button

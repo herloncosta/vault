@@ -1,3 +1,4 @@
 node_modules/
 .env
 SECURITY.md
+*.log
