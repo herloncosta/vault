@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useForm, Controller } from "react-hook-form";
 import * as api from "../lib/api";
 import { fmt, parse as parseCurrency, toInput } from "../lib/currency";
+import FormSelect from "./select";
 
 const paymentOptions = ["Crédito", "Débito", "Boleto", "PIX", "Dinheiro", "Automático"];
 
@@ -39,10 +40,26 @@ export default function RecurringExpenseForm({ type, editing, onSave, onClose }:
     }
   }, [type]);
 
-  useEffect(() => { fetchCategories(); }, [fetchCategories]);
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
-  const { control, register, handleSubmit, reset, formState: { isSubmitting } } = useForm<Form>({
-    defaultValues: { amount: 0, description: "", category: "", paymentMethod: "", dayOfMonth: 1, startDate: "", endDate: "" },
+  const {
+    control,
+    register,
+    handleSubmit,
+    reset,
+    formState: { isSubmitting },
+  } = useForm<Form>({
+    defaultValues: {
+      amount: 0,
+      description: "",
+      category: "",
+      paymentMethod: "",
+      dayOfMonth: 1,
+      startDate: "",
+      endDate: "",
+    },
   });
 
   useEffect(() => {
@@ -57,19 +74,38 @@ export default function RecurringExpenseForm({ type, editing, onSave, onClose }:
         endDate: editing.endDate ? editing.endDate.slice(0, 10) : "",
       });
     } else {
-      reset({ amount: 0, description: "", category: "", paymentMethod: "", dayOfMonth: 1, startDate: "", endDate: "" });
+      reset({
+        amount: 0,
+        description: "",
+        category: "",
+        paymentMethod: "",
+        dayOfMonth: 1,
+        startDate: "",
+        endDate: "",
+      });
     }
   }, [editing, reset]);
 
   const onSubmit = handleSubmit(async (data) => {
     setError("");
-    if (data.amount <= 0) { setError("Valor inválido"); return; }
-    if (!data.description.trim()) { setError("Descrição é obrigatória"); return; }
-    if (!data.startDate) { setError("Data de início é obrigatória"); return; }
+    if (data.amount <= 0) {
+      setError("Valor inválido");
+      return;
+    }
+    if (!data.description.trim()) {
+      setError("Descrição é obrigatória");
+      return;
+    }
+    if (!data.startDate) {
+      setError("Data de início é obrigatória");
+      return;
+    }
 
     try {
       const payload: api.CreateRecurringExpensePayload = {
-        type, amount: data.amount, description: data.description.trim(),
+        type,
+        amount: data.amount,
+        description: data.description.trim(),
         category: data.category || undefined,
         paymentMethod: data.paymentMethod || undefined,
         dayOfMonth: data.dayOfMonth,
@@ -91,12 +127,19 @@ export default function RecurringExpenseForm({ type, editing, onSave, onClose }:
   return (
     <form onSubmit={onSubmit}>
       {error && (
-        <p className="mb-6 rounded-lg bg-red-50 px-4 py-2.5 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">{error}</p>
+        <p className="mb-6 rounded-lg bg-red-50 px-4 py-2.5 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
+          {error}
+        </p>
       )}
 
       <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="rec-amount" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Valor</label>
+          <label
+            htmlFor="rec-amount"
+            className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400"
+          >
+            Valor
+          </label>
           <Controller
             name="amount"
             control={control}
@@ -115,7 +158,12 @@ export default function RecurringExpenseForm({ type, editing, onSave, onClose }:
           />
         </div>
         <div>
-          <label htmlFor="rec-description" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Descrição</label>
+          <label
+            htmlFor="rec-description"
+            className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400"
+          >
+            Descrição
+          </label>
           <input
             id="rec-description"
             type="text"
@@ -128,44 +176,83 @@ export default function RecurringExpenseForm({ type, editing, onSave, onClose }:
 
       <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label htmlFor="rec-category" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Categoria</label>
-          <select
-            id="rec-category"
-            {...register("category")}
-            className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-4 py-2.5 pr-9 text-sm text-slate-900 outline-none transition-all duration-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-blue-400"
+          <label
+            htmlFor="rec-category"
+            className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400"
           >
-            <option value="">Sem categoria</option>
-            {loadingCategories ? (
-              <option value="" disabled>Carregando…</option>
-            ) : categories.map((c) => <option key={c.id} value={c.name}>{c.name}</option>)}
-          </select>
+            Categoria
+          </label>
+          <Controller
+            name="category"
+            control={control}
+            render={({ field }) => (
+              <FormSelect
+                inputId="rec-category"
+                value={field.value}
+                onChange={field.onChange}
+                options={categories.map((c) => ({ value: c.name, label: c.name }))}
+                placeholder="Sem categoria"
+                isLoading={loadingCategories}
+              />
+            )}
+          />
         </div>
         <div>
-          <label htmlFor="rec-paymentMethod" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Forma de pagamento</label>
-          <select
-            id="rec-paymentMethod"
-            {...register("paymentMethod")}
-            className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-4 py-2.5 pr-9 text-sm text-slate-900 outline-none transition-all duration-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-blue-400"
+          <label
+            htmlFor="rec-paymentMethod"
+            className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400"
           >
-            <option value="">Selecione</option>
-            {paymentOptions.map((p) => <option key={p} value={p}>{p}</option>)}
-          </select>
+            Forma de pagamento
+          </label>
+          <Controller
+            name="paymentMethod"
+            control={control}
+            render={({ field }) => (
+              <FormSelect
+                inputId="rec-paymentMethod"
+                value={field.value}
+                onChange={field.onChange}
+                options={paymentOptions.map((p) => ({ value: p, label: p }))}
+                placeholder="Selecione"
+              />
+            )}
+          />
         </div>
       </div>
 
       <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div>
-          <label htmlFor="rec-dayOfMonth" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Dia vencimento</label>
-          <select
-            id="rec-dayOfMonth"
-            {...register("dayOfMonth", { valueAsNumber: true })}
-            className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-all duration-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-blue-400"
+          <label
+            htmlFor="rec-dayOfMonth"
+            className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400"
           >
-            {Array.from({ length: 28 }, (_, i) => i + 1).map((d) => <option key={d} value={d}>{d}</option>)}
-          </select>
+            Dia vencimento
+          </label>
+          <Controller
+            name="dayOfMonth"
+            control={control}
+            render={({ field }) => (
+              <FormSelect
+                inputId="rec-dayOfMonth"
+                value={String(field.value)}
+                onChange={(v) => field.onChange(Number(v))}
+                options={Array.from({ length: 28 }, (_, i) => ({
+                  value: String(i + 1),
+                  label: String(i + 1),
+                }))}
+                placeholder="Dia"
+                allowClear={false}
+              />
+            )}
+          />
         </div>
         <div>
-          <label htmlFor="rec-startDate" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Data início</label>
+          <label
+            htmlFor="rec-startDate"
+            className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400"
+          >
+            Data início
+          </label>
           <input
             id="rec-startDate"
             type="date"
@@ -174,7 +261,12 @@ export default function RecurringExpenseForm({ type, editing, onSave, onClose }:
           />
         </div>
         <div>
-          <label htmlFor="rec-endDate" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Data término</label>
+          <label
+            htmlFor="rec-endDate"
+            className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400"
+          >
+            Data término
+          </label>
           <input
             id="rec-endDate"
             type="date"
@@ -189,7 +281,13 @@ export default function RecurringExpenseForm({ type, editing, onSave, onClose }:
         disabled={isSubmitting}
         className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all duration-300 hover:bg-blue-700 hover:shadow-blue-600/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-[0.97] disabled:opacity-60 disabled:shadow-none"
       >
-        {isSubmitting ? "Salvando…" : editing ? "Atualizar" : type === "INCOME" ? "Criar receita fixa" : "Criar despesa fixa"}
+        {isSubmitting
+          ? "Salvando…"
+          : editing
+            ? "Atualizar"
+            : type === "INCOME"
+              ? "Criar receita fixa"
+              : "Criar despesa fixa"}
       </button>
     </form>
   );
