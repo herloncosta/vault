@@ -13,12 +13,9 @@ import {
   ChevronRight,
 } from "lucide-react";
 import * as api from "../lib/api";
+import { brl as formatCurrency } from "../lib/currency";
 import TransactionForm from "../components/transaction-form";
 import Modal from "../components/modal";
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
-}
 
 function formatDate(dateStr: string) {
   return new Intl.DateTimeFormat("pt-BR").format(new Date(dateStr));
@@ -133,7 +130,7 @@ export default function RecurringExpensesPage() {
       />
 
       <div className="mb-4 flex items-center gap-2">
-        <span className="text-xs font-medium text-slate-400 dark:text-gray-500">Tipo:</span>
+        <span className="text-xs font-medium text-slate-500 dark:text-gray-500">Tipo:</span>
         {["", "INCOME", "EXPENSE"].map((f) => (
           <button
             key={f}
@@ -174,10 +171,13 @@ export default function RecurringExpensesPage() {
           ))}
         </div>
       ) : expenses.length === 0 ? (
-        <div className="rounded-md border border-slate-200 bg-white p-12 text-center dark:border-gray-800 dark:bg-gray-900">
-          <RotateCcw size={48} className="mx-auto mb-3 text-slate-300 dark:text-gray-600" />
+        <div className="rounded-xl border border-slate-200 bg-white p-12 text-center dark:border-gray-800 dark:bg-gray-900">
+          <RotateCcw size={48} className="mx-auto mb-3 text-slate-400 dark:text-gray-600" />
           <p className="text-slate-500 dark:text-gray-400">
             Nenhum registro encontrado
+          </p>
+          <p className="mt-1 text-xs text-slate-500 dark:text-gray-500">
+            Use o botão acima para cadastrar a primeira despesa fixa.
           </p>
         </div>
       ) : (
@@ -188,7 +188,7 @@ export default function RecurringExpensesPage() {
             return (
               <div
                 key={expense.id}
-                className={`rounded-md border bg-white p-5 shadow-sm transition-all duration-300 hover:shadow-md dark:bg-gray-900 ${
+                className={`rounded-xl border bg-white p-5 shadow-sm transition-all duration-300 hover:shadow-md dark:bg-gray-900 ${
                   isActive
                     ? "border-slate-200 dark:border-gray-800"
                     : "border-slate-200 opacity-60 dark:border-gray-800"
@@ -228,7 +228,7 @@ export default function RecurringExpensesPage() {
                   </div>
 
                   <div className="flex items-center justify-between gap-3 sm:justify-end">
-                    <span className={`text-lg font-bold ${isActive ? (expense.type === "INCOME" ? "text-emerald-500 dark:text-emerald-400" : "text-red-400") : "text-slate-400 dark:text-gray-500"}`}>
+                    <span className={`text-lg font-bold ${isActive ? (expense.type === "INCOME" ? "text-emerald-500 dark:text-emerald-400" : "text-red-400") : "text-slate-500 dark:text-gray-500"}`}>
                       {expense.type === "INCOME" ? "+" : "-"}{formatCurrency(Number(expense.amount))}
                     </span>
                     <div className="flex items-center gap-1">
@@ -238,7 +238,7 @@ export default function RecurringExpensesPage() {
                         className={`cursor-pointer rounded-md p-1.5 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                           isActive
                             ? "text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-950"
-                            : "text-slate-400 hover:bg-slate-100 dark:hover:bg-gray-800"
+                            : "text-slate-500 hover:bg-slate-100 dark:hover:bg-gray-800"
                         }`}
                         title={isActive ? "Desativar" : "Ativar"}
                       >
@@ -247,14 +247,14 @@ export default function RecurringExpensesPage() {
                       <button
                         type="button"
                         onClick={() => openEdit(expense)}
-                        className="cursor-pointer rounded-md p-1.5 text-slate-400 transition-all duration-300 hover:bg-slate-100 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:hover:bg-gray-800 dark:hover:text-blue-400"
+                        className="cursor-pointer rounded-md p-1.5 text-slate-500 transition-all duration-300 hover:bg-slate-100 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:hover:bg-gray-800 dark:hover:text-blue-400"
                       >
                         <Pencil size={16} />
                       </button>
                       <button
                         type="button"
                         onClick={() => setDeleteId(expense.id)}
-                        className="cursor-pointer rounded-md p-1.5 text-slate-400 transition-all duration-300 hover:bg-red-50 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 dark:hover:bg-red-950 dark:hover:text-red-400"
+                        className="cursor-pointer rounded-md p-1.5 text-slate-500 transition-all duration-300 hover:bg-red-50 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 dark:hover:bg-red-950 dark:hover:text-red-400"
                       >
                         <Trash2 size={16} />
                       </button>
@@ -322,7 +322,7 @@ export default function RecurringExpensesPage() {
           <button
             type="button"
             onClick={() => setDeleteId(null)}
-            className="flex-1 cursor-pointer rounded-md border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 transition-all duration-300 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 active:bg-slate-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+            className="flex-1 cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 transition-all duration-300 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 active:bg-slate-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
           >
             Cancelar
           </button>

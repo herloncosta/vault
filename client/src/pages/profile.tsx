@@ -6,10 +6,7 @@ import {
 } from "lucide-react";
 import ProfileEditor from "../components/profile-editor";
 import Modal from "../components/modal";
-
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString("pt-BR");
-}
+import { fmtDate as formatDate } from "../lib/date";
 
 export default function ProfilePage() {
   const { user, deleteAccount } = useAuth();
@@ -69,7 +66,7 @@ export default function ProfilePage() {
               <Mail size={16} />
             </div>
             <div>
-              <dt className="text-xs text-slate-400 dark:text-gray-500">
+              <dt className="text-xs text-slate-500 dark:text-gray-500">
                 Email
               </dt>
               <dd className="text-slate-900 dark:text-gray-100">
@@ -82,7 +79,7 @@ export default function ProfilePage() {
               <Shield size={16} />
             </div>
             <div>
-              <dt className="text-xs text-slate-400 dark:text-gray-500">
+              <dt className="text-xs text-slate-500 dark:text-gray-500">
                 Permissão
               </dt>
               <dd className="text-slate-900 dark:text-gray-100">
@@ -95,7 +92,7 @@ export default function ProfilePage() {
               <Calendar size={16} />
             </div>
             <div>
-              <dt className="text-xs text-slate-400 dark:text-gray-500">
+              <dt className="text-xs text-slate-500 dark:text-gray-500">
                 Membro desde
               </dt>
               <dd className="text-slate-900 dark:text-gray-100">
@@ -131,7 +128,7 @@ export default function ProfilePage() {
               setDeleteConfirm(true);
               setDeleteError("");
             }}
-            className="flex cursor-pointer items-center gap-2 rounded-md border border-red-200 bg-white px-3 py-2 text-xs font-medium text-red-600 transition-all duration-300 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 dark:border-red-900/40 dark:bg-gray-800 dark:text-red-400 dark:hover:bg-red-900/20"
+            className="flex cursor-pointer items-center gap-2 rounded-xl border border-red-200 bg-white px-3 py-2 text-xs font-medium text-red-600 transition-all duration-300 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 dark:border-red-900/40 dark:bg-gray-800 dark:text-red-400 dark:hover:bg-red-900/20"
           >
             <Trash2 size={14} />
             Excluir
@@ -173,7 +170,7 @@ export default function ProfilePage() {
             type="button"
             onClick={() => setDeleteConfirm(false)}
             disabled={deleting}
-            className="flex-1 cursor-pointer rounded-md border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 transition-all duration-300 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+            className="flex-1 cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 transition-all duration-300 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
           >
             Cancelar
           </button>

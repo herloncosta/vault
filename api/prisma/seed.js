@@ -60,6 +60,48 @@ async function main() {
     });
   }
 
+  await prisma.installmentExpense.deleteMany({ where: { userId: operator.id } });
+  await prisma.recurringExpense.deleteMany({ where: { userId: operator.id } });
+
+  const daysAgo = (n) => new Date(now.getTime() - n * 86400000);
+
+  const sampleRecurring = [
+    { type: "EXPENSE", amount: 54.9, description: "Streaming", category: "Assinaturas", paymentMethod: "Cartão de crédito", dayOfMonth: 10, startDate: daysAgo(60) },
+    { type: "EXPENSE", amount: 99.9, description: "Academia", category: "Saúde", paymentMethod: "Cartão de débito", dayOfMonth: 5, startDate: daysAgo(90) },
+  ];
+
+  for (const r of sampleRecurring) {
+    await prisma.recurringExpense.create({ data: { userId: operator.id, ...r } });
+  }
+
+  const installmentCount = 10;
+  const installmentExpense = await prisma.installmentExpense.create({
+    data: {
+      userId: operator.id,
+      description: "Notebook",
+      totalAmount: 6000,
+      installmentCount,
+      type: "CREDIT_CARD",
+      category: "Compras",
+      firstDueDate: daysAgo(30),
+    },
+  });
+
+  const firstDue = daysAgo(30);
+  for (let i = 0; i < installmentCount; i++) {
+    const due = new Date(firstDue.getFullYear(), firstDue.getMonth() + i, firstDue.getDate());
+    await prisma.installment.create({
+      data: {
+        installmentExpenseId: installmentExpense.id,
+        amount: 600,
+        installmentNumber: i + 1,
+        dueDate: due,
+        paid: i === 0,
+        paidAt: i === 0 ? now : null,
+      },
+    });
+  }
+
   const defaultCategories = [
     { name: "Salário", type: "INCOME" },
     { name: "Freelance", type: "INCOME" },
@@ -95,6 +137,8 @@ async function main() {
     operator: operator.email,
   });
   console.log(`Seeded ${sampleTransactions.length} transactions for operator`);
+  console.log(`Seeded ${sampleRecurring.length} recurring expenses for operator`);
+  console.log(`Seeded 1 installment expense (${installmentCount}x) for operator`);
   console.log(`Seeded ${defaultCategories.length} default categories per user`);
 }
 

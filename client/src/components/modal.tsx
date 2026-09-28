@@ -36,6 +36,15 @@ export default function Modal({
   }, []);
 
   useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isOpen, onClose]);
+
+  useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
     } else {
@@ -66,7 +75,7 @@ export default function Modal({
               <button
                 type="button"
                 onClick={onClose}
-                className="flex cursor-pointer items-center gap-1 rounded-md p-1.5 text-sm text-slate-400 transition-all duration-300 hover:bg-slate-100 hover:text-slate-600 dark:text-gray-500 dark:hover:bg-gray-800 dark:hover:text-gray-300"
+                className="flex cursor-pointer items-center gap-1 rounded-md p-1.5 text-sm text-slate-500 transition-all duration-300 hover:bg-slate-100 hover:text-slate-600 dark:text-gray-500 dark:hover:bg-gray-800 dark:hover:text-gray-300"
               >
                 <X size={16} />
               </button>

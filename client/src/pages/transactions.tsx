@@ -24,6 +24,8 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import * as api from "../lib/api";
+import { brl as formatCurrency } from "../lib/currency";
+import { fmtDate as formatDate } from "../lib/date";
 import TransactionForm from "../components/transaction-form";
 
 const categoryIcons: Record<string, LucideIcon> = {
@@ -39,14 +41,6 @@ const categoryIcons: Record<string, LucideIcon> = {
   Freelance: Receipt,
   Outro: ArrowDownToLine,
 };
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
-}
-
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString("pt-BR");
-}
 
 const sourceConfig = {
   transaction: { label: "", icon: null, color: "" },
@@ -142,7 +136,7 @@ export default function TransactionsPage() {
       />
 
       <div className="mb-4 flex items-center gap-3">
-        <Filter size={16} className="text-slate-400" />
+        <Filter size={16} className="text-slate-500" />
         {["", "INCOME", "EXPENSE"].map((f) => (
           <button
             key={f}
@@ -159,7 +153,7 @@ export default function TransactionsPage() {
         ))}
       </div>
 
-      <div className="rounded-md border border-slate-200 bg-white shadow-lg dark:border-gray-800 dark:bg-gray-900">
+      <div className="rounded-xl border border-slate-200 bg-white shadow-lg dark:border-gray-800 dark:bg-gray-900">
         {loading ? (
           <div className="space-y-3 p-4">
             {[1, 2, 3, 4, 5].map((i) => (
@@ -171,8 +165,9 @@ export default function TransactionsPage() {
           </div>
         ) : transactions.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-16">
-            <ArrowDownToLine size={40} className="text-slate-300 dark:text-gray-600" />
-            <p className="text-sm text-slate-400 dark:text-gray-500">Nenhuma transação encontrada</p>
+            <ArrowDownToLine size={40} className="text-slate-400 dark:text-gray-600" />
+            <p className="text-sm text-slate-500 dark:text-gray-500">Nenhuma transação encontrada</p>
+            <p className="text-xs text-slate-500 dark:text-gray-500">Use Nova transação acima para criar a primeira.</p>
           </div>
         ) : (
           <div className="divide-y divide-slate-100 dark:divide-gray-800">
@@ -209,7 +204,7 @@ export default function TransactionsPage() {
                         </span>
                       )}
                     </div>
-                    <p className="truncate text-xs text-slate-400 dark:text-gray-500">
+                    <p className="truncate text-xs text-slate-500 dark:text-gray-500">
                       {formatDate(t.date)}
                       {t.category ? ` • ${t.category}` : ""}
                       {t.paymentMethod ? ` • ${t.paymentMethod}` : ""}
@@ -231,7 +226,7 @@ export default function TransactionsPage() {
                         <button
                           type="button"
                           onClick={() => handleEdit(t)}
-                          className="cursor-pointer rounded-md p-1.5 text-slate-300 transition-all duration-300 hover:bg-blue-50 hover:text-blue-500 dark:text-gray-600 dark:hover:bg-blue-900/20 dark:hover:text-blue-400"
+                          className="cursor-pointer rounded-md p-1.5 text-slate-400 transition-all duration-300 hover:bg-blue-50 hover:text-blue-500 dark:text-gray-600 dark:hover:bg-blue-900/20 dark:hover:text-blue-400"
                           aria-label="editar"
                         >
                           <Pencil size={14} />
@@ -239,7 +234,7 @@ export default function TransactionsPage() {
                         <button
                           type="button"
                           onClick={() => handleDelete(t.id, t.source)}
-                          className="cursor-pointer rounded-md p-1.5 text-slate-300 transition-all duration-300 hover:bg-red-50 hover:text-red-500 dark:text-gray-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                          className="cursor-pointer rounded-md p-1.5 text-slate-400 transition-all duration-300 hover:bg-red-50 hover:text-red-500 dark:text-gray-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
                           aria-label="excluir"
                         >
                           <Trash2 size={14} />
@@ -248,7 +243,7 @@ export default function TransactionsPage() {
                     ) : (
                       <Link
                         to={t.source === "installment" ? "/despesas-parceladas" : "/despesas-fixas"}
-                        className="rounded-md p-1.5 text-slate-300 transition-all duration-300 hover:bg-slate-100 hover:text-blue-500 dark:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-blue-400"
+                        className="rounded-md p-1.5 text-slate-400 transition-all duration-300 hover:bg-slate-100 hover:text-blue-500 dark:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-blue-400"
                         aria-label="ver detalhes"
                       >
                         <ExternalLink size={14} />

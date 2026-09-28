@@ -13,12 +13,9 @@ import {
   ChevronLeft,
 } from "lucide-react";
 import * as api from "../lib/api";
+import { brl as formatCurrency } from "../lib/currency";
 import TransactionForm from "../components/transaction-form";
 import Modal from "../components/modal";
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(value);
-}
 
 function formatDate(dateStr: string) {
   return new Intl.DateTimeFormat("pt-BR").format(new Date(dateStr));
@@ -163,10 +160,13 @@ export default function InstallmentExpensesPage() {
           ))}
         </div>
       ) : expenses.length === 0 ? (
-        <div className="rounded-md border border-slate-200 bg-white p-12 text-center dark:border-gray-800 dark:bg-gray-900">
-          <CreditCard size={48} className="mx-auto mb-3 text-slate-300 dark:text-gray-600" />
+        <div className="rounded-xl border border-slate-200 bg-white p-12 text-center dark:border-gray-800 dark:bg-gray-900">
+          <CreditCard size={48} className="mx-auto mb-3 text-slate-400 dark:text-gray-600" />
           <p className="text-slate-500 dark:text-gray-400">
             Nenhuma despesa parcelada encontrada
+          </p>
+          <p className="mt-1 text-xs text-slate-500 dark:text-gray-500">
+            Use o botão acima para cadastrar a primeira.
           </p>
         </div>
       ) : (
@@ -180,7 +180,7 @@ export default function InstallmentExpensesPage() {
             return (
               <div
                 key={expense.id}
-                className={`rounded-md border bg-white shadow-sm transition-all duration-300 dark:bg-gray-900 ${
+                className={`rounded-xl border bg-white shadow-sm transition-all duration-300 dark:bg-gray-900 ${
                   isFullyPaid
                     ? "border-emerald-200 opacity-70 dark:border-emerald-900"
                     : "border-slate-200 dark:border-gray-800"
@@ -202,7 +202,7 @@ export default function InstallmentExpensesPage() {
                       <h3 className={`font-semibold ${isFullyPaid ? "text-slate-500 dark:text-gray-400" : "text-slate-900 dark:text-gray-100"}`}>
                         {expense.description}
                       </h3>
-                      <p className="mt-0.5 text-xs text-slate-400 dark:text-gray-500">
+                      <p className="mt-0.5 text-xs text-slate-500 dark:text-gray-500">
                         {expense.installmentCount}x {formatCurrency(Number(expense.totalAmount) / expense.installmentCount)} • {isCard ? "Cartão" : "Carnê"}
                         {expense.category && ` • ${expense.category}`}
                       </p>
@@ -213,11 +213,11 @@ export default function InstallmentExpensesPage() {
                       <p className={`text-sm font-bold ${isFullyPaid ? "text-emerald-500 dark:text-emerald-400" : "text-slate-900 dark:text-gray-100"}`}>
                         {formatCurrency(Number(expense.totalAmount))}
                       </p>
-                      <p className="text-xs text-slate-400 dark:text-gray-500">
+                      <p className="text-xs text-slate-500 dark:text-gray-500">
                         {totalPaid}/{expense.installmentCount} pagas
                       </p>
                     </div>
-                    {isExpanded ? <ChevronDown size={20} className="text-slate-400" /> : <ChevronRight size={20} className="text-slate-400" />}
+                    {isExpanded ? <ChevronDown size={20} className="text-slate-500" /> : <ChevronRight size={20} className="text-slate-500" />}
                   </div>
                 </button>
 
@@ -231,7 +231,7 @@ export default function InstallmentExpensesPage() {
                             style={{ width: `${(totalPaid / expense.installmentCount) * 100}%` }}
                           />
                         </div>
-                        <span className="text-xs text-slate-400 dark:text-gray-500">
+                        <span className="text-xs text-slate-500 dark:text-gray-500">
                           {Math.round((totalPaid / expense.installmentCount) * 100)}%
                         </span>
                       </div>
@@ -239,14 +239,14 @@ export default function InstallmentExpensesPage() {
                         <button
                           type="button"
                           onClick={() => openEdit(expense)}
-                          className="cursor-pointer rounded-md p-1.5 text-slate-400 transition-all duration-300 hover:bg-slate-100 hover:text-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-500 dark:hover:bg-gray-800 dark:hover:text-violet-400"
+                          className="cursor-pointer rounded-md p-1.5 text-slate-500 transition-all duration-300 hover:bg-slate-100 hover:text-violet-600 focus:outline-none focus:ring-2 focus:ring-violet-500 dark:hover:bg-gray-800 dark:hover:text-violet-400"
                         >
                           <Pencil size={15} />
                         </button>
                         <button
                           type="button"
                           onClick={() => setDeleteId(expense.id)}
-                          className="cursor-pointer rounded-md p-1.5 text-slate-400 transition-all duration-300 hover:bg-red-50 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 dark:hover:bg-red-950 dark:hover:text-red-400"
+                          className="cursor-pointer rounded-md p-1.5 text-slate-500 transition-all duration-300 hover:bg-red-50 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 dark:hover:bg-red-950 dark:hover:text-red-400"
                         >
                           <Trash2 size={15} />
                         </button>
@@ -274,7 +274,7 @@ export default function InstallmentExpensesPage() {
                                 className={`cursor-pointer transition-all duration-300 focus:outline-none ${
                                   inst.paid
                                     ? "text-emerald-500 hover:text-emerald-600"
-                                    : "text-slate-300 hover:text-emerald-500 dark:text-gray-600 dark:hover:text-emerald-400"
+                                    : "text-slate-400 hover:text-emerald-500 dark:text-gray-600 dark:hover:text-emerald-400"
                                 }`}
                                 title={inst.paid ? "Marcar como não paga" : "Marcar como paga"}
                               >
@@ -283,7 +283,7 @@ export default function InstallmentExpensesPage() {
                               <span className={`font-medium ${inst.paid ? "text-emerald-700 dark:text-emerald-400" : overdue ? "text-red-600 dark:text-red-400" : "text-slate-700 dark:text-gray-300"}`}>
                                 {inst.installmentNumber}ª parcela
                               </span>
-                              <span className="text-slate-400 dark:text-gray-500">
+                              <span className="text-slate-500 dark:text-gray-500">
                                 {formatDate(inst.dueDate)}
                               </span>
                             </div>
@@ -357,7 +357,7 @@ export default function InstallmentExpensesPage() {
           <button
             type="button"
             onClick={() => setDeleteId(null)}
-            className="flex-1 cursor-pointer rounded-md border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 transition-all duration-300 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-violet-500 active:bg-slate-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+            className="flex-1 cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 transition-all duration-300 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-violet-500 active:bg-slate-100 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
           >
             Cancelar
           </button>
