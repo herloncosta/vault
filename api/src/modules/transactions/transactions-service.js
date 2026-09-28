@@ -123,8 +123,6 @@ export async function list(authUser, query = {}) {
   const now = new Date();
 
   for (const re of recurringExpenses) {
-    if (re.endDate && re.endDate < now) continue;
-
     const startMonth = re.startDate.getMonth() + re.startDate.getFullYear() * 12;
     const endMonth = re.endDate
       ? re.endDate.getMonth() + re.endDate.getFullYear() * 12
@@ -135,7 +133,7 @@ export async function list(authUser, query = {}) {
       const month = m % 12;
       const occurrenceDate = new Date(year, month, re.dayOfMonth);
 
-      if (occurrenceDate > now && m > endMonth - 1) break;
+      if (!re.endDate && occurrenceDate > now && m > endMonth - 1) break;
       if (occurrenceDate < re.startDate) continue;
 
       if (filters.startDate && occurrenceDate < new Date(filters.startDate)) continue;
