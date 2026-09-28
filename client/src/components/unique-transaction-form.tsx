@@ -2,8 +2,14 @@ import { useEffect, useState, useCallback } from "react";
 import { useForm, Controller } from "react-hook-form";
 import * as api from "../lib/api";
 import { fmt, parse as parseCurrency, toInput } from "../lib/currency";
+import SelectField from "./select";
+import type { SelectOption } from "./select";
 
 const paymentOptions = ["Crédito", "Débito", "Boleto", "PIX", "Dinheiro", "Automático"];
+const paymentSelectOptions: SelectOption[] = [
+  { value: "", label: "Selecione" },
+  ...paymentOptions.map((p) => ({ value: p, label: p })),
+];
 
 interface Props {
   type: "INCOME" | "EXPENSE";
@@ -109,16 +115,25 @@ export default function UniqueTransactionForm({ type, editing, onSave, onClose }
       <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="uni-category" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Categoria</label>
-          <select
-            id="uni-category"
-            {...register("category")}
-            className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-4 py-2.5 pr-9 text-sm text-slate-900 outline-none transition-all duration-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-blue-400"
-          >
-            <option value="">Sem categoria</option>
-            {loadingCategories ? (
-              <option value="" disabled>Carregando…</option>
-            ) : categories.map((c) => <option key={c.id} value={c.name}>{c.name}</option>)}
-          </select>
+          <Controller
+            name="category"
+            control={control}
+            render={({ field }) => {
+              const options: SelectOption[] = [
+                { value: "", label: "Sem categoria" },
+                ...categories.map((c) => ({ value: c.name, label: c.name })),
+              ];
+              return (
+                <SelectField
+                  id="uni-category"
+                  options={options}
+                  value={options.find((o) => o.value === field.value) ?? null}
+                  onChange={(opt) => field.onChange(opt?.value ?? "")}
+                  isLoading={loadingCategories}
+                />
+              );
+            }}
+          />
         </div>
         <div>
           <label htmlFor="uni-date" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Data</label>
@@ -133,14 +148,18 @@ export default function UniqueTransactionForm({ type, editing, onSave, onClose }
 
       <div className="mb-6">
         <label htmlFor="uni-paymentMethod" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Forma de pagamento</label>
-        <select
-          id="uni-paymentMethod"
-          {...register("paymentMethod")}
-          className="w-full appearance-none rounded-lg border border-slate-200 bg-white px-4 py-2.5 pr-9 text-sm text-slate-900 outline-none transition-all duration-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 dark:focus:border-blue-400"
-        >
-          <option value="">Selecione</option>
-          {paymentOptions.map((p) => <option key={p} value={p}>{p}</option>)}
-        </select>
+        <Controller
+          name="paymentMethod"
+          control={control}
+          render={({ field }) => (
+            <SelectField
+              id="uni-paymentMethod"
+              options={paymentSelectOptions}
+              value={paymentSelectOptions.find((o) => o.value === field.value) ?? null}
+              onChange={(opt) => field.onChange(opt?.value ?? "")}
+            />
+          )}
+        />
       </div>
 
       <button

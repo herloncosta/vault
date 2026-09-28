@@ -20,8 +20,6 @@ import {
 	ArrowDownToLine,
 } from "lucide-react";
 import {
-	BarChart,
-	Bar,
 	XAxis,
 	YAxis,
 	CartesianGrid,
@@ -31,6 +29,10 @@ import {
 	PieChart,
 	Pie,
 	Cell,
+	AreaChart,
+	Area,
+	LineChart,
+	Line,
 } from "recharts";
 import * as api from "../lib/api";
 import { parse as parseCurrency } from "../lib/currency";
@@ -61,6 +63,7 @@ export default function HomePage() {
 	const { user, refreshUser } = useAuth();
 	const [transactions, setTransactions] = useState<api.Transaction[]>([]);
 	const [summary, setSummary] = useState<api.TransactionsSummary | null>(null);
+	const [installmentExpenses, setInstallmentExpenses] = useState<api.InstallmentExpense[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [editingBudget, setEditingBudget] = useState(false);
 	const [budgetInput, setBudgetInput] = useState("");
@@ -75,6 +78,10 @@ export default function HomePage() {
 			.catch(() => setTransactions([]))
 			.finally(() => setLoading(false));
 		api.getTransactionsSummary().then(setSummary).catch(() => setSummary(null));
+		api
+			.listInstallmentExpenses({ limit: "100" })
+			.then((res) => setInstallmentExpenses(res.data))
+			.catch(() => setInstallmentExpenses([]));
 	}
 
 	useEffect(() => {
@@ -260,6 +267,13 @@ export default function HomePage() {
 				</div>
 			</div>
 
+			<div className="mb-8">
+				<h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-gray-100">
+					Evolução do saldo
+				</h2>
+				<BalanceAreaChart transactions={transactions} />
+			</div>
+
 			<TransactionForm
 				isOpen={modalOpen}
 				initialType={modalType}
@@ -279,19 +293,28 @@ export default function HomePage() {
 					<h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-gray-100">
 						Despesas por categoria
 					</h2>
-					<CategoryPieChart
-						transactions={monthTransactions}
-						type="EXPENSE"
-					/>
+					<DonutChart data={groupSum(monthTransactions, "EXPENSE", "category")} />
 				</div>
 				<div>
 					<h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-gray-100">
-						Receitas por categoria
+						Despesas por forma de pagamento
 					</h2>
-					<CategoryPieChart
-						transactions={monthTransactions}
-						type="INCOME"
-					/>
+					<DonutChart data={groupSum(monthTransactions, "EXPENSE", "paymentMethod")} />
+				</div>
+			</div>
+
+			<div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
+				<div>
+					<h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-gray-100">
+						Fixas vs variáveis
+					</h2>
+					<FixedVariableBar transactions={monthTransactions} />
+				</div>
+				<div>
+					<h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-gray-100">
+						Parcelas
+					</h2>
+					<InstallmentsDonut expenses={installmentExpenses} />
 				</div>
 			</div>
 
@@ -351,6 +374,13 @@ export default function HomePage() {
 						})
 					)}
 				</div>
+			</div>
+
+			<div className="mb-8">
+				<h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-gray-100">
+					Gasto diário vs limite
+				</h2>
+				<DailySpendingChart transactions={monthTransactions} budgetLimit={budgetLimit} />
 			</div>
 
 			<div>
@@ -461,24 +491,57 @@ const CHART_COLORS = [
 	"#06b6d4", "#d946ef", "#eab308", "#22c55e", "#64748b",
 ];
 
-function CategoryPieChart({ transactions, type }: { transactions: api.Transaction[]; type: "INCOME" | "EXPENSE" }) {
-	const byCategory = transactions
-		.filter((t) => t.type === type && t.category)
-		.reduce<Record<string, number>>((acc, t) => {
-			acc[t.category!] = (acc[t.category!] || 0) + Number(t.amount);
-			return acc;
-		}, {});
+const tooltipContentStyle = {
+	backgroundColor: "var(--tooltip-bg, #fff)",
+	border: "1px solid var(--tooltip-border, #e2e8f0)",
+	borderRadius: "12px",
+	fontSize: "12px",
+	boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+} as const;
 
-	const data = Object.entries(byCategory)
+const tooltipLabelStyle = { fontWeight: 600, marginBottom: 4 } as const;
+
+const tooltipFormatter = (value: any) => [formatCurrency(Number(value) || 0)];
+
+const axisKFormatter = (v: number) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v));
+
+function EmptyChart({ message = "Nenhum dado no mês atual" }: { message?: string }) {
+	return (
+		<div className="flex items-center justify-center rounded-md border border-slate-200 bg-white p-8 shadow-lg dark:border-gray-800 dark:bg-gray-900">
+			<p className="text-sm text-slate-400 dark:text-gray-500">{message}</p>
+		</div>
+	);
+}
+
+function groupSum(
+	transactions: api.Transaction[],
+	type: "INCOME" | "EXPENSE",
+	key: "category" | "paymentMethod",
+) {
+	const totals: Record<string, number> = {};
+	for (const t of transactions) {
+		const k = t[key];
+		if (t.type !== type || !k) continue;
+		totals[k] = (totals[k] ?? 0) + Number(t.amount);
+	}
+	return Object.entries(totals)
 		.map(([name, value]) => ({ name, value }))
 		.sort((a, b) => b.value - a.value);
+}
 
+function DonutChart({
+	data,
+	colors,
+	emptyMessage,
+	subtitle,
+}: {
+	data: { name: string; value: number }[];
+	colors?: string[];
+	emptyMessage?: string;
+	subtitle?: string;
+}) {
 	if (data.length === 0) {
-		return (
-			<div className="flex items-center justify-center rounded-md border border-slate-200 bg-white p-8 shadow-lg dark:border-gray-800 dark:bg-gray-900">
-				<p className="text-sm text-slate-400 dark:text-gray-500">Nenhum dado no mês atual</p>
-			</div>
-		);
+		return <EmptyChart message={emptyMessage ?? "Nenhum dado no mês atual"} />;
 	}
 
 	return (
@@ -496,19 +559,16 @@ function CategoryPieChart({ transactions, type }: { transactions: api.Transactio
 						paddingAngle={3}
 					>
 						{data.map((_, i) => (
-							<Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+							<Cell
+								key={i}
+								fill={colors?.[i % colors.length] ?? CHART_COLORS[i % CHART_COLORS.length]}
+							/>
 						))}
 					</Pie>
 					<Tooltip
-						contentStyle={{
-							backgroundColor: "var(--tooltip-bg, #fff)",
-							border: "1px solid var(--tooltip-border, #e2e8f0)",
-							borderRadius: "12px",
-							fontSize: "12px",
-							boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-						}}
-						formatter={(value) => [formatCurrency(Number(value) || 0)]}
-						labelStyle={{ fontWeight: 600, marginBottom: 4 }}
+						contentStyle={tooltipContentStyle}
+						formatter={tooltipFormatter}
+						labelStyle={tooltipLabelStyle}
 					/>
 					<Legend
 						wrapperStyle={{ fontSize: 11, paddingTop: 4 }}
@@ -517,7 +577,244 @@ function CategoryPieChart({ transactions, type }: { transactions: api.Transactio
 					/>
 				</PieChart>
 			</ResponsiveContainer>
+			{subtitle && (
+				<p className="mt-2 text-center text-xs text-slate-400 dark:text-gray-500">{subtitle}</p>
+			)}
 		</div>
+	);
+}
+
+function BalanceAreaChart({ transactions }: { transactions: api.Transaction[] }) {
+	const byMonth = new Map<string, number>();
+	for (const t of transactions) {
+		const d = new Date(t.date);
+		const key = `${d.getFullYear()}-${String(d.getMonth()).padStart(2, "0")}`;
+		byMonth.set(
+			key,
+			(byMonth.get(key) ?? 0) + (t.type === "INCOME" ? Number(t.amount) : -Number(t.amount)),
+		);
+	}
+
+	let acc = 0;
+	const data = [...byMonth.entries()]
+		.sort(([a], [b]) => a.localeCompare(b))
+		.map(([key, net]) => {
+			acc += net;
+			const [y, m] = key.split("-");
+			return {
+				label: `${monthNames[Number(m)]}/${y.slice(-2)}`,
+				Saldo: Math.round(acc * 100) / 100,
+			};
+		})
+		.slice(-12);
+
+	if (data.length === 0) return <EmptyChart message="Nenhuma transação ainda" />;
+
+	return (
+		<div className="rounded-md border border-slate-200 bg-white p-4 shadow-lg dark:border-gray-800 dark:bg-gray-900">
+			<ResponsiveContainer width="100%" height={260}>
+				<AreaChart data={data} margin={{ top: 8, right: 8, left: 8, bottom: 4 }}>
+					<defs>
+						<linearGradient id="balanceGradient" x1="0" y1="0" x2="0" y2="1">
+							<stop offset="0%" stopColor="#3b82f6" stopOpacity={0.35} />
+							<stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
+						</linearGradient>
+					</defs>
+					<CartesianGrid
+						strokeDasharray="3 3"
+						stroke="currentColor"
+						className="text-slate-100 dark:text-gray-800"
+					/>
+					<XAxis
+						dataKey="label"
+						tick={{ fontSize: 10, fill: "currentColor" }}
+						className="text-slate-400 dark:text-gray-500"
+						axisLine={{ stroke: "currentColor" }}
+						tickLine={false}
+						interval={0}
+						angle={-30}
+						textAnchor="end"
+						height={36}
+					/>
+					<YAxis
+						tick={{ fontSize: 10, fill: "currentColor" }}
+						className="text-slate-400 dark:text-gray-500"
+						axisLine={false}
+						tickLine={false}
+						tickFormatter={axisKFormatter}
+						width={40}
+					/>
+					<Tooltip
+						contentStyle={tooltipContentStyle}
+						formatter={tooltipFormatter}
+						labelStyle={tooltipLabelStyle}
+					/>
+					<Area
+						type="monotone"
+						dataKey="Saldo"
+						stroke="#3b82f6"
+						strokeWidth={2}
+						fill="url(#balanceGradient)"
+					/>
+				</AreaChart>
+			</ResponsiveContainer>
+		</div>
+	);
+}
+
+function DailySpendingChart({
+	transactions,
+	budgetLimit,
+}: {
+	transactions: api.Transaction[];
+	budgetLimit: number;
+}) {
+	const now = new Date();
+	const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+	const today = now.getDate();
+
+	const perDay = new Array<number>(daysInMonth).fill(0);
+	for (const t of transactions) {
+		if (t.type !== "EXPENSE") continue;
+		const d = new Date(t.date);
+		if (d <= now) perDay[d.getDate() - 1] += Number(t.amount);
+	}
+
+	let acc = 0;
+	const data = perDay.map((amount, i) => {
+		acc += amount;
+		return {
+			day: i + 1,
+			Gasto: i + 1 <= today ? Math.round(acc * 100) / 100 : null,
+			Limite: Math.round(((budgetLimit / daysInMonth) * (i + 1)) * 100) / 100,
+		};
+	});
+
+	return (
+		<div className="rounded-md border border-slate-200 bg-white p-4 shadow-lg dark:border-gray-800 dark:bg-gray-900">
+			<ResponsiveContainer width="100%" height={260}>
+				<LineChart data={data} margin={{ top: 8, right: 8, left: 8, bottom: 4 }}>
+					<CartesianGrid
+						strokeDasharray="3 3"
+						stroke="currentColor"
+						className="text-slate-100 dark:text-gray-800"
+					/>
+					<XAxis
+						dataKey="day"
+						tick={{ fontSize: 10, fill: "currentColor" }}
+						className="text-slate-400 dark:text-gray-500"
+						axisLine={{ stroke: "currentColor" }}
+						tickLine={false}
+						interval={4}
+					/>
+					<YAxis
+						tick={{ fontSize: 10, fill: "currentColor" }}
+						className="text-slate-400 dark:text-gray-500"
+						axisLine={false}
+						tickLine={false}
+						tickFormatter={axisKFormatter}
+						width={40}
+					/>
+					<Tooltip
+						contentStyle={tooltipContentStyle}
+						formatter={tooltipFormatter}
+						labelStyle={tooltipLabelStyle}
+					/>
+					<Legend
+						wrapperStyle={{ fontSize: 11, paddingTop: 4 }}
+						iconType="circle"
+						iconSize={8}
+					/>
+					<Line
+						type="monotone"
+						dataKey="Gasto"
+						name="Gasto acumulado"
+						stroke="#3b82f6"
+						strokeWidth={2}
+						dot={false}
+					/>
+					<Line
+						type="monotone"
+						dataKey="Limite"
+						name="Ritmo do limite"
+						stroke="#94a3b8"
+						strokeWidth={1.5}
+						strokeDasharray="6 6"
+						dot={false}
+					/>
+				</LineChart>
+			</ResponsiveContainer>
+		</div>
+	);
+}
+
+function FixedVariableBar({ transactions }: { transactions: api.Transaction[] }) {
+	const expenses = transactions.filter((t) => t.type === "EXPENSE");
+	const fixed = expenses
+		.filter((t) => t.source !== "transaction")
+		.reduce((a, t) => a + Number(t.amount), 0);
+	const variable = expenses
+		.filter((t) => t.source === "transaction")
+		.reduce((a, t) => a + Number(t.amount), 0);
+	const total = fixed + variable;
+
+	if (total === 0) return <EmptyChart />;
+
+	const items = [
+		{ label: "Fixas", value: fixed, color: "#8b5cf6" },
+		{ label: "Variáveis", value: variable, color: "#3b82f6" },
+	];
+
+	return (
+		<div className="rounded-md border border-slate-200 bg-white p-5 shadow-lg dark:border-gray-800 dark:bg-gray-900">
+			<div className="flex h-3 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-gray-800">
+				{items.map((it) => (
+					<div
+						key={it.label}
+						className="h-full transition-all duration-300"
+						style={{ width: `${(it.value / total) * 100}%`, backgroundColor: it.color }}
+					/>
+				))}
+			</div>
+			<div className="mt-4 space-y-2">
+				{items.map((it) => (
+					<div key={it.label} className="flex items-center gap-2 text-sm">
+						<span
+							className="h-2.5 w-2.5 rounded-full"
+							style={{ backgroundColor: it.color }}
+						/>
+						<span className="flex-1 text-slate-500 dark:text-gray-400">{it.label}</span>
+						<span className="font-semibold text-slate-900 dark:text-gray-100">
+							{formatCurrency(it.value)}
+						</span>
+						<span className="w-10 text-right text-xs text-slate-400 dark:text-gray-500">
+							{Math.round((it.value / total) * 100)}%
+						</span>
+					</div>
+				))}
+			</div>
+		</div>
+	);
+}
+
+function InstallmentsDonut({ expenses }: { expenses: api.InstallmentExpense[] }) {
+	const all = expenses.flatMap((e) => e.installments);
+	const paidList = all.filter((i) => i.paid);
+	const paid = paidList.reduce((a, i) => a + Number(i.amount), 0);
+	const remaining = all.filter((i) => !i.paid).reduce((a, i) => a + Number(i.amount), 0);
+
+	const data = [
+		{ name: "Pago", value: paid },
+		{ name: "A vencer", value: remaining },
+	].filter((d) => d.value > 0);
+
+	return (
+		<DonutChart
+			data={data}
+			colors={["#10b981", "#f59e0b"]}
+			emptyMessage="Nenhuma compra parcelada"
+			subtitle={all.length > 0 ? `${paidList.length} de ${all.length} parcelas pagas` : ""}
+		/>
 	);
 }
 
@@ -548,7 +845,7 @@ function MonthlyChart({ transactions }: { transactions: api.Transaction[] }) {
 	return (
 		<div className="rounded-md border border-slate-200 bg-white p-4 shadow-lg dark:border-gray-800 dark:bg-gray-900">
 			<ResponsiveContainer width="100%" height={260}>
-				<BarChart
+				<LineChart
 					data={monthlyData}
 					margin={{ top: 8, right: 8, left: 8, bottom: 4 }}
 				>
@@ -579,34 +876,30 @@ function MonthlyChart({ transactions }: { transactions: api.Transaction[] }) {
 						width={40}
 					/>
 					<Tooltip
-						contentStyle={{
-							backgroundColor: "var(--tooltip-bg, #fff)",
-							border: "1px solid var(--tooltip-border, #e2e8f0)",
-							borderRadius: "12px",
-							fontSize: "12px",
-							boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-						}}
-						formatter={(value) => [formatCurrency(Number(value) || 0)]}
-						labelStyle={{ fontWeight: 600, marginBottom: 4 }}
+						contentStyle={tooltipContentStyle}
+						formatter={tooltipFormatter}
+						labelStyle={tooltipLabelStyle}
 					/>
 					<Legend
 						wrapperStyle={{ fontSize: 11, paddingTop: 4 }}
 						iconType="circle"
 						iconSize={8}
 					/>
-					<Bar
+					<Line
+						type="monotone"
 						dataKey="Receita"
-						radius={[4, 4, 0, 0]}
-						maxBarSize={14}
-						fill="#10b981"
+						stroke="#10b981"
+						strokeWidth={2}
+						dot={false}
 					/>
-					<Bar
+					<Line
+						type="monotone"
 						dataKey="Despesa"
-						radius={[4, 4, 0, 0]}
-						maxBarSize={14}
-						fill="#f87171"
+						stroke="#f87171"
+						strokeWidth={2}
+						dot={false}
 					/>
-				</BarChart>
+				</LineChart>
 			</ResponsiveContainer>
 		</div>
 	);
