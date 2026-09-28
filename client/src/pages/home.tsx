@@ -5,7 +5,6 @@ import {
 	TrendingUp,
 	TrendingDown,
 	Pencil,
-	Plus,
 	ShoppingCart,
 	Home,
 	Car,
@@ -21,8 +20,6 @@ import {
 	ArrowDownToLine,
 } from "lucide-react";
 import {
-	LineChart,
-	Line,
 	XAxis,
 	YAxis,
 	CartesianGrid,
@@ -32,6 +29,10 @@ import {
 	PieChart,
 	Pie,
 	Cell,
+	AreaChart,
+	Area,
+	LineChart,
+	Line,
 } from "recharts";
 import * as api from "../lib/api";
 import { parse as parseCurrency, brl as formatCurrency } from "../lib/currency";
@@ -55,6 +56,7 @@ export default function HomePage() {
 	const { user, refreshUser } = useAuth();
 	const [transactions, setTransactions] = useState<api.Transaction[]>([]);
 	const [summary, setSummary] = useState<api.TransactionsSummary | null>(null);
+	const [installmentExpenses, setInstallmentExpenses] = useState<api.InstallmentExpense[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [editingBudget, setEditingBudget] = useState(false);
 	const [budgetInput, setBudgetInput] = useState("");
@@ -75,6 +77,10 @@ export default function HomePage() {
 			})
 			.finally(() => setLoading(false));
 		api.getTransactionsSummary().then(setSummary).catch(() => setSummary(null));
+		api
+			.listInstallmentExpenses({ limit: "100" })
+			.then((res) => setInstallmentExpenses(res.data))
+			.catch(() => setInstallmentExpenses([]));
 	}
 
 	useEffect(() => {
@@ -142,8 +148,8 @@ export default function HomePage() {
 
 	if (loading) {
 		return (
-		<main className="mx-auto max-w-6xl px-4 py-10">
-			<div className="space-y-6">
+			<main className="mx-auto max-w-5xl px-4 py-10">
+				<div className="space-y-6">
 					<div className="h-8 w-48 animate-pulse rounded-lg bg-slate-200 dark:bg-gray-800" />
 					<div className="h-44 animate-pulse rounded-lg bg-slate-200 dark:bg-gray-800" />
 					<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -153,83 +159,50 @@ export default function HomePage() {
 								className="h-28 animate-pulse rounded-md bg-slate-200 dark:bg-gray-800"
 							/>
 						))}
-			</div>
-		</div>
-	</main>
+					</div>
+				</div>
+			</main>
 		);
 	}
 
 	return (
-	<main className="mx-auto max-w-6xl px-4 py-10">
-		<div className="relative mb-6 overflow-hidden rounded-2xl bg-linear-to-br from-blue-600 to-violet-600 p-6 text-white shadow-xl shadow-blue-600/20 md:p-8 dark:from-blue-700 dark:to-violet-700">
-			<div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-white/10" />
-			<div className="absolute -bottom-8 -left-8 h-28 w-28 rounded-full bg-white/5" />
-			<div className="relative flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+		<main className="mx-auto max-w-5xl px-4 py-10">
+			<div className="mb-8 flex items-start justify-between">
 				<div>
-					<p className="text-xs text-white/70">
+					<p className="text-xs text-slate-500 dark:text-gray-400">
 						Bem-vindo de volta,
 					</p>
-					<h1 className="mt-0.5 text-xl font-bold md:text-2xl">
+					<h1 className="text-2xl font-bold text-slate-900 dark:text-gray-100">
 						{user?.name ?? user?.email}
 					</h1>
-					<p className="mt-5 text-xs font-medium tracking-widest text-white/70 uppercase">
-						Saldo do mês
-					</p>
-					<p className="mt-1 text-3xl font-bold tracking-tight md:text-4xl">
-						{formatCurrency(monthBalance)}
-					</p>
-					<p className="mt-1 text-sm text-white/70">
-						Total geral: {formatCurrency(balance)}
-					</p>
-					<div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-white/70">
-						{incomeChange === null && expenseChange === null ? (
-							<span>sem dados do mês anterior</span>
-						) : (
-							<>
-								{incomeChange !== null && (
-									<span className="flex items-center gap-1">
-										<TrendingUp size={16} className="text-emerald-300" />
-										<span className="text-emerald-300">
-											Receitas {incomeChange >= 0 ? "+" : ""}{incomeChange.toFixed(1)}%
-										</span>
-									</span>
-								)}
-								{expenseChange !== null && (
-									<span className="text-red-200">
-										Gastos {expenseChange >= 0 ? "+" : ""}{expenseChange.toFixed(1)}%
-									</span>
-								)}
-								<span>vs. mês anterior</span>
-							</>
-						)}
-					</div>
 				</div>
-				<div className="flex gap-2">
-					<button
-						type="button"
-						onClick={() => {
-							setModalType("INCOME");
-							setModalOpen(true);
-						}}
-						className="flex cursor-pointer items-center gap-2 rounded-xl bg-white/15 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur transition-all duration-300 hover:bg-white/25 focus:outline-none focus:ring-2 focus:ring-white/50 active:scale-[0.97]"
+				<button
+					type="button"
+					onClick={() => {
+						setModalType("EXPENSE");
+						setModalOpen(true);
+					}}
+					className="flex cursor-pointer items-center gap-2 rounded-md bg-blue-600 px-3 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all duration-300 hover:bg-blue-700 hover:shadow-blue-600/30 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-[0.97] md:px-4"
+					aria-label="Nova transação"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="16"
+						height="16"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						strokeWidth="2"
+						strokeLinecap="round"
+						strokeLinejoin="round"
 					>
-						<Plus size={16} />
-						Nova receita
-					</button>
-					<button
-						type="button"
-						onClick={() => {
-							setModalType("EXPENSE");
-							setModalOpen(true);
-						}}
-						className="flex cursor-pointer items-center gap-2 rounded-xl bg-black/20 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur transition-all duration-300 hover:bg-black/30 focus:outline-none focus:ring-2 focus:ring-white/50 active:scale-[0.97]"
-					>
-						<Plus size={16} />
-						Nova despesa
-					</button>
-				</div>
+						<title>Ícone de Adicionar</title>
+						<path d="M5 12h14" />
+						<path d="M12 5v14" />
+					</svg>
+					<span className="hidden md:inline">Nova transação</span>
+				</button>
 			</div>
-		</div>
 
 			{txError ? (
 				<div className="rounded-xl border border-red-200 bg-white p-10 text-center shadow-lg dark:border-red-900/40 dark:bg-gray-900">
@@ -292,32 +265,96 @@ export default function HomePage() {
 				))}
 			</div>
 
-		<TransactionForm
+			<div className="relative mb-8 overflow-hidden rounded-lg bg-linear-to-br from-blue-600 to-violet-600 p-6 text-white shadow-xl shadow-blue-600/20 dark:from-blue-700 dark:to-violet-700">
+				<div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-white/10" />
+				<div className="absolute -bottom-8 -left-8 h-28 w-28 rounded-full bg-white/5" />
+				<p className="relative text-xs font-medium tracking-widest text-white/70 uppercase">
+					Saldo do mês
+				</p>
+				<p className="relative mt-2 text-3xl font-bold tracking-tight">
+					{formatCurrency(monthBalance)}
+				</p>
+				<p className="relative mt-1 text-sm text-white/70">
+					Total geral: {formatCurrency(balance)}
+				</p>
+				<div className="relative mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-white/70">
+					{incomeChange === null && expenseChange === null ? (
+						<span>sem dados do mês anterior</span>
+					) : (
+						<>
+							{incomeChange !== null && (
+								<span className="flex items-center gap-1">
+									<TrendingUp size={16} className="text-emerald-300" />
+									<span className="text-emerald-300">
+										Receitas {incomeChange >= 0 ? "+" : ""}{incomeChange.toFixed(1)}%
+									</span>
+								</span>
+							)}
+							{expenseChange !== null && (
+								<span className="text-red-200">
+									Gastos {expenseChange >= 0 ? "+" : ""}{expenseChange.toFixed(1)}%
+								</span>
+							)}
+							<span>vs. mês anterior</span>
+						</>
+					)}
+				</div>
+			</div>
+
+			<div className="mb-8">
+				<h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-gray-100">
+					Evolução do saldo
+				</h2>
+				<BalanceAreaChart transactions={transactions} />
+			</div>
+
+			<TransactionForm
 				isOpen={modalOpen}
 				initialType={modalType}
 				onSave={fetchTransactions}
 				onClose={() => setModalOpen(false)}
 			/>
 
-		<div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
-			<div className="space-y-6 lg:col-span-2">
-				<div>
-					<h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-gray-100">
-						Receitas x Despesas · últimos 7 meses
-					</h2>
-					<MonthlyChart transactions={transactions} />
-				</div>
-
-			<div>
+			<div className="mb-8">
 				<h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-gray-100">
-					Despesas por categoria · este mês
+					Receitas x Despesas
 				</h2>
-				<ExpenseDonut transactions={monthTransactions} />
+				<MonthlyChart transactions={transactions} />
 			</div>
 
-		<div className="lg:col-span-2">
-			<h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-gray-100">
-				Transações recentes
+			<div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
+				<div>
+					<h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-gray-100">
+						Despesas por categoria
+					</h2>
+					<DonutChart data={groupSum(monthTransactions, "EXPENSE", "category")} />
+				</div>
+				<div>
+					<h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-gray-100">
+						Despesas por forma de pagamento
+					</h2>
+					<DonutChart data={groupSum(monthTransactions, "EXPENSE", "paymentMethod")} />
+				</div>
+			</div>
+
+			<div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
+				<div>
+					<h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-gray-100">
+						Fixas vs variáveis
+					</h2>
+					<FixedVariableBar transactions={monthTransactions} />
+				</div>
+				<div>
+					<h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-gray-100">
+						Parcelas
+					</h2>
+					<InstallmentsDonut expenses={installmentExpenses} />
+				</div>
+			</div>
+
+			<div className="mb-8">
+				<h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-gray-100">
+					Transações recentes
 				</h2>
 				<div className="rounded-xl border border-slate-200 bg-white p-2 shadow-lg dark:border-gray-800 dark:bg-gray-900">
 					{recentTransactions.length === 0 ? (
@@ -330,7 +367,7 @@ export default function HomePage() {
 								Nenhuma transação ainda
 							</p>
 							<p className="text-xs text-slate-500 dark:text-gray-500">
-								Use Nova receita ou Nova despesa para começar.
+								Use Nova transação acima para começar.
 							</p>
 						</div>
 					) : (
@@ -375,12 +412,18 @@ export default function HomePage() {
 					)}
 				</div>
 			</div>
-		</div>
 
-		<div className="lg:col-start-3 lg:row-start-1 lg:row-span-3">
-			<div className="mb-4 flex items-center justify-between">
-				<h2 className="text-sm font-semibold text-slate-900 dark:text-gray-100">
-					Limite mensal
+			<div className="mb-8">
+				<h2 className="mb-4 text-sm font-semibold text-slate-900 dark:text-gray-100">
+					Gasto diário vs limite
+				</h2>
+				<DailySpendingChart transactions={monthTransactions} budgetLimit={budgetLimit} />
+			</div>
+
+			<div>
+				<div className="mb-4 flex items-center justify-between">
+					<h2 className="text-sm font-semibold text-slate-900 dark:text-gray-100">
+						Limite mensal
 					</h2>
 					{!editingBudget && (
 						<button
@@ -463,10 +506,9 @@ export default function HomePage() {
 					)}
 				</div>
 			</div>
-		</div>
-			</>
-		)}
-	</main>
+				</>
+			)}
+		</main>
 	);
 }
 
@@ -491,30 +533,63 @@ const CHART_COLORS = [
 	"#06b6d4", "#d946ef", "#eab308", "#22c55e", "#64748b",
 ];
 
+const tooltipContentStyle = {
+	backgroundColor: "var(--tooltip-bg, #fff)",
+	border: "1px solid var(--tooltip-border, #e2e8f0)",
+	borderRadius: "12px",
+	fontSize: "12px",
+	boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+} as const;
+
+const tooltipLabelStyle = { fontWeight: 600, marginBottom: 4 } as const;
+
+const tooltipFormatter = (value: any) => [formatCurrency(Number(value) || 0)];
+
+const axisKFormatter = (v: number) => (v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v));
+
+function EmptyChart({ message = "Nenhum dado no mês atual" }: { message?: string }) {
+	return (
+		<div className="flex items-center justify-center rounded-xl border border-slate-200 bg-white p-8 shadow-lg dark:border-gray-800 dark:bg-gray-900">
+			<p className="text-sm text-slate-500 dark:text-gray-500">{message}</p>
+		</div>
+	);
+}
+
+function groupSum(
+	transactions: api.Transaction[],
+	type: "INCOME" | "EXPENSE",
+	key: "category" | "paymentMethod",
+) {
+	const totals: Record<string, number> = {};
+	for (const t of transactions) {
+		const k = t[key];
+		if (t.type !== type || !k) continue;
+		totals[k] = (totals[k] ?? 0) + Number(t.amount);
+	}
+	return Object.entries(totals)
+		.map(([name, value]) => ({ name, value }))
+		.sort((a, b) => b.value - a.value);
+}
+
 function colorForCategory(name: string) {
 	let hash = 0;
 	for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
 	return CHART_COLORS[hash % CHART_COLORS.length];
 }
 
-function ExpenseDonut({ transactions }: { transactions: api.Transaction[] }) {
-	const byCategory = transactions
-		.filter((t) => t.type === "EXPENSE" && t.category)
-		.reduce<Record<string, number>>((acc, t) => {
-			acc[t.category!] = (acc[t.category!] || 0) + Number(t.amount);
-			return acc;
-		}, {});
-
-	const data = Object.entries(byCategory)
-		.map(([name, value]) => ({ name, value }))
-		.sort((a, b) => b.value - a.value);
-
+function DonutChart({
+	data,
+	colors,
+	emptyMessage,
+	subtitle,
+}: {
+	data: { name: string; value: number }[];
+	colors?: string[];
+	emptyMessage?: string;
+	subtitle?: string;
+}) {
 	if (data.length === 0) {
-		return (
-			<div className="flex items-center justify-center rounded-xl border border-slate-200 bg-white p-8 shadow-lg dark:border-gray-800 dark:bg-gray-900">
-				<p className="text-sm text-slate-500 dark:text-gray-500">Nenhuma despesa no mês atual</p>
-			</div>
-		);
+		return <EmptyChart message={emptyMessage ?? "Nenhum dado no mês atual"} />;
 	}
 
 	const total = data.reduce((a, d) => a + d.value, 0);
@@ -534,29 +609,26 @@ function ExpenseDonut({ transactions }: { transactions: api.Transaction[] }) {
 							innerRadius={50}
 							paddingAngle={3}
 						>
-							{data.map((d) => (
-								<Cell key={d.name} fill={colorForCategory(d.name)} />
+							{data.map((d, i) => (
+								<Cell
+									key={d.name}
+									fill={colors?.[i % colors.length] ?? colorForCategory(d.name)}
+								/>
 							))}
 						</Pie>
 						<Tooltip
-							contentStyle={{
-								backgroundColor: "var(--tooltip-bg, #fff)",
-								border: "1px solid var(--tooltip-border, #e2e8f0)",
-								borderRadius: "12px",
-								fontSize: "12px",
-								boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-							}}
-							formatter={(value) => [formatCurrency(Number(value) || 0)]}
-							labelStyle={{ fontWeight: 600, marginBottom: 4 }}
+							contentStyle={tooltipContentStyle}
+							formatter={tooltipFormatter}
+							labelStyle={tooltipLabelStyle}
 						/>
 					</PieChart>
 				</ResponsiveContainer>
 				<ul className="w-full flex-1 space-y-2">
-					{data.map((d) => (
+					{data.map((d, i) => (
 						<li key={d.name} className="flex items-center gap-2 text-sm">
 							<span
 								className="h-2.5 w-2.5 shrink-0 rounded-full"
-								style={{ backgroundColor: colorForCategory(d.name) }}
+								style={{ backgroundColor: colors?.[i % colors.length] ?? colorForCategory(d.name) }}
 							/>
 							<span className="flex-1 truncate text-slate-600 dark:text-gray-300">{d.name}</span>
 							<span className="font-semibold text-slate-900 dark:text-gray-100">
@@ -569,7 +641,244 @@ function ExpenseDonut({ transactions }: { transactions: api.Transaction[] }) {
 					))}
 				</ul>
 			</div>
+			{subtitle && (
+				<p className="mt-2 text-center text-xs text-slate-500 dark:text-gray-500">{subtitle}</p>
+			)}
 		</div>
+	);
+}
+
+function BalanceAreaChart({ transactions }: { transactions: api.Transaction[] }) {
+	const byMonth = new Map<string, number>();
+	for (const t of transactions) {
+		const d = new Date(t.date);
+		const key = `${d.getFullYear()}-${String(d.getMonth()).padStart(2, "0")}`;
+		byMonth.set(
+			key,
+			(byMonth.get(key) ?? 0) + (t.type === "INCOME" ? Number(t.amount) : -Number(t.amount)),
+		);
+	}
+
+	let acc = 0;
+	const data = [...byMonth.entries()]
+		.sort(([a], [b]) => a.localeCompare(b))
+		.map(([key, net]) => {
+			acc += net;
+			const [y, m] = key.split("-");
+			return {
+				label: `${monthNames[Number(m)]}/${y.slice(-2)}`,
+				Saldo: Math.round(acc * 100) / 100,
+			};
+		})
+		.slice(-12);
+
+	if (data.length === 0) return <EmptyChart message="Nenhuma transação ainda" />;
+
+	return (
+		<div className="rounded-xl border border-slate-200 bg-white p-4 shadow-lg dark:border-gray-800 dark:bg-gray-900">
+			<ResponsiveContainer width="100%" height={260}>
+				<AreaChart data={data} margin={{ top: 8, right: 8, left: 8, bottom: 4 }}>
+					<defs>
+						<linearGradient id="balanceGradient" x1="0" y1="0" x2="0" y2="1">
+							<stop offset="0%" stopColor="#3b82f6" stopOpacity={0.35} />
+							<stop offset="100%" stopColor="#3b82f6" stopOpacity={0} />
+						</linearGradient>
+					</defs>
+					<CartesianGrid
+						strokeDasharray="3 3"
+						stroke="currentColor"
+						className="text-slate-100 dark:text-gray-800"
+					/>
+					<XAxis
+						dataKey="label"
+						tick={{ fontSize: 10, fill: "currentColor" }}
+						className="text-slate-500 dark:text-gray-500"
+						axisLine={{ stroke: "currentColor" }}
+						tickLine={false}
+						interval={0}
+						angle={-30}
+						textAnchor="end"
+						height={36}
+					/>
+					<YAxis
+						tick={{ fontSize: 10, fill: "currentColor" }}
+						className="text-slate-500 dark:text-gray-500"
+						axisLine={false}
+						tickLine={false}
+						tickFormatter={axisKFormatter}
+						width={40}
+					/>
+					<Tooltip
+						contentStyle={tooltipContentStyle}
+						formatter={tooltipFormatter}
+						labelStyle={tooltipLabelStyle}
+					/>
+					<Area
+						type="monotone"
+						dataKey="Saldo"
+						stroke="#3b82f6"
+						strokeWidth={2}
+						fill="url(#balanceGradient)"
+					/>
+				</AreaChart>
+			</ResponsiveContainer>
+		</div>
+	);
+}
+
+function DailySpendingChart({
+	transactions,
+	budgetLimit,
+}: {
+	transactions: api.Transaction[];
+	budgetLimit: number;
+}) {
+	const now = new Date();
+	const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+	const today = now.getDate();
+
+	const perDay = new Array<number>(daysInMonth).fill(0);
+	for (const t of transactions) {
+		if (t.type !== "EXPENSE") continue;
+		const d = new Date(t.date);
+		if (d <= now) perDay[d.getDate() - 1] += Number(t.amount);
+	}
+
+	let acc = 0;
+	const data = perDay.map((amount, i) => {
+		acc += amount;
+		return {
+			day: i + 1,
+			Gasto: i + 1 <= today ? Math.round(acc * 100) / 100 : null,
+			Limite: Math.round(((budgetLimit / daysInMonth) * (i + 1)) * 100) / 100,
+		};
+	});
+
+	return (
+		<div className="rounded-xl border border-slate-200 bg-white p-4 shadow-lg dark:border-gray-800 dark:bg-gray-900">
+			<ResponsiveContainer width="100%" height={260}>
+				<LineChart data={data} margin={{ top: 8, right: 8, left: 8, bottom: 4 }}>
+					<CartesianGrid
+						strokeDasharray="3 3"
+						stroke="currentColor"
+						className="text-slate-100 dark:text-gray-800"
+					/>
+					<XAxis
+						dataKey="day"
+						tick={{ fontSize: 10, fill: "currentColor" }}
+						className="text-slate-500 dark:text-gray-500"
+						axisLine={{ stroke: "currentColor" }}
+						tickLine={false}
+						interval={4}
+					/>
+					<YAxis
+						tick={{ fontSize: 10, fill: "currentColor" }}
+						className="text-slate-500 dark:text-gray-500"
+						axisLine={false}
+						tickLine={false}
+						tickFormatter={axisKFormatter}
+						width={40}
+					/>
+					<Tooltip
+						contentStyle={tooltipContentStyle}
+						formatter={tooltipFormatter}
+						labelStyle={tooltipLabelStyle}
+					/>
+					<Legend
+						wrapperStyle={{ fontSize: 11, paddingTop: 4 }}
+						iconType="circle"
+						iconSize={8}
+					/>
+					<Line
+						type="monotone"
+						dataKey="Gasto"
+						name="Gasto acumulado"
+						stroke="#3b82f6"
+						strokeWidth={2}
+						dot={false}
+					/>
+					<Line
+						type="monotone"
+						dataKey="Limite"
+						name="Ritmo do limite"
+						stroke="#94a3b8"
+						strokeWidth={1.5}
+						strokeDasharray="6 6"
+						dot={false}
+					/>
+				</LineChart>
+			</ResponsiveContainer>
+		</div>
+	);
+}
+
+function FixedVariableBar({ transactions }: { transactions: api.Transaction[] }) {
+	const expenses = transactions.filter((t) => t.type === "EXPENSE");
+	const fixed = expenses
+		.filter((t) => t.source !== "transaction")
+		.reduce((a, t) => a + Number(t.amount), 0);
+	const variable = expenses
+		.filter((t) => t.source === "transaction")
+		.reduce((a, t) => a + Number(t.amount), 0);
+	const total = fixed + variable;
+
+	if (total === 0) return <EmptyChart />;
+
+	const items = [
+		{ label: "Fixas", value: fixed, color: "#8b5cf6" },
+		{ label: "Variáveis", value: variable, color: "#3b82f6" },
+	];
+
+	return (
+		<div className="rounded-xl border border-slate-200 bg-white p-5 shadow-lg dark:border-gray-800 dark:bg-gray-900">
+			<div className="flex h-3 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-gray-800">
+				{items.map((it) => (
+					<div
+						key={it.label}
+						className="h-full transition-all duration-300"
+						style={{ width: `${(it.value / total) * 100}%`, backgroundColor: it.color }}
+					/>
+				))}
+			</div>
+			<div className="mt-4 space-y-2">
+				{items.map((it) => (
+					<div key={it.label} className="flex items-center gap-2 text-sm">
+						<span
+							className="h-2.5 w-2.5 rounded-full"
+							style={{ backgroundColor: it.color }}
+						/>
+						<span className="flex-1 text-slate-500 dark:text-gray-400">{it.label}</span>
+						<span className="font-semibold text-slate-900 dark:text-gray-100">
+							{formatCurrency(it.value)}
+						</span>
+						<span className="w-10 text-right text-xs text-slate-500 dark:text-gray-500">
+							{Math.round((it.value / total) * 100)}%
+						</span>
+					</div>
+				))}
+			</div>
+		</div>
+	);
+}
+
+function InstallmentsDonut({ expenses }: { expenses: api.InstallmentExpense[] }) {
+	const all = expenses.flatMap((e) => e.installments);
+	const paidList = all.filter((i) => i.paid);
+	const paid = paidList.reduce((a, i) => a + Number(i.amount), 0);
+	const remaining = all.filter((i) => !i.paid).reduce((a, i) => a + Number(i.amount), 0);
+
+	const data = [
+		{ name: "Pago", value: paid },
+		{ name: "A vencer", value: remaining },
+	].filter((d) => d.value > 0);
+
+	return (
+		<DonutChart
+			data={data}
+			colors={["#10b981", "#f59e0b"]}
+			emptyMessage="Nenhuma compra parcelada"
+			subtitle={all.length > 0 ? `${paidList.length} de ${all.length} parcelas pagas` : ""}
+		/>
 	);
 }
 
@@ -609,33 +918,27 @@ function MonthlyChart({ transactions }: { transactions: api.Transaction[] }) {
 						stroke="currentColor"
 						className="text-slate-100 dark:text-gray-800"
 					/>
-					<XAxis
-						dataKey="label"
-						tick={{ fontSize: 10, fill: "currentColor" }}
-						className="text-slate-500 dark:text-gray-500"
-						axisLine={{ stroke: "currentColor" }}
-						tickLine={false}
-					/>
-					<YAxis
-						tick={{ fontSize: 10, fill: "currentColor" }}
-						className="text-slate-500 dark:text-gray-500"
-						axisLine={false}
-						tickLine={false}
-						tickFormatter={(v: number) =>
-							v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v)
-						}
+						<XAxis
+							dataKey="label"
+							tick={{ fontSize: 10, fill: "currentColor" }}
+							className="text-slate-500 dark:text-gray-500"
+							axisLine={{ stroke: "currentColor" }}
+							tickLine={false}
+						/>
+						<YAxis
+							tick={{ fontSize: 10, fill: "currentColor" }}
+							className="text-slate-500 dark:text-gray-500"
+							axisLine={false}
+							tickLine={false}
+							tickFormatter={(v: number) =>
+								v >= 1000 ? `${(v / 1000).toFixed(0)}k` : String(v)
+							}
 						width={40}
 					/>
 					<Tooltip
-						contentStyle={{
-							backgroundColor: "var(--tooltip-bg, #fff)",
-							border: "1px solid var(--tooltip-border, #e2e8f0)",
-							borderRadius: "12px",
-							fontSize: "12px",
-							boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-						}}
-						formatter={(value) => [formatCurrency(Number(value) || 0)]}
-						labelStyle={{ fontWeight: 600, marginBottom: 4 }}
+						contentStyle={tooltipContentStyle}
+						formatter={tooltipFormatter}
+						labelStyle={tooltipLabelStyle}
 					/>
 					<Legend
 						wrapperStyle={{ fontSize: 11, paddingTop: 4 }}
@@ -647,14 +950,14 @@ function MonthlyChart({ transactions }: { transactions: api.Transaction[] }) {
 						dataKey="Receita"
 						stroke="#10b981"
 						strokeWidth={2}
-						dot={{ r: 3 }}
+						dot={false}
 					/>
 					<Line
 						type="monotone"
 						dataKey="Despesa"
 						stroke="#f87171"
 						strokeWidth={2}
-						dot={{ r: 3 }}
+						dot={false}
 					/>
 				</LineChart>
 			</ResponsiveContainer>

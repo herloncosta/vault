@@ -2,9 +2,14 @@ import { useEffect, useState, useCallback } from "react";
 import { useForm, Controller } from "react-hook-form";
 import * as api from "../lib/api";
 import { fmt, parse as parseCurrency, toInput } from "../lib/currency";
-import FormSelect from "./select";
+import SelectField from "./select";
+import type { SelectOption } from "./select";
 
 const paymentOptions = ["Crédito", "Débito", "Boleto", "PIX", "Dinheiro", "Automático"];
+const paymentSelectOptions: SelectOption[] = [
+  { value: "", label: "Selecione" },
+  ...paymentOptions.map((p) => ({ value: p, label: p })),
+];
 
 interface Props {
   type: "INCOME" | "EXPENSE";
@@ -22,20 +27,8 @@ interface Form {
 }
 
 export default function UniqueTransactionForm({ type, editing, onSave, onClose }: Props) {
-  const {
-    control,
-    register,
-    handleSubmit,
-    reset,
-    formState: { isSubmitting },
-  } = useForm<Form>({
-    defaultValues: {
-      amount: 0,
-      description: "",
-      category: "",
-      date: new Date().toISOString().slice(0, 10),
-      paymentMethod: "",
-    },
+  const { control, register, handleSubmit, reset, formState: { isSubmitting } } = useForm<Form>({
+    defaultValues: { amount: 0, description: "", category: "", date: new Date().toISOString().slice(0, 10), paymentMethod: "" },
   });
 
   const [categories, setCategories] = useState<api.Category[]>([]);
@@ -53,9 +46,7 @@ export default function UniqueTransactionForm({ type, editing, onSave, onClose }
     }
   }, [type]);
 
-  useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
+  useEffect(() => { fetchCategories(); }, [fetchCategories]);
 
   useEffect(() => {
     if (editing) {
@@ -67,22 +58,14 @@ export default function UniqueTransactionForm({ type, editing, onSave, onClose }
         paymentMethod: editing.paymentMethod ?? "",
       });
     } else {
-      reset({
-        amount: 0,
-        description: "",
-        category: "",
-        date: new Date().toISOString().slice(0, 10),
-        paymentMethod: "",
-      });
+      reset({ amount: 0, description: "", category: "", date: new Date().toISOString().slice(0, 10), paymentMethod: "" });
     }
   }, [editing, reset]);
 
   const onSubmit = handleSubmit(async (data) => {
     if (data.amount <= 0) return;
     const payload = {
-      type,
-      amount: data.amount,
-      description: data.description,
+      type, amount: data.amount, description: data.description,
       category: data.category || undefined,
       date: new Date(`${data.date}T12:00:00`).toISOString(),
       paymentMethod: data.paymentMethod || undefined,
@@ -99,12 +82,7 @@ export default function UniqueTransactionForm({ type, editing, onSave, onClose }
   return (
     <form onSubmit={onSubmit}>
       <div className="mb-5">
-        <label
-          htmlFor="uni-amount"
-          className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400"
-        >
-          Valor
-        </label>
+        <label htmlFor="uni-amount" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Valor</label>
         <Controller
           name="amount"
           control={control}
@@ -124,12 +102,7 @@ export default function UniqueTransactionForm({ type, editing, onSave, onClose }
       </div>
 
       <div className="mb-5">
-        <label
-          htmlFor="uni-description"
-          className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400"
-        >
-          Descrição
-        </label>
+        <label htmlFor="uni-description" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Descrição</label>
         <input
           id="uni-description"
           type="text"
@@ -141,34 +114,29 @@ export default function UniqueTransactionForm({ type, editing, onSave, onClose }
 
       <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label
-            htmlFor="uni-category"
-            className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400"
-          >
-            Categoria
-          </label>
+          <label htmlFor="uni-category" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Categoria</label>
           <Controller
             name="category"
             control={control}
-            render={({ field }) => (
-              <FormSelect
-                inputId="uni-category"
-                value={field.value}
-                onChange={field.onChange}
-                options={categories.map((c) => ({ value: c.name, label: c.name }))}
-                placeholder="Sem categoria"
-                isLoading={loadingCategories}
-              />
-            )}
+            render={({ field }) => {
+              const options: SelectOption[] = [
+                { value: "", label: "Sem categoria" },
+                ...categories.map((c) => ({ value: c.name, label: c.name })),
+              ];
+              return (
+                <SelectField
+                  id="uni-category"
+                  options={options}
+                  value={options.find((o) => o.value === field.value) ?? null}
+                  onChange={(opt) => field.onChange(opt?.value ?? "")}
+                  isLoading={loadingCategories}
+                />
+              );
+            }}
           />
         </div>
         <div>
-          <label
-            htmlFor="uni-date"
-            className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400"
-          >
-            Data
-          </label>
+          <label htmlFor="uni-date" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Data</label>
           <input
             id="uni-date"
             type="date"
@@ -179,22 +147,16 @@ export default function UniqueTransactionForm({ type, editing, onSave, onClose }
       </div>
 
       <div className="mb-6">
-        <label
-          htmlFor="uni-paymentMethod"
-          className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400"
-        >
-          Forma de pagamento
-        </label>
+        <label htmlFor="uni-paymentMethod" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Forma de pagamento</label>
         <Controller
           name="paymentMethod"
           control={control}
           render={({ field }) => (
-            <FormSelect
-              inputId="uni-paymentMethod"
-              value={field.value}
-              onChange={field.onChange}
-              options={paymentOptions.map((p) => ({ value: p, label: p }))}
-              placeholder="Selecione"
+            <SelectField
+              id="uni-paymentMethod"
+              options={paymentSelectOptions}
+              value={paymentSelectOptions.find((o) => o.value === field.value) ?? null}
+              onChange={(opt) => field.onChange(opt?.value ?? "")}
             />
           )}
         />

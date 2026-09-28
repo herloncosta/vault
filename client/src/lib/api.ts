@@ -28,13 +28,12 @@ async function doFetch<T>(
 
     if (res.ok) {
       if (res.status === 204) return { ok: true, status: 204, body: undefined, message: "" };
-      return { ok: true, status: 200, body: await res.json(), message: "" };
+      return { ok: true, status: 200, body: (await res.json()) as T, message: "" };
     }
-
-    const body = await res.json().catch(() => ({ error: res.statusText }));
+    const body = await res.json().catch(() => ({ error: res.statusText })) as { error?: any };
     const message = Array.isArray(body.error)
       ? body.error.map((e: any) => e.message ?? e).join(". ")
-      : (body.error || "Request failed");
+      : (body.error ?? "Request failed");
 
     return { ok: false, status: res.status, body: undefined, message };
   } catch {

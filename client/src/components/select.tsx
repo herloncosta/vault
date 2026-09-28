@@ -1,97 +1,61 @@
-import ReactSelect, { type StylesConfig } from "react-select";
-import { useTheme } from "../contexts/theme-context";
+import Select from "react-select";
+import type { ClassNamesConfig } from "react-select";
 
 export interface SelectOption {
-  value: string;
+  value: string | number;
   label: string;
 }
 
-interface FormSelectProps {
-  inputId?: string;
-  value: string;
-  onChange: (value: string) => void;
+interface SelectFieldProps {
+  id?: string;
   options: SelectOption[];
-  placeholder?: string;
-  isDisabled?: boolean;
+  value: SelectOption | null;
+  onChange: (option: SelectOption | null) => void;
   isLoading?: boolean;
-  allowClear?: boolean;
 }
 
-export default function FormSelect({
-  inputId,
-  value,
-  onChange,
-  options,
-  placeholder = "Selecione",
-  isDisabled,
-  isLoading,
-  allowClear = true,
-}: FormSelectProps) {
-  const { dark } = useTheme();
-
-  const blue = dark ? "#60a5fa" : "#3b82f6";
-  const styles: StylesConfig<SelectOption, false> = {
-    control: (base, state) => ({
-      ...base,
-      minHeight: 42,
-      borderRadius: 8,
-      borderColor: state.isFocused ? blue : dark ? "#374151" : "#e2e8f0",
-      backgroundColor: dark ? "#1f2937" : "#ffffff",
-      boxShadow: state.isFocused ? `0 0 0 1px ${blue}` : "none",
-      "&:hover": { borderColor: state.isFocused ? blue : dark ? "#4b5563" : "#cbd5e1" },
-      fontSize: 14,
-    }),
-    singleValue: (base) => ({ ...base, color: dark ? "#f3f4f6" : "#0f172a" }),
-    placeholder: (base) => ({ ...base, color: dark ? "#4b5563" : "#cbd5e1" }),
-    input: (base) => ({ ...base, color: dark ? "#f3f4f6" : "#0f172a" }),
-    menu: (base) => ({
-      ...base,
-      backgroundColor: dark ? "#1f2937" : "#ffffff",
-      borderRadius: 8,
-      zIndex: 9999,
-    }),
-    menuList: (base) => ({ ...base, padding: 4, maxHeight: 224 }),
-    option: (base, state) => ({
-      ...base,
-      borderRadius: 6,
-      fontSize: 14,
-      backgroundColor: state.isSelected
-        ? dark
-          ? "rgba(59,130,246,0.2)"
-          : "#eff6ff"
+const classNames: ClassNamesConfig<SelectOption, false> = {
+  control: (state) =>
+    `rounded-lg border bg-white text-sm transition-all duration-300 dark:bg-gray-800 ${
+      state.isFocused
+        ? "border-blue-500 ring-1 ring-blue-500 dark:border-blue-400"
+        : "border-slate-200 dark:border-gray-700"
+    }`,
+  valueContainer: () => "px-4 py-2.5",
+  singleValue: () => "text-slate-900 dark:text-gray-100",
+  input: () => "text-slate-900 dark:text-gray-100",
+  placeholder: () => "text-slate-500 dark:text-gray-400",
+  indicatorsContainer: () => "pr-3 text-slate-500 dark:text-gray-500",
+  indicatorSeparator: () => "hidden",
+  menu: () =>
+    "z-[60] mt-1 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800",
+  menuList: () => "max-h-56 overflow-y-auto py-1",
+  option: (state) =>
+    `cursor-pointer px-4 py-2 text-sm ${
+      state.isSelected
+        ? "bg-blue-600 text-white"
         : state.isFocused
-          ? dark
-            ? "#374151"
-            : "#f1f5f9"
-          : "transparent",
-      color: state.isSelected ? (dark ? "#93c5fd" : "#1d4ed8") : dark ? "#f3f4f6" : "#0f172a",
-      "&:active": { backgroundColor: dark ? "#374151" : "#e2e8f0" },
-    }),
-    indicatorSeparator: () => ({ display: "none" }),
-    dropdownIndicator: (base) => ({
-      ...base,
-      color: dark ? "#6b7280" : "#94a3b8",
-      padding: "0 8px",
-    }),
-    clearIndicator: (base) => ({ ...base, color: dark ? "#6b7280" : "#94a3b8", padding: "0 8px" }),
-  };
+          ? "bg-blue-50 text-slate-900 dark:bg-gray-700 dark:text-gray-100"
+          : "text-slate-900 dark:text-gray-100"
+    }`,
+  noOptionsMessage: () => "px-4 py-2 text-sm text-slate-500 dark:text-gray-500",
+  loadingMessage: () => "px-4 py-2 text-sm text-slate-500 dark:text-gray-500",
+};
 
+export default function SelectField({ id, options, value, onChange, isLoading }: SelectFieldProps) {
   return (
-    <ReactSelect
-      inputId={inputId}
-      value={options.find((o) => o.value === value) ?? null}
-      onChange={(opt) => onChange(opt?.value ?? "")}
+    <Select<SelectOption, false>
+      inputId={id}
+      unstyled
+      classNames={classNames}
       options={options}
-      placeholder={placeholder}
-      isDisabled={isDisabled}
+      value={value}
+      onChange={onChange}
       isLoading={isLoading}
-      isClearable={allowClear}
-      isSearchable
-      menuPortalTarget={document.body}
-      menuPosition="fixed"
-      styles={styles}
-      noOptionsMessage={() => "Nenhuma opção"}
       loadingMessage={() => "Carregando…"}
+      noOptionsMessage={() => "Nenhuma opção"}
+      menuPortalTarget={document.body}
+      styles={{ menuPortal: (base) => ({ ...base, zIndex: 60 }) }}
     />
   );
 }

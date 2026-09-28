@@ -3,7 +3,8 @@ import { useForm, Controller } from "react-hook-form";
 import { CreditCard, Receipt } from "lucide-react";
 import * as api from "../lib/api";
 import { fmt, parse as parseCurrency, toInput } from "../lib/currency";
-import FormSelect from "./select";
+import SelectField from "./select";
+import type { SelectOption } from "./select";
 
 interface Props {
   editing: api.InstallmentExpense | null | undefined;
@@ -37,27 +38,10 @@ export default function InstallmentExpenseForm({ editing, onSave, onClose }: Pro
     }
   }, []);
 
-  useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
+  useEffect(() => { fetchCategories(); }, [fetchCategories]);
 
-  const {
-    control,
-    register,
-    handleSubmit,
-    reset,
-    watch,
-    setValue,
-    formState: { isSubmitting },
-  } = useForm<Form>({
-    defaultValues: {
-      description: "",
-      totalAmount: 0,
-      installmentCount: "2",
-      installmentType: "CREDIT_CARD",
-      category: "",
-      firstDueDate: "",
-    },
+  const { control, register, handleSubmit, reset, watch, setValue, formState: { isSubmitting } } = useForm<Form>({
+    defaultValues: { description: "", totalAmount: 0, installmentCount: "2", installmentType: "CREDIT_CARD", category: "", firstDueDate: "" },
   });
 
   useEffect(() => {
@@ -71,31 +55,15 @@ export default function InstallmentExpenseForm({ editing, onSave, onClose }: Pro
         firstDueDate: editing.firstDueDate.slice(0, 10),
       });
     } else {
-      reset({
-        description: "",
-        totalAmount: 0,
-        installmentCount: "2",
-        installmentType: "CREDIT_CARD",
-        category: "",
-        firstDueDate: "",
-      });
+      reset({ description: "", totalAmount: 0, installmentCount: "2", installmentType: "CREDIT_CARD", category: "", firstDueDate: "" });
     }
   }, [editing, reset]);
 
   const onSubmit = handleSubmit(async (data) => {
     setError("");
-    if (data.totalAmount <= 0) {
-      setError("Valor total inválido");
-      return;
-    }
-    if (!data.description.trim()) {
-      setError("Descrição é obrigatória");
-      return;
-    }
-    if (!data.firstDueDate) {
-      setError("Primeiro vencimento é obrigatório");
-      return;
-    }
+    if (data.totalAmount <= 0) { setError("Valor total inválido"); return; }
+    if (!data.description.trim()) { setError("Descrição é obrigatória"); return; }
+    if (!data.firstDueDate) { setError("Primeiro vencimento é obrigatório"); return; }
 
     try {
       const payload: api.CreateInstallmentExpensePayload = {
@@ -121,18 +89,11 @@ export default function InstallmentExpenseForm({ editing, onSave, onClose }: Pro
   return (
     <form onSubmit={onSubmit}>
       {error && (
-        <p className="mb-6 rounded-lg bg-red-50 px-4 py-2.5 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">
-          {error}
-        </p>
+        <p className="mb-6 rounded-lg bg-red-50 px-4 py-2.5 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">{error}</p>
       )}
 
       <div className="mb-5">
-        <label
-          htmlFor="inst-description"
-          className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400"
-        >
-          Descrição
-        </label>
+        <label htmlFor="inst-description" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Descrição</label>
         <input
           id="inst-description"
           type="text"
@@ -144,12 +105,7 @@ export default function InstallmentExpenseForm({ editing, onSave, onClose }: Pro
 
       <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label
-            htmlFor="inst-totalAmount"
-            className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400"
-          >
-            Valor total
-          </label>
+          <label htmlFor="inst-totalAmount" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Valor total</label>
           <Controller
             name="totalAmount"
             control={control}
@@ -168,12 +124,7 @@ export default function InstallmentExpenseForm({ editing, onSave, onClose }: Pro
           />
         </div>
         <div>
-          <label
-            htmlFor="inst-installmentCount"
-            className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400"
-          >
-            Quantidade de parcelas
-          </label>
+          <label htmlFor="inst-installmentCount" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Quantidade de parcelas</label>
           <input
             id="inst-installmentCount"
             type="number"
@@ -187,12 +138,7 @@ export default function InstallmentExpenseForm({ editing, onSave, onClose }: Pro
 
       <div className="mb-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label
-            htmlFor="inst-type"
-            className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400"
-          >
-            Tipo
-          </label>
+          <label htmlFor="inst-type" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Tipo</label>
           <div id="inst-type" className="flex gap-2">
             {(["CREDIT_CARD", "CARNE"] as const).map((t) => (
               <button
@@ -212,36 +158,31 @@ export default function InstallmentExpenseForm({ editing, onSave, onClose }: Pro
           </div>
         </div>
         <div>
-          <label
-            htmlFor="inst-category"
-            className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400"
-          >
-            Categoria
-          </label>
+          <label htmlFor="inst-category" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Categoria</label>
           <Controller
             name="category"
             control={control}
-            render={({ field }) => (
-              <FormSelect
-                inputId="inst-category"
-                value={field.value}
-                onChange={field.onChange}
-                options={categories.map((c) => ({ value: c.name, label: c.name }))}
-                placeholder="Sem categoria"
-                isLoading={loadingCategories}
-              />
-            )}
+            render={({ field }) => {
+              const options: SelectOption[] = [
+                { value: "", label: "Sem categoria" },
+                ...categories.map((c) => ({ value: c.name, label: c.name })),
+              ];
+              return (
+                <SelectField
+                  id="inst-category"
+                  options={options}
+                  value={options.find((o) => o.value === field.value) ?? null}
+                  onChange={(opt) => field.onChange(opt?.value ?? "")}
+                  isLoading={loadingCategories}
+                />
+              );
+            }}
           />
         </div>
       </div>
 
       <div className="mb-6">
-        <label
-          htmlFor="inst-firstDueDate"
-          className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400"
-        >
-          Primeiro vencimento
-        </label>
+        <label htmlFor="inst-firstDueDate" className="mb-1.5 block text-xs font-medium text-slate-500 dark:text-gray-400">Primeiro vencimento</label>
         <input
           id="inst-firstDueDate"
           type="date"
